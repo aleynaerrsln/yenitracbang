@@ -1,0 +1,276 @@
+/* src/pages/GenreDetail.css - SPOTIFY GİBİ TABLE */
+
+.genre-detail {
+  width: 100%;
+  min-height: 100%;
+  background: linear-gradient(180deg, rgba(18, 18, 18, 1) 0%, rgba(10, 10, 10, 1) 100%);
+  color: #fff;
+}
+
+.genre-banner {
+  width: 100%;
+  height: 280px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 2rem;
+}
+
+.genre-banner-overlay {
+  width: 100%;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.genre-title {
+  font-size: 4rem;
+  font-weight: 900;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.genre-stats {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.genre-content {
+  padding: 2rem;
+}
+
+/* Table Header */
+.playlist-table-header {
+  display: grid;
+  grid-template-columns: 50px 3fr 150px 180px 100px;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+/* Table Body */
+.playlists-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.playlist-table-row {
+  display: grid;
+  grid-template-columns: 50px 3fr 150px 180px 100px;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.playlist-table-row:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.playlist-table-row:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.playlist-table-row:nth-child(odd):hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Columns */
+.col-number {
+  position: relative;
+  text-align: center;
+}
+
+.col-number .number {
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.play-btn-small {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  background: #1DB954;
+  border: none;
+  border-radius: 50%;
+  color: #000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.play-btn-small svg {
+  margin-left: 2px;
+}
+
+.playlist-table-row:hover .number {
+  display: none;
+}
+
+.playlist-table-row:hover .play-btn-small {
+  display: flex;
+}
+
+.col-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.playlist-cover-small {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  flex-shrink: 0;
+}
+
+.playlist-cover-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.playlist-info-table {
+  flex: 1;
+  min-width: 0;
+}
+
+.playlist-info-table h3 {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  margin: 0 0 4px 0;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playlist-info-table p {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-tracks,
+.col-date {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.col-duration {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.playlist-stats-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.genre-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.genre-detail-loading,
+.genre-detail-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.genre-detail-error button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .genre-title {
+    font-size: 2.5rem;
+  }
+
+  .genre-banner {
+    height: 200px;
+    padding: 1rem;
+  }
+
+  .playlist-table-header {
+    grid-template-columns: 40px 1fr 80px;
+    gap: 0.75rem;
+  }
+
+  .col-date,
+  .col-tracks {
+    display: none;
+  }
+
+  .playlist-table-row {
+    grid-template-columns: 40px 1fr 80px;
+    gap: 0.75rem;
+  }
+
+  .playlist-cover-small {
+    width: 40px;
+    height: 40px;
+  }
+}
