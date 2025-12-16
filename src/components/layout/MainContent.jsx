@@ -26,13 +26,13 @@ const fetchData = async () => {
       hotAPI.getHotPlaylists()
     ]);
 
-    // ⭐ Console'a yazdır - kontrol et
+
     console.log('Genres Response:', genresRes);
     console.log('Hot Response:', hotRes);
 
-    // Genres - DÜZELT
+ 
     if (genresRes.data.success) {
-      setGenres(genresRes.data.data || []); // ⭐ "data" değil "genres" olabilir
+      setGenres(genresRes.data.data || []); 
     }
 
     // Hot Playlists
