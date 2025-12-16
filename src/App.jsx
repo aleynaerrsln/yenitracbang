@@ -1,12 +1,15 @@
-// src/App.jsx - SIDEBAR & LIBRARY KALDIRILDI
+// src/App.jsx - MyPlaylistDetail ROUTE EKLENDİ
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import MainLayout from './components/layout/MainLayout';
 import Auth from './pages/Auth';
 import MainContent from './components/layout/MainContent';
 import PlaylistDetail from './pages/PlaylistDetail';
+import MyPlaylistDetail from './pages/MyPlaylistDetail';
 import GenreDetail from './pages/GenreDetail';
+import Library from './pages/Library';
 import NotFound from './pages/NotFound';
 import './App.css';
 
@@ -46,8 +49,9 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<MainContent />} />
         <Route path="/playlist/:id" element={<PlaylistDetail />} />
+        <Route path="/my-playlist/:id" element={<MyPlaylistDetail />} />
         <Route path="/genre/:slug" element={<GenreDetail />} />
-        {/* Library route kaldırıldı */}
+        <Route path="/library" element={<Library />} />
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
@@ -59,7 +63,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <ToastProvider>
+          <AppRoutes />
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );

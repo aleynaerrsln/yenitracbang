@@ -1,16 +1,20 @@
-// src/pages/Library.jsx - TAM VERSİYON
+// src/pages/Library.jsx - TOAST İLE GÜNCELLE
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiMusic, FiPlus, FiHeart } from 'react-icons/fi';
+import { FiMusic, FiPlus, FiChevronRight } from 'react-icons/fi';
 import { playlistAPI } from '../services/api';
+import { useToast } from '../context/ToastContext';
+import CreatePlaylistModal from '../components/modals/CreatePlaylistModal';
 import './Library.css';
 
 const Library = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('playlists'); // 'playlists' | 'liked'
-  const [playlists, setPlaylists] = useState([]);
+  const toast = useToast();
+  const [activeTab, setActiveTab] = useState('playlists');
+  const [myPlaylists, setMyPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'playlists') {
@@ -23,23 +27,43 @@ const Library = () => {
       setLoading(true);
       const response = await playlistAPI.getMyPlaylists();
       if (response.data.success) {
-        setPlaylists(response.data.playlists || []);
+        setMyPlaylists(response.data.playlists || []);
       }
     } catch (error) {
       console.error('Fetch playlists error:', error);
+      toast.error('Failed to load playlists');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCreatePlaylist = async (formData) => {
+    try {
+      const playlistData = {
+        name: formData.name,
+        description: formData.description,
+        isPublic: formData.isPublic,
+      };
+
+      const response = await playlistAPI.createPlaylist(playlistData);
+      
+      if (response.data.success) {
+        setMyPlaylists([response.data.playlist, ...myPlaylists]);
+        toast.success('Playlist created successfully');
+      }
+    } catch (error) {
+      console.error('Create playlist error:', error);
+      toast.error('Failed to create playlist');
+      throw error;
+    }
+  };
+
   return (
     <div className="library-page">
-      {/* Header */}
       <div className="library-header">
         <h1>Library</h1>
       </div>
 
-      {/* Tabs */}
       <div className="library-tabs">
         <button
           className={`tab-btn ${activeTab === 'playlists' ? 'active' : ''}`}
@@ -55,58 +79,64 @@ const Library = () => {
         </button>
       </div>
 
-      {/* Create Playlist Button */}
-      {activeTab === 'playlists' && (
-        <button className="create-playlist-btn">
-          <div className="create-icon">
-            <FiPlus size={16} />
-          </div>
-          <span>Create Playlist</span>
-        </button>
-      )}
+      <div className="tab-content">
+        {activeTab === 'playlists' ? (
+          <>
+            <button 
+              className="create-playlist-btn"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <div className="create-icon">
+                <FiPlus size={20} />
+              </div>
+              <span>Create Playlist</span>
+            </button>
 
-      {/* Content */}
-      <div className="library-content">
-        {loading ? (
-          <div className="library-loading">
-            <div className="spinner"></div>
-          </div>
-        ) : activeTab === 'playlists' ? (
-          playlists.length === 0 ? (
-            <div className="library-empty">
-              <FiMusic size={64} />
-              <p>No playlists yet</p>
-            </div>
-          ) : (
-            <div className="playlists-grid">
-              {playlists.map((playlist) => (
-                <div
-                  key={playlist._id}
-                  className="library-playlist-item"
-                  onClick={() => navigate(`/playlist/${playlist._id}`)}
-                >
-                  <div className="library-playlist-cover">
-                    {playlist.coverImage ? (
-                      <img src={playlist.coverImage} alt={playlist.name} />
-                    ) : (
-                      <FiMusic size={32} />
-                    )}
-                  </div>
-                  <div className="library-playlist-info">
-                    <h3>{playlist.name}</h3>
-                    <p>{playlist.musicCount || 0} tracks</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
+            {loading ? (
+              <div className="loading-state">
+                <p>Loading...</p>
+              </div>
+            ) : myPlaylists.length === 0 ? (
+              <div className="empty-state">
+                <p>No playlists yet</p>
+              </div>
+            ) : (
+              <div className="playlists-list">
+                {myPlaylists.map((playlist) => (
+                  <button
+                    key={playlist._id}
+                    className="playlist-item"
+                    onClick={() => navigate(`/my-playlist/${playlist._id}`)}
+                  >
+                    <div className="playlist-cover-small">
+                      {playlist.coverImage ? (
+                        <img src={playlist.coverImage} alt={playlist.name} />
+                      ) : (
+                        <FiMusic size={20} />
+                      )}
+                    </div>
+                    <div className="playlist-info">
+                      <h3>{playlist.name}</h3>
+                      <p>{playlist.musicCount || 0} tracks</p>
+                    </div>
+                    <FiChevronRight size={20} className="chevron-icon" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         ) : (
-          <div className="library-empty">
-            <FiHeart size={64} />
+          <div className="empty-state">
             <p>No liked songs yet</p>
           </div>
         )}
       </div>
+
+      <CreatePlaylistModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreatePlaylist}
+      />
     </div>
   );
 };

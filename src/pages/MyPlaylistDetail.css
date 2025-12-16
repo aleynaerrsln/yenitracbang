@@ -1,0 +1,380 @@
+/* src/pages/MyPlaylistDetail.css - TAM MODERN VERSİYON */
+
+.my-playlist-detail {
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(15, 25, 35, 0.98) 0%, rgba(5, 10, 15, 0.98) 100%);
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* ========== LOADING ========== */
+
+.my-playlist-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  background: #000;
+}
+
+/* ========== BACK BUTTON ========== */
+
+.my-back-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1.5rem;
+}
+
+.my-back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ========== COVER CONTAINER ========== */
+
+.my-cover-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.my-cover-image {
+  width: 160px;
+  height: 160px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.my-cover-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.my-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.my-placeholder-text {
+  font-size: 4rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
+}
+
+/* ========== PLAYLIST INFO ========== */
+
+.my-playlist-info {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.my-playlist-info h1 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.35rem 0;
+}
+
+.my-playlist-info p {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+}
+
+/* ========== ACTION GRID - MODERN ========== */
+
+.my-action-grid {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding: 0 0.25rem;
+}
+
+.my-action-grid::-webkit-scrollbar {
+  height: 4px;
+}
+
+.my-action-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.my-action-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.my-action-btn {
+  flex: 1;
+  min-width: 85px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.6rem 0.4rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.my-action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.my-action-btn:hover::before {
+  opacity: 1;
+}
+
+.my-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.my-action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.my-action-btn span {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Delete Button - Modern */
+.my-delete-btn {
+  background: rgba(226, 33, 52, 0.1);
+  border-color: rgba(226, 33, 52, 0.2);
+  color: #E22134;
+}
+
+.my-delete-btn::before {
+  background: linear-gradient(135deg, rgba(226, 33, 52, 0.15) 0%, rgba(226, 33, 52, 0.08) 100%);
+}
+
+.my-delete-btn:hover {
+  background: rgba(226, 33, 52, 0.2);
+  border-color: rgba(226, 33, 52, 0.3);
+  box-shadow: 0 4px 16px rgba(226, 33, 52, 0.3);
+}
+
+/* ========== EMPTY STATE ========== */
+
+.my-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1rem;
+}
+
+.my-empty-icon {
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.25);
+  animation: floatAnimation 3s ease-in-out infinite;
+}
+
+@keyframes floatAnimation {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.my-empty-state h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+}
+
+.my-empty-state p {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ========== TRACKS LIST ========== */
+
+.my-tracks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 0.25rem;
+  padding-bottom: 2rem; /* Scroll için alt boşluk */
+}
+
+.my-track-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.875rem;
+  transition: all 0.2s;
+}
+
+.my-track-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ========== TRACKS SECTION ========== */
+
+.my-tracks-section {
+  margin-top: 1rem;
+}
+
+.tracks-header {
+  margin-bottom: 1rem;
+  padding: 0 0.25rem;
+}
+
+.tracks-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.title-accent {
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, #3B82F6 0%, #667eea 100%);
+  border-radius: 2px;
+}
+
+.tracks-title h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.my-tracks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 0.25rem;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+  .my-playlist-detail {
+    padding: 0.875rem;
+  }
+
+  .my-cover-image {
+    width: 150px;
+    height: 150px;
+  }
+
+  .my-placeholder-text {
+    font-size: 3.5rem;
+  }
+
+  .my-playlist-info h1 {
+    font-size: 1.25rem;
+  }
+
+  .my-action-btn {
+    min-width: 80px;
+    padding: 0.55rem 0.35rem;
+    font-size: 0.68rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-cover-image {
+    width: 140px;
+    height: 140px;
+  }
+
+  .my-placeholder-text {
+    font-size: 3rem;
+  }
+
+  .my-playlist-info h1 {
+    font-size: 1.15rem;
+  }
+
+  .my-playlist-info p {
+    font-size: 0.8rem;
+  }
+
+  .my-action-btn {
+    min-width: 75px;
+    padding: 0.5rem 0.3rem;
+    font-size: 0.65rem;
+    gap: 0.2rem;
+  }
+
+  .my-empty-state {
+    padding: 2rem 0.75rem;
+  }
+
+  .my-empty-state h2 {
+    font-size: 1.125rem;
+  }
+
+  .my-empty-state p {
+    font-size: 0.8rem;
+  }
+}
+
+/* ========== SCROLLBAR ========== */
+
+.my-playlist-detail::-webkit-scrollbar {
+  width: 6px;
+}
+
+.my-playlist-detail::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.my-playlist-detail::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.my-playlist-detail::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

@@ -1,0 +1,252 @@
+/* src/components/tracks/TrackCard.css - MOBILE APP STYLE */
+
+.track-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.track-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ========== COVER ========== */
+
+.track-card-cover {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.track-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.track-cover-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ========== INFO ========== */
+
+.track-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.track-card-info h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.track-card-info p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ========== PLATFORM BUTTONS ========== */
+
+.platform-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.platform-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+/* Spotify */
+.platform-btn.spotify {
+  background: #1DB954;
+  color: #fff;
+}
+
+.platform-btn.spotify:hover {
+  background: #1ed760;
+  transform: scale(1.05);
+}
+
+/* Beatport */
+.platform-btn.beatport {
+  background: #444;
+  color: #fff;
+}
+
+.platform-btn.beatport:hover {
+  background: #555;
+  transform: scale(1.05);
+}
+
+/* Apple Music */
+.platform-btn.apple {
+  background: #FA243C;
+  color: #fff;
+}
+
+.platform-btn.apple:hover {
+  background: #fb4358;
+  transform: scale(1.05);
+}
+
+/* SoundCloud */
+.platform-btn.soundcloud {
+  background: #FF5500;
+  color: #fff;
+}
+
+.platform-btn.soundcloud:hover {
+  background: #ff6619;
+  transform: scale(1.05);
+}
+
+/* ========== ACTIONS ========== */
+
+.track-card-actions {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.action-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.action-icon.more {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.action-icon.like {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  flex-direction: column;
+  gap: 0.1rem;
+  width: auto;
+  height: auto;
+}
+
+.action-icon.like:hover {
+  color: #E22134;
+}
+
+.like-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+  .track-card {
+    gap: 0.875rem;
+    padding: 0.875rem;
+  }
+
+  .track-card-cover {
+    width: 70px;
+    height: 70px;
+  }
+
+  .track-card-info h3 {
+    font-size: 0.95rem;
+  }
+
+  .track-card-info p {
+    font-size: 0.85rem;
+  }
+
+  .platform-btn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .track-card {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .track-card-cover {
+    width: 65px;
+    height: 65px;
+  }
+
+  .track-card-info h3 {
+    font-size: 0.9rem;
+  }
+
+  .track-card-info p {
+    font-size: 0.8rem;
+  }
+
+  .platform-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+  }
+}
