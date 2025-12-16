@@ -1,22 +1,82 @@
-/* src/components/layout/MainLayout.css - DÜZELT */
+/* src/components/layout/MainLayout.css - CENTER-CONTENT İZOLE */
 
 .main-layout {
   display: flex;
-  flex-direction: column;  /* ⭐ EKLE */
+  flex-direction: column;
   height: 100vh;
   width: 100%;
   background: #0a0a0a;
   overflow: hidden;
 }
 
-.main-layout-content {  /* ⭐ YENİ */
+.main-layout-content {
   display: grid;
-  grid-template-columns: 280px 1fr 320px;
+  grid-template-columns: 280px 1fr 320px; /* Sol 280px | Orta esnek | Sağ 320px */
   flex: 1;
   overflow: hidden;
 }
 
+/* Sol: LeftSidebar */
+.main-layout-content > *:nth-child(1) {
+  background: #000;
+  overflow-y: auto;
+  overflow-x: hidden; /* ⭐ Yatay taşma engeli */
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Orta: center-content */
 .center-content {
   overflow-y: auto;
+  overflow-x: hidden; /* ⭐ Yatay taşma engeli */
   background: linear-gradient(180deg, rgba(18, 18, 18, 1) 0%, rgba(10, 10, 10, 1) 100%);
+  position: relative; /* ⭐ İçeriği izole et */
+  max-width: 100%; /* ⭐ Taşma engeli */
+}
+
+/* Sağ: RightPanel */
+.main-layout-content > *:nth-child(3) {
+  background: #000;
+  overflow-y: auto;
+  overflow-x: hidden; /* ⭐ Yatay taşma engeli */
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar */
+.main-layout-content > *::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-layout-content > *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main-layout-content > *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.main-layout-content > *::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .main-layout-content {
+    grid-template-columns: 280px 1fr; /* Sol + Orta */
+  }
+  
+  .main-layout-content > *:nth-child(3) {
+    display: none; /* Sağ panel gizle */
+  }
+}
+
+@media (max-width: 768px) {
+  .main-layout-content {
+    grid-template-columns: 1fr; /* Sadece orta */
+  }
+  
+  .main-layout-content > *:nth-child(1),
+  .main-layout-content > *:nth-child(3) {
+    display: none; /* Sol ve sağ gizle */
+  }
 }

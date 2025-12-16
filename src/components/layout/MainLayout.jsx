@@ -1,19 +1,25 @@
-// src/components/layout/MainLayout.jsx - TOPNAVBAR EKLE
+// src/components/layout/MainLayout.jsx - SOLA YENİ ALAN EKLENDI
 
-import Sidebar from './Sidebar';
+import LeftSidebar from './LeftSidebar';  // ⭐ YENİ
 import RightPanel from './RightPanel';
-import TopNavbar from './TopNavbar';  // ⭐ EKLE
+import TopNavbar from './TopNavbar';
 import './MainLayout.css';
 
 const MainLayout = ({ children }) => {
   return (
     <div className="main-layout">
-      <TopNavbar />  {/* ⭐ EKLE */}
+      <TopNavbar />
+      
       <div className="main-layout-content">
-        <Sidebar />
+        {/* ⭐ YENİ: Sol Boş Alan */}
+        <LeftSidebar />
+        
+        {/* Orta: MainContent (AYNEN KALDI) */}
         <div className="center-content">
           {children}
         </div>
+        
+        {/* Sağ: RightPanel (AYNEN KALDI) */}
         <RightPanel />
       </div>
     </div>

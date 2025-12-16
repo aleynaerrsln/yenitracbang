@@ -1,4 +1,4 @@
-// src/App.jsx - DÜZELTİLMİŞ
+// src/App.jsx - SIDEBAR & LIBRARY KALDIRILDI
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -7,7 +7,6 @@ import Auth from './pages/Auth';
 import MainContent from './components/layout/MainContent';
 import PlaylistDetail from './pages/PlaylistDetail';
 import GenreDetail from './pages/GenreDetail';
-import Library from './pages/Library';
 import NotFound from './pages/NotFound';
 import './App.css';
 
@@ -48,7 +47,7 @@ function AppRoutes() {
         <Route path="/" element={<MainContent />} />
         <Route path="/playlist/:id" element={<PlaylistDetail />} />
         <Route path="/genre/:slug" element={<GenreDetail />} />
-        <Route path="/library" element={<Library />} />
+        {/* Library route kaldırıldı */}
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>

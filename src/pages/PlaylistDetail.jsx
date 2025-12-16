@@ -1,8 +1,9 @@
+// src/pages/PlaylistDetail.jsx - MOBİL GİBİ KART LAYOUT
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { playlistAPI } from '../services/api';  // ← musicController kaldırıldı
+import { playlistAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FaPlay, FaRandom, FaHeart, FaRegHeart, FaShare, FaClock } from 'react-icons/fa';
+import { FaPlay, FaRandom, FaHeart, FaRegHeart, FaShare } from 'react-icons/fa';
 import { BsSpotify, BsApple, BsSoundwave } from 'react-icons/bs';
 import { SiBeatport } from 'react-icons/si';
 import './PlaylistDetail.css';
@@ -30,7 +31,6 @@ const PlaylistDetail = () => {
       
       if (response.data.success) {
         setPlaylist(response.data.playlist);
-        // Check if user liked this playlist (userLikes içinde user._id var mı?)
         setIsLiked(response.data.playlist.userLikes?.includes(user?._id));
       } else {
         setError('Playlist bulunamadı');
@@ -48,14 +48,7 @@ const PlaylistDetail = () => {
       navigate('/auth');
       return;
     }
-
-    try {
-      // API call for like/unlike playlist
-      // Burası backend'e göre düzenlenebilir
-      setIsLiked(!isLiked);
-    } catch (err) {
-      console.error('Like error:', err);
-    }
+    setIsLiked(!isLiked);
   };
 
   const handleShare = () => {
@@ -66,7 +59,6 @@ const PlaylistDetail = () => {
         url: window.location.href,
       });
     } else {
-      // Copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert('Link kopyalandı!');
     }
@@ -78,19 +70,12 @@ const PlaylistDetail = () => {
     return num;
   };
 
-  const formatDuration = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   if (loading) {
     return (
       <div className="playlist-detail">
         <div className="playlist-header skeleton">
           <div className="skeleton-cover"></div>
           <div className="skeleton-info">
-            <div className="skeleton-line"></div>
             <div className="skeleton-line"></div>
             <div className="skeleton-line"></div>
           </div>
@@ -116,7 +101,6 @@ const PlaylistDetail = () => {
     <div className="playlist-detail">
       {/* Playlist Header */}
       <div className="playlist-header">
-        {/* Cover Image - Sol */}
         <div className="cover-container">
           {playlist.coverImage ? (
             <img 
@@ -131,12 +115,11 @@ const PlaylistDetail = () => {
           )}
         </div>
 
-        {/* Playlist Info - Sağ */}
         <div className="playlist-info">
           <span className="playlist-type">
-            {playlist.isAdminPlaylist && '👑 Official Playlist'}
-            {playlist.isArtistEssential && '⭐ Artist Essential'}
-            {!playlist.isAdminPlaylist && !playlist.isArtistEssential && '📁 Public Playlist'}
+            {playlist.isAdminPlaylist && '👑 OFFICIAL PLAYLIST'}
+            {playlist.isArtistEssential && '⭐ ARTIST ESSENTIAL'}
+            {!playlist.isAdminPlaylist && !playlist.isArtistEssential && '📁 PUBLIC PLAYLIST'}
           </span>
           
           <h1 className="playlist-name">{playlist.name}</h1>
@@ -146,7 +129,6 @@ const PlaylistDetail = () => {
           )}
 
           <div className="playlist-meta">
-            {/* Owner */}
             <div className="meta-item">
               <div className="owner-avatar">
                 {playlist.owner?.profileImage ? (
@@ -155,76 +137,61 @@ const PlaylistDetail = () => {
                   <span>{playlist.owner?.displayName?.charAt(0) || 'A'}</span>
                 )}
               </div>
-              <span className="owner-name">{playlist.owner?.displayName || 'Admin'}</span>
+              <span className="owner-name">{playlist.owner?.displayName || 'Admin User'}</span>
             </div>
 
             <span className="meta-separator">•</span>
-
-            {/* Track Count */}
             <span className="meta-item">
               {playlist.musicCount || playlist.musics?.length || 0} tracks
             </span>
 
             <span className="meta-separator">•</span>
-
-            {/* Likes */}
             <span className="meta-item">
               ❤️ {formatNumber(playlist.likes || 0)} likes
             </span>
 
             <span className="meta-separator">•</span>
-
-            {/* Views */}
             <span className="meta-item">
               👁️ {formatNumber(playlist.views || 0)} views
             </span>
           </div>
-
-          {/* Action Buttons */}
-          <div className="action-buttons">
-            <button className="btn-play">
-              <FaPlay /> Play All
-            </button>
-
-            <button className="btn-shuffle">
-              <FaRandom /> Shuffle
-            </button>
-
-            <button 
-              className={`btn-like ${isLiked ? 'liked' : ''}`}
-              onClick={handleLike}
-            >
-              {isLiked ? <FaHeart /> : <FaRegHeart />}
-            </button>
-
-            <button className="btn-share" onClick={handleShare}>
-              <FaShare />
-            </button>
-          </div>
         </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="action-buttons">
+        <button className="btn-play">
+          <FaPlay />
+        </button>
+
+        <button className="btn-shuffle">
+          <FaRandom />
+        </button>
+
+        <button 
+          className={`btn-like ${isLiked ? 'liked' : ''}`}
+          onClick={handleLike}
+        >
+          {isLiked ? <FaHeart /> : <FaRegHeart />}
+        </button>
+
+        <button className="btn-share" onClick={handleShare}>
+          <FaShare />
+        </button>
       </div>
 
       {/* Track List */}
       <div className="track-list-container">
         <div className="track-list-header">
-          <div className="header-col track-number">#</div>
-          <div className="header-col track-title">Title</div>
-          <div className="header-col track-artist">Artist</div>
-          <div className="header-col track-album">Playlist</div>
-          <div className="header-col track-platforms">Platforms</div>
-          <div className="header-col track-duration">
-            <FaClock />
-          </div>
+          <h3>Tracks ({playlist.musics?.length || 0})</h3>
         </div>
 
         <div className="track-list">
           {playlist.musics && playlist.musics.length > 0 ? (
-            playlist.musics.map((track, index) => (
-              <TrackRow 
+            playlist.musics.map((track) => (
+              <TrackCard 
                 key={track._id} 
-                track={track} 
-                index={index + 1}
-                playlistName={playlist.name}
+                track={track}
               />
             ))
           ) : (
@@ -238,17 +205,16 @@ const PlaylistDetail = () => {
   );
 };
 
-// Track Row Component
-const TrackRow = ({ track, index, playlistName }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+// Track Card Component (Mobil Benzeri)
+const TrackCard = ({ track }) => {
+  const [isLiked, setIsLiked] = useState(false);
 
   const platformIcons = {
-    spotify: { icon: <BsSpotify />, color: '#1DB954', name: 'Spotify' },
-    appleMusic: { icon: <BsApple />, color: '#FC3C44', name: 'Apple Music' },
-    youtubeMusic: { icon: <BsSoundwave />, color: '#FF0000', name: 'YouTube Music' },
-    beatport: { icon: <SiBeatport />, color: '#01FF95', name: 'Beatport' },
-    soundcloud: { icon: <BsSoundwave />, color: '#FF5500', name: 'SoundCloud' },
+    spotify: { icon: <BsSpotify />, class: 'spotify', name: 'Spotify' },
+    appleMusic: { icon: <BsApple />, class: 'apple', name: 'Apple Music' },
+    youtubeMusic: { icon: <BsSoundwave />, class: 'youtube', name: 'YouTube Music' },
+    beatport: { icon: <SiBeatport />, class: 'beatport', name: 'Beatport' },
+    soundcloud: { icon: <BsSoundwave />, class: 'soundcloud', name: 'SoundCloud' },
   };
 
   const getPlatformLinks = () => {
@@ -268,71 +234,53 @@ const TrackRow = ({ track, index, playlistName }) => {
     window.open(url, '_blank');
   };
 
+  const handleLike = (e) => {
+    e.stopPropagation();
+    setIsLiked(!isLiked);
+  };
+
   return (
-    <div 
-      className={`track-row ${isHovered ? 'hovered' : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Track Number / Play Button */}
-      <div className="track-col track-number">
-        {isHovered ? (
-          <button 
-            className="btn-play-track"
-            onClick={() => setIsPlaying(!isPlaying)}
-          >
-            {isPlaying ? '⏸' : '▶'}
-          </button>
+    <div className="track-card">
+      {/* Track Cover */}
+      <div className="track-cover-small">
+        {track.imageUrl ? (
+          <img src={track.imageUrl} alt={track.title} />
         ) : (
-          <span>{index}</span>
+          <span>🎵</span>
         )}
       </div>
 
-      {/* Track Title + Cover */}
-      <div className="track-col track-title">
-        <div className="track-cover-small">
-          {track.imageUrl ? (
-            <img src={track.imageUrl} alt={track.title} />
-          ) : (
-            <span>🎵</span>
-          )}
+      {/* Track Info */}
+      <div className="track-info">
+        <div className="track-name">{track.title}</div>
+        <div className="track-artist">
+          {track.artist || track.artistNames || 'Unknown Artist'}
         </div>
-        <div className="track-title-text">
-          <div className="track-name">{track.title}</div>
-        </div>
-      </div>
-
-      {/* Artist */}
-      <div className="track-col track-artist">
-        {track.artist || track.artistNames || 'Unknown Artist'}
-      </div>
-
-      {/* Album (Playlist Name) */}
-      <div className="track-col track-album">
-        {playlistName}
       </div>
 
       {/* Platform Buttons */}
-      <div className="track-col track-platforms">
-        <div className="platform-buttons">
-          {getPlatformLinks().map(({ platform, url, icon, color, name }) => (
-            <button
-              key={platform}
-              className="platform-btn"
-              style={{ '--platform-color': color }}
-              onClick={(e) => handlePlatformClick(url, e)}
-              title={`Open on ${name}`}
-            >
-              {icon}
-            </button>
-          ))}
-        </div>
+      <div className="track-platforms">
+        {getPlatformLinks().map(({ platform, url, icon, class: className, name }) => (
+          <button
+            key={platform}
+            className={`platform-btn ${className}`}
+            onClick={(e) => handlePlatformClick(url, e)}
+            title={`Open on ${name}`}
+          >
+            {icon}
+          </button>
+        ))}
       </div>
 
-      {/* Duration */}
-      <div className="track-col track-duration">
-        {/* Duration bilgisi backend'de yok, şimdilik varsayılan */}
-        3:45
+      {/* Like Button */}
+      <div className="track-like">
+        <button 
+          className={`btn-track-like ${isLiked ? 'liked' : ''}`}
+          onClick={handleLike}
+        >
+          {isLiked ? <FaHeart /> : <FaRegHeart />}
+        </button>
+        <span className="like-count">{track.likes || 0}</span>
       </div>
     </div>
   );
