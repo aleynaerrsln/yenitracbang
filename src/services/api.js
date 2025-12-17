@@ -1,3 +1,5 @@
+// src/services/api.js - FULL VERSION WITH CORRECTIONS
+
 import axios from 'axios';
 
 const API_BASE_URL =
@@ -68,9 +70,21 @@ export const hotAPI = {
 export const playlistAPI = {
   // User
   getMyPlaylists: () => api.get('/playlists/my-playlists'),
-  createPlaylist: (data) => api.post('/playlists', data),
+  createPlaylist: (data) => {
+    // FormData ise, axios otomatik Content-Type set eder
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    return api.post('/playlists', data, config);
+  },
   addTracksToPlaylist: (id, trackIds) => api.post(`/playlists/${id}/tracks`, { trackIds }),
-  removeTrackFromPlaylist: (id, trackId) => api.delete(`/playlists/${id}/tracks/${trackId}`),
+  removeTrackFromPlaylist: (id, trackIds) => {
+    // Tek track ise array'e çevir
+    const ids = Array.isArray(trackIds) ? trackIds : [trackIds];
+    return api.delete(`/playlists/${id}/tracks`, { data: { trackIds: ids } });
+  },
+  moveTracksToTop: (id, trackIds) => api.put(`/playlists/${id}/reorder/top`, { trackIds }),
+  moveTracksToBottom: (id, trackIds) => api.put(`/playlists/${id}/reorder/bottom`, { trackIds }),
   updatePlaylist: (id, data) =>
     api.put(`/playlists/${id}`, data),
   deletePlaylist: (id) =>
@@ -106,26 +120,6 @@ export const playlistAPI = {
   searchPrivatePlaylists: (query, userId) =>
     api.get('/playlists/search-private', {
       params: { query, userId },
-    }),
-
-  // Tracks
-  addTracks: (id, trackIds) =>
-    api.post(`/playlists/${id}/tracks`, { trackIds }),
-  removeTracks: (id, trackIds) =>
-    api.delete(`/playlists/${id}/tracks`, {
-      data: { trackIds },
-    }),
-  reorderTracks: (id, trackIds) =>
-    api.put(`/playlists/${id}/tracks/reorder`, {
-      trackIds,
-    }),
-  moveTracksToTop: (id, trackIds) =>
-    api.put(`/playlists/${id}/tracks/move-top`, {
-      trackIds,
-    }),
-  moveTracksToBottom: (id, trackIds) =>
-    api.put(`/playlists/${id}/tracks/move-bottom`, {
-      trackIds,
     }),
 
   // Cover
@@ -180,8 +174,10 @@ export const musicAPI = {
     }),
 
   // Search
-  searchMusic: (params) =>
-    api.get('/music/search', { params }),
+  searchMusic: (query) =>
+    api.get('/search/musics', {
+      params: { query },
+    }),
   searchMusicByArtist: (params) =>
     api.get('/music/search/artist', {
       params,
@@ -219,8 +215,8 @@ export const searchAPI = {
   searchAll: (query) =>
     api.get('/search', { params: { q: query } }),
   searchMusic: (query) =>
-    api.get('/search/music', {
-      params: { q: query },
+    api.get('/search/musics', {
+      params: { query },
     }),
   searchPlaylists: (query) =>
     api.get('/search/playlists', {

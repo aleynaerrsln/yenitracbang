@@ -1,7 +1,7 @@
-// src/pages/Library.jsx - TOAST İLE GÜNCELLE
+// src/pages/Library.jsx
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FiMusic, FiPlus, FiChevronRight } from 'react-icons/fi';
 import { playlistAPI } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -10,22 +10,44 @@ import './Library.css';
 
 const Library = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
+
   const [activeTab, setActiveTab] = useState('playlists');
   const [myPlaylists, setMyPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // 🔥 İLK YÜKLEME
   useEffect(() => {
     if (activeTab === 'playlists') {
       fetchPlaylists();
     }
   }, [activeTab]);
 
+  // 🔥 PLAYLISTE ŞARKI EKLENİP GERİ GELİNDİ Mİ?
+  useEffect(() => {
+    if (location.state?.playlistUpdated) {
+      const { playlistId, addedCount = 1 } = location.state;
+
+      setMyPlaylists(prev =>
+        prev.map(p =>
+          p._id === playlistId
+            ? { ...p, musicCount: (p.musicCount || 0) + addedCount }
+            : p
+        )
+      );
+
+      // state'i temizle (önemli)
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location, navigate]);
+
   const fetchPlaylists = async () => {
     try {
       setLoading(true);
       const response = await playlistAPI.getMyPlaylists();
+
       if (response.data.success) {
         setMyPlaylists(response.data.playlists || []);
       }
@@ -39,16 +61,23 @@ const Library = () => {
 
   const handleCreatePlaylist = async (formData) => {
     try {
-      const playlistData = {
-        name: formData.name,
-        description: formData.description,
-        isPublic: formData.isPublic,
-      };
+      const uploadData = new FormData();
+      uploadData.append('name', formData.name);
+      uploadData.append('description', formData.description || '');
+      uploadData.append('isPublic', formData.isPublic);
 
-      const response = await playlistAPI.createPlaylist(playlistData);
-      
+      if (formData.coverImage) {
+        uploadData.append('coverImage', formData.coverImage);
+      }
+
+      const response = await playlistAPI.createPlaylist(uploadData);
+
       if (response.data.success) {
-        setMyPlaylists([response.data.playlist, ...myPlaylists]);
+        setMyPlaylists(prev => [
+          { ...response.data.playlist, musicCount: 0 },
+          ...prev,
+        ]);
+
         toast.success('Playlist created successfully');
       }
     } catch (error) {
@@ -82,7 +111,7 @@ const Library = () => {
       <div className="tab-content">
         {activeTab === 'playlists' ? (
           <>
-            <button 
+            <button
               className="create-playlist-btn"
               onClick={() => setIsModalOpen(true)}
             >
@@ -106,7 +135,9 @@ const Library = () => {
                   <button
                     key={playlist._id}
                     className="playlist-item"
-                    onClick={() => navigate(`/my-playlist/${playlist._id}`)}
+                    onClick={() =>
+                      navigate(`/my-playlist/${playlist._id}`)
+                    }
                   >
                     <div className="playlist-cover-small">
                       {playlist.coverImage ? (
@@ -115,10 +146,12 @@ const Library = () => {
                         <FiMusic size={20} />
                       )}
                     </div>
+
                     <div className="playlist-info">
                       <h3>{playlist.name}</h3>
                       <p>{playlist.musicCount || 0} tracks</p>
                     </div>
+
                     <FiChevronRight size={20} className="chevron-icon" />
                   </button>
                 ))}

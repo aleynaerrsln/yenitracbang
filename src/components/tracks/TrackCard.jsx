@@ -34,7 +34,7 @@ const TrackCard = ({ track, onLike }) => {
               className="platform-btn spotify"
               onClick={() => openLink(track.platformLinks.spotify)}
             >
-              <SiSpotify size={16} />
+              <SiSpotify size={18} />
               <span>Spotify</span>
             </button>
           )}
@@ -44,7 +44,7 @@ const TrackCard = ({ track, onLike }) => {
               className="platform-btn beatport"
               onClick={() => openLink(track.platformLinks.beatport)}
             >
-              <FiMusic size={16} />
+              <FiMusic size={18} />
               <span>Beatport</span>
             </button>
           )}
@@ -54,7 +54,7 @@ const TrackCard = ({ track, onLike }) => {
               className="platform-btn apple"
               onClick={() => openLink(track.platformLinks.appleMusic)}
             >
-              <SiApplemusic size={16} />
+              <SiApplemusic size={18} />
               <span>Apple</span>
             </button>
           )}
@@ -64,7 +64,7 @@ const TrackCard = ({ track, onLike }) => {
               className="platform-btn soundcloud"
               onClick={() => openLink(track.platformLinks.soundcloud)}
             >
-              <SiSoundcloud size={16} />
+              <SiSoundcloud size={18} />
               <span>SoundCloud</span>
             </button>
           )}

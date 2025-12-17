@@ -79,66 +79,77 @@
 .platform-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.625rem;
   margin-top: auto;
 }
 
 .platform-btn {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.9rem;
-  border-radius: 8px;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  border-radius: 10px;
   border: none;
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: 100px;
+}
+
+.platform-btn svg {
+  flex-shrink: 0;
 }
 
 /* Spotify */
 .platform-btn.spotify {
-  background: #1DB954;
+  background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
   color: #fff;
 }
 
 .platform-btn.spotify:hover {
-  background: #1ed760;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #1ed760 0%, #1fdf64 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(29, 185, 84, 0.4);
 }
 
 /* Beatport */
 .platform-btn.beatport {
-  background: #444;
+  background: linear-gradient(135deg, #333 0%, #444 100%);
   color: #fff;
 }
 
 .platform-btn.beatport:hover {
-  background: #555;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #444 0%, #555 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(68, 68, 68, 0.4);
 }
 
 /* Apple Music */
 .platform-btn.apple {
-  background: #FA243C;
+  background: linear-gradient(135deg, #FA243C 0%, #fc3d52 100%);
   color: #fff;
 }
 
 .platform-btn.apple:hover {
-  background: #fb4358;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #fc3d52 0%, #fd4f62 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(250, 36, 60, 0.4);
 }
 
 /* SoundCloud */
 .platform-btn.soundcloud {
-  background: #FF5500;
+  background: linear-gradient(135deg, #FF5500 0%, #ff6619 100%);
   color: #fff;
 }
 
 .platform-btn.soundcloud:hover {
-  background: #ff6619;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #ff6619 0%, #ff7730 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 85, 0, 0.4);
 }
 
 /* ========== ACTIONS ========== */
@@ -220,9 +231,19 @@
     font-size: 0.85rem;
   }
 
+  .platform-buttons {
+    gap: 0.5rem;
+  }
+
   .platform-btn {
-    padding: 0.45rem 0.8rem;
+    padding: 0.5rem 0.95rem;
     font-size: 0.75rem;
+    min-width: 90px;
+  }
+
+  .platform-btn svg {
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -245,8 +266,18 @@
     font-size: 0.8rem;
   }
 
+  .platform-buttons {
+    gap: 0.4rem;
+  }
+
   .platform-btn {
-    padding: 0.4rem 0.75rem;
+    padding: 0.45rem 0.85rem;
     font-size: 0.7rem;
+    min-width: 85px;
+  }
+
+  .platform-btn svg {
+    width: 15px;
+    height: 15px;
   }
 }

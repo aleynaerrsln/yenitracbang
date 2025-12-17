@@ -7,6 +7,7 @@ import { RxScissors } from 'react-icons/rx';
 import { playlistAPI } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import AddTracksModal from '../components/modals/AddTracksModal';
+import EditPlaylistModal from '../components/modals/EditPlaylistModal';
 import TrackCard from '../components/tracks/TrackCard';
 import './MyPlaylistDetail.css';
 
@@ -17,6 +18,7 @@ const MyPlaylistDetail = () => {
   const [playlist, setPlaylist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAddTracksOpen, setIsAddTracksOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   useEffect(() => {
     fetchPlaylistDetails();
@@ -54,8 +56,7 @@ const MyPlaylistDetail = () => {
   };
 
   const handleEditPlaylist = () => {
-    // TODO: Edit playlist modal
-    console.log('Edit playlist');
+    setIsEditOpen(true);
   };
 
   const handleRenamePlaylist = () => {
@@ -95,10 +96,20 @@ const MyPlaylistDetail = () => {
 
   return (
     <div className="my-playlist-detail">
-      {/* Back Button */}
-      <button className="my-back-button" onClick={() => navigate(-1)}>
-        <FiArrowLeft size={20} />
-      </button>
+      {/* Edit Playlist Modal */}
+      {isEditOpen ? (
+        <EditPlaylistModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          playlist={playlist}
+          onUpdate={fetchPlaylistDetails}
+        />
+      ) : (
+        <>
+          {/* Back Button */}
+          <button className="my-back-button" onClick={() => navigate(-1)}>
+            <FiArrowLeft size={20} />
+          </button>
 
       {/* Playlist Cover */}
       <div className="my-cover-container">
@@ -170,6 +181,8 @@ const MyPlaylistDetail = () => {
             ))}
           </div>
         </div>
+      )}
+      </>
       )}
 
       {/* Add Tracks Modal */}

@@ -1,10 +1,13 @@
 /* src/pages/MyPlaylistDetail.css - TAM MODERN VERSİYON */
 
 .my-playlist-detail {
+  position: relative;
   min-height: 100vh;
+  height: 100%;
   background: linear-gradient(180deg, rgba(15, 25, 35, 0.98) 0%, rgba(5, 10, 15, 0.98) 100%);
   padding: 1rem;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ========== LOADING ========== */
@@ -243,7 +246,7 @@
   flex-direction: column;
   gap: 0.75rem;
   padding: 0 0.25rem;
-  padding-bottom: 2rem; /* Scroll için alt boşluk */
+  padding-bottom: 4rem; /* Scroll için daha fazla alt boşluk */
 }
 
 .my-track-item {
@@ -261,6 +264,7 @@
 
 .my-tracks-section {
   margin-top: 1rem;
+  margin-bottom: 2rem; /* Alt boşluk */
 }
 
 .tracks-header {
@@ -300,6 +304,7 @@
 @media (max-width: 768px) {
   .my-playlist-detail {
     padding: 0.875rem;
+    padding-bottom: 2rem; /* Mobile için ekstra alt boşluk */
   }
 
   .my-cover-image {
@@ -319,6 +324,10 @@
     min-width: 80px;
     padding: 0.55rem 0.35rem;
     font-size: 0.68rem;
+  }
+
+  .my-tracks-list {
+    padding-bottom: 3rem; /* Mobile için daha fazla boşluk */
   }
 }
 
@@ -357,6 +366,10 @@
 
   .my-empty-state p {
     font-size: 0.8rem;
+  }
+
+  .my-tracks-list {
+    padding-bottom: 2.5rem; /* Mobile için boşluk */
   }
 }
 
