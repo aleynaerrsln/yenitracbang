@@ -1,0 +1,134 @@
+/* src/components/modals/DeletePlaylistModal.css */
+
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.delete-modal-content {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(40, 40, 50, 0.98);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.delete-modal-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.delete-modal-header h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+}
+
+.delete-modal-header p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.delete-playlist-name {
+  color: #E22134;
+  font-weight: 600;
+}
+
+.delete-modal-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.delete-modal-btn {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.delete-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.delete-confirm-btn {
+  background: #E22134;
+  color: #fff;
+}
+
+.delete-confirm-btn:hover:not(:disabled) {
+  background: #c41d2e;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(226, 33, 52, 0.4);
+}
+
+.delete-confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .delete-modal-content {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .delete-modal-icon {
+    font-size: 3rem;
+  }
+
+  .delete-modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .delete-modal-header p {
+    font-size: 0.85rem;
+  }
+
+  .delete-modal-btn {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+}

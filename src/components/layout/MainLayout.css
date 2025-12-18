@@ -11,7 +11,7 @@
 
 .main-layout-content {
   display: grid;
-  grid-template-columns: 280px 1fr 320px; /* Sol 280px | Orta esnek | Sağ 320px */
+  grid-template-columns: 300px 1fr 340px; /* Sol 350px | Orta esnek | Sağ 380px */
   flex: 1;
   overflow: hidden;
 }

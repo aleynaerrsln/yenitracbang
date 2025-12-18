@@ -1,4 +1,4 @@
-// src/components/layout/MainContent.jsx
+// src/components/layout/MainContent.jsx - MİNİMALİST HEADER
 import { useState, useEffect } from 'react';
 import { genreAPI, hotAPI } from '../../services/api';
 import GenreCard from '../common/GenreCard';
@@ -15,48 +15,39 @@ const MainContent = () => {
     fetchData();
   }, []);
 
-// src/components/layout/MainContent.jsx - fetchData fonksiyonunu düzelt
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      const [genresRes, hotRes] = await Promise.all([
+        genreAPI.getAllGenres(),
+        hotAPI.getHotPlaylists()
+      ]);
 
-const fetchData = async () => {
-  try {
-    setLoading(true);
-    
-    const [genresRes, hotRes] = await Promise.all([
-      genreAPI.getAllGenres(),
-      hotAPI.getHotPlaylists()
-    ]);
+      console.log('Genres Response:', genresRes);
+      console.log('Hot Response:', hotRes);
 
+      if (genresRes.data.success) {
+        setGenres(genresRes.data.data || []); 
+      }
 
-    console.log('Genres Response:', genresRes);
-    console.log('Hot Response:', hotRes);
+      if (hotRes.data.success) {
+        setHotPlaylists(hotRes.data.hotPlaylists || []);
+      }
 
- 
-    if (genresRes.data.success) {
-      setGenres(genresRes.data.data || []); 
+    } catch (error) {
+      console.error('Data fetch error:', error);
+    } finally {
+      setLoading(false);
     }
-
-    // Hot Playlists
-    if (hotRes.data.success) {
-      setHotPlaylists(hotRes.data.hotPlaylists || []);
-    }
-
-  } catch (error) {
-    console.error('Data fetch error:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const tabs = ['Discovery', 'Top 10', 'World', 'House', 'Hot'];
 
   return (
     <div className="main-content">
-      {/* Header */}
+      {/* Header - Minimalist */}
       <div className="main-header">
-        <div className="logo-mobile">
-          <h1>trackbang</h1>
-        </div>
-        
         <div className="header-tabs">
           {tabs.map((tab) => (
             <button
@@ -67,11 +58,6 @@ const fetchData = async () => {
               {tab}
             </button>
           ))}
-        </div>
-
-        <div className="header-actions">
-          <button className="btn-icon-round">💬</button>
-          <button className="btn-icon-round">🔔</button>
         </div>
       </div>
 

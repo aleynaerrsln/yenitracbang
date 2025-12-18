@@ -1,4 +1,4 @@
-/* src/components/layout/MainContent.css - TAM VE GÜNCEL */
+/* src/components/layout/MainContent.css - MİNİMALİST HEADER */
 
 .main-content {
   flex: 1;
@@ -7,31 +7,15 @@
   color: #fff;
 }
 
-/* Header */
+/* Header - Ultra Minimalist */
 .main-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem 2rem;
-  background: rgba(10, 10, 10, 0.8);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1.25rem 2rem;
+  background: transparent;
   position: sticky;
   top: 0;
   z-index: 100;
-}
-
-.logo-mobile {
-  display: none;
-}
-
-.logo-mobile h1 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0;
 }
 
 .header-tabs {
@@ -40,50 +24,31 @@
 }
 
 .tab-btn {
-  padding: 0.5rem 1.25rem;
-  border-radius: 20px;
+  padding: 0.625rem 1.5rem;
+  border-radius: 8px;
   border: none;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  font-weight: 600;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9375rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .tab-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .tab-btn.active {
-  background: #667eea;
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.btn-icon-round {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-  font-size: 1.25rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-}
-
-.btn-icon-round:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: scale(1.05);
+  font-weight: 600;
 }
 
 /* Content Scroll */
@@ -232,17 +197,24 @@
 }
 
 @media (max-width: 768px) {
-  .logo-mobile {
-    display: block;
+  .main-header {
+    padding: 1rem 1.5rem;
   }
 
   .header-tabs {
-    gap: 0.25rem;
+    gap: 0.375rem;
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .header-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .tab-btn {
-    padding: 0.4rem 1rem;
-    font-size: 0.8rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
   }
 
   .content-scroll {
@@ -284,13 +256,12 @@
 }
 
 @media (max-width: 480px) {
-  .header-actions {
-    gap: 0.5rem;
+  .header-tabs {
+    gap: 0.25rem;
   }
 
-  .btn-icon-round {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
+  .tab-btn {
+    padding: 0.45rem 1.125rem;
+    font-size: 0.8125rem;
   }
 }

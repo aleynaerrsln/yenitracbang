@@ -1,15 +1,17 @@
-// src/components/layout/TopNavbar.jsx - USER INFO EKLE
+// src/components/layout/TopNavbar.jsx - HAMBURGER MENU
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiHome, FiSearch, FiBell, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiHome, FiBell, FiUser, FiLogOut, FiMenu } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
+import SideMenu from './SideMenu';
 import './TopNavbar.css';
 
 const TopNavbar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -18,29 +20,30 @@ const TopNavbar = () => {
 
   return (
     <div className="top-navbar">
-      {/* Logo */}
-      <div className="navbar-logo" onClick={() => navigate('/')}>
-        <h1>trackbang</h1>
+      {/* Hamburger Menu + Logo */}
+      <div className="navbar-left">
+        <button className="hamburger-btn" onClick={() => setIsSideMenuOpen(true)}>
+          <FiMenu size={24} />
+        </button>
+        <div className="navbar-logo" onClick={() => navigate('/')}>
+          <img src="/logo.png" alt="TrackBang" />
+        </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="navbar-nav">
-        <button className="nav-btn active" onClick={() => navigate('/')}>
+      {/* Center: Home + Search */}
+      <div className="navbar-center">
+        <button className="nav-home-btn" onClick={() => navigate('/')}>
           <FiHome size={24} />
         </button>
-        <button className="nav-btn" onClick={() => navigate('/search')}>
-          <FiSearch size={24} />
-        </button>
-      </div>
 
-      {/* Search Bar */}
-      <div className="navbar-search">
-        <FiSearch className="search-icon" />
-        <input 
-          type="text" 
-          placeholder="Ne çalmak istiyorsun?"
-          onClick={() => navigate('/search')}
-        />
+        <div className="navbar-search">
+          <input 
+            type="text" 
+            placeholder="Ne çalmak istiyorsun?"
+            onClick={() => navigate('/search')}
+            readOnly
+          />
+        </div>
       </div>
 
       {/* Right Actions */}
@@ -102,6 +105,9 @@ const TopNavbar = () => {
           )}
         </div>
       </div>
+
+      {/* Side Menu Drawer */}
+      <SideMenu isOpen={isSideMenuOpen} onClose={() => setIsSideMenuOpen(false)} />
     </div>
   );
 };
