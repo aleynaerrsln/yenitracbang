@@ -1,4 +1,4 @@
-/* src/components/layout/MainLayout.css - CENTER-CONTENT İZOLE */
+/* ================= SPOTIFY DESKTOP LAYOUT ================= */
 
 .main-layout {
   display: flex;
@@ -9,74 +9,91 @@
   overflow: hidden;
 }
 
+/* TopNavbar altındaki ana gövde */
 .main-layout-content {
-  display: grid;
-  grid-template-columns: 300px 1fr 340px; /* Sol 350px | Orta esnek | Sağ 380px */
   flex: 1;
+  display: grid;
+  grid-template-columns: 430px minmax(0,1fr) 320px;  /* Spotify oranları */
   overflow: hidden;
+  transition: grid-template-columns 0.3s ease;
 }
 
-/* Sol: LeftSidebar */
+/* Left sidebar collapsed */
+.main-layout-content.left-collapsed {
+  grid-template-columns: 80px minmax(0,1fr) 320px;
+}
+
+/* ================= LEFT SIDEBAR ================= */
+
 .main-layout-content > *:nth-child(1) {
   background: #000;
-  overflow-y: auto;
-  overflow-x: hidden; /* ⭐ Yatay taşma engeli */
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-/* Orta: center-content */
+/* ================= CENTER CONTENT ================= */
+
 .center-content {
+  position: relative;
+  background: linear-gradient(180deg,#121212 0%,#0a0a0a 100%);
   overflow-y: auto;
-  overflow-x: hidden; /* ⭐ Yatay taşma engeli */
-  background: linear-gradient(180deg, rgba(18, 18, 18, 1) 0%, rgba(10, 10, 10, 1) 100%);
-  position: relative; /* ⭐ İçeriği izole et */
-  max-width: 100%; /* ⭐ Taşma engeli */
+  overflow-x: hidden;
+  min-width: 0;        /* 🔥 grid overflow bug fix */
+  isolation: isolate; /* 🔥 blend/blur bug fix */
 }
 
-/* Sağ: RightPanel */
+/* ================= RIGHT PANEL ================= */
+
 .main-layout-content > *:nth-child(3) {
   background: #000;
   overflow-y: auto;
-  overflow-x: hidden; /* ⭐ Yatay taşma engeli */
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: hidden;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
 }
 
-/* Scrollbar */
-.main-layout-content > *::-webkit-scrollbar {
+/* ================= SCROLLBAR ================= */
+
+.center-content::-webkit-scrollbar,
+.main-layout-content > *:nth-child(3)::-webkit-scrollbar {
   width: 8px;
 }
 
-.main-layout-content > *::-webkit-scrollbar-track {
+.center-content::-webkit-scrollbar-track,
+.main-layout-content > *:nth-child(3)::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.main-layout-content > *::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+.center-content::-webkit-scrollbar-thumb,
+.main-layout-content > *:nth-child(3)::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.22);
   border-radius: 4px;
 }
 
-.main-layout-content > *::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+.center-content::-webkit-scrollbar-thumb:hover,
+.main-layout-content > *:nth-child(3)::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.35);
 }
 
-/* Responsive */
+/* ================= RESPONSIVE ================= */
+
 @media (max-width: 1200px) {
   .main-layout-content {
-    grid-template-columns: 280px 1fr; /* Sol + Orta */
+    grid-template-columns: 280px minmax(0,1fr);
   }
-  
+
   .main-layout-content > *:nth-child(3) {
-    display: none; /* Sağ panel gizle */
+    display: none;
   }
 }
 
 @media (max-width: 768px) {
   .main-layout-content {
-    grid-template-columns: 1fr; /* Sadece orta */
+    grid-template-columns: minmax(0,1fr);
   }
-  
+
   .main-layout-content > *:nth-child(1),
   .main-layout-content > *:nth-child(3) {
-    display: none; /* Sol ve sağ gizle */
+    display: none;
   }
 }

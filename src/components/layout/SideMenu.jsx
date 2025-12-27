@@ -47,7 +47,7 @@ const SideMenu = ({ isOpen, onClose }) => {
         <div className="side-menu-section">
           <div className="section-title">MENU</div>
           
-          <button className="menu-item" onClick={() => handleNavigate('/library')}>
+          <button className="menu-item" onClick={() => handleNavigate('/lists')}>
             <FiList size={20} />
             <span>Lists</span>
             <span className="arrow">›</span>

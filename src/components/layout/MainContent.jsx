@@ -9,7 +9,6 @@ const MainContent = () => {
   const [genres, setGenres] = useState([]);
   const [hotPlaylists, setHotPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTab, setSelectedTab] = useState('Discovery');
 
   useEffect(() => {
     fetchData();
@@ -42,25 +41,8 @@ const MainContent = () => {
     }
   };
 
-  const tabs = ['Discovery', 'Top 10', 'World', 'House', 'Hot'];
-
   return (
     <div className="main-content">
-      {/* Header - Minimalist */}
-      <div className="main-header">
-        <div className="header-tabs">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              className={`tab-btn ${selectedTab === tab ? 'active' : ''}`}
-              onClick={() => setSelectedTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="content-scroll">
         {/* Genres Section */}

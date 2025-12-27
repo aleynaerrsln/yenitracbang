@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiMusic, FiPlus, FiSearch } from 'react-icons/fi';
+import { FiMusic, FiPlus, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { HiViewList } from 'react-icons/hi';
 import { playlistAPI } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import CreatePlaylistModal from '../modals/CreatePlaylistModal';
 import './LeftSidebar.css';
 
-const LeftSidebar = () => {
+const LeftSidebar = ({ isCollapsed, onToggleCollapse }) => {
   const navigate = useNavigate();
   const toast = useToast();
   const [myPlaylists, setMyPlaylists] = useState([]);
@@ -67,37 +67,55 @@ const LeftSidebar = () => {
   );
 
   return (
-    <div className="left-sidebar">
+    <div className={`left-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       {/* Header */}
       <div className="sidebar-header">
         <button className="library-title" onClick={() => navigate('/library')}>
-          <FiMusic size={24} />
-          <span>Kitaplığın</span>
+          <FiMusic size={26} />
+          {!isCollapsed && <span>Kitaplığın</span>}
         </button>
-        <button 
-          className="create-btn" 
-          onClick={() => setIsCreateModalOpen(true)}
-          title="Oluştur"
-        >
-          <FiPlus size={24} />
-        </button>
+
+        <div className="header-actions">
+          {!isCollapsed && (
+            <button
+              className="create-btn"
+              onClick={() => setIsCreateModalOpen(true)}
+              title="Oluştur"
+            >
+              <FiPlus size={20} />
+            </button>
+          )}
+
+          {/* Collapse Toggle Button */}
+          <button
+            className="collapse-toggle-btn"
+            onClick={() => onToggleCollapse(!isCollapsed)}
+            title={isCollapsed ? "Genişlet" : "Daralt"}
+          >
+            {isCollapsed ? <FiChevronRight size={16} /> : <FiChevronLeft size={16} />}
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="sidebar-tabs">
-        <button className="tab-item active">Playlists</button>
-      </div>
+      {!isCollapsed && (
+        <div className="sidebar-tabs">
+          <button className="tab-item active">Playlists</button>
+        </div>
+      )}
 
       {/* Search & Sort */}
-      <div className="sidebar-controls">
-        <button className="control-btn">
-          <FiSearch size={16} />
-        </button>
-        <button className="control-btn">
-          <span className="sort-text">Son çalınanlar</span>
-          <HiViewList size={16} />
-        </button>
-      </div>
+      {!isCollapsed && (
+        <div className="sidebar-controls">
+          <button className="control-btn">
+            <FiSearch size={16} />
+          </button>
+          <button className="control-btn">
+            <span className="sort-text">Son çalınanlar</span>
+            <HiViewList size={16} />
+          </button>
+        </div>
+      )}
 
       {/* Playlists List */}
       <div className="sidebar-playlists">
@@ -111,27 +129,37 @@ const LeftSidebar = () => {
           </div>
         ) : (
           filteredPlaylists.map((playlist) => (
-            <button
-              key={playlist._id}
-              className="sidebar-playlist-item"
-              onClick={() => navigate(`/my-playlist/${playlist._id}`)}
-            >
-              <div className="playlist-cover-box">
-                {playlist.coverImage ? (
-                  <img src={playlist.coverImage} alt={playlist.name} />
-                ) : (
-                  <div className="cover-fallback">
-                    <FiMusic size={20} />
-                  </div>
-                )}
-              </div>
-              <div className="playlist-details">
-                <span className="playlist-title">{playlist.name}</span>
-                <span className="playlist-meta">
-                  Çalma listesi • {playlist.musicCount || 0} şarkı
-                </span>
-              </div>
-            </button>
+<button
+  key={playlist._id}
+  className="sidebar-playlist-item"
+  onClick={() => navigate(`/my-playlist/${playlist._id}`)}
+  title={isCollapsed ? playlist.name : ''}
+>
+  <div className="spotify-row">
+
+    <div className="playlist-cover-box">
+      {playlist.coverImage ? (
+        <img src={playlist.coverImage} alt={playlist.name} />
+      ) : (
+        <div className="cover-fallback">
+          <FiMusic size={24} />
+        </div>
+      )}
+    </div>
+
+    {!isCollapsed && (
+      <div className="spotify-text">
+        <div className="spotify-title">{playlist.name}</div>
+        <div className="spotify-meta">
+          Playlist • {playlist.owner?.username || playlist.owner?.name || 'user'}
+        </div>
+      </div>
+    )}
+
+  </div>
+</button>
+
+
           ))
         )}
       </div>

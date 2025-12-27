@@ -10,6 +10,10 @@ import PlaylistDetail from './pages/PlaylistDetail';
 import MyPlaylistDetail from './pages/MyPlaylistDetail';
 import GenreDetail from './pages/GenreDetail';
 import Library from './pages/Library';
+import ListsPage from './pages/ListsPage';
+import Top10Page from './pages/Top10Page';
+import WorldPage from './pages/WorldPage';
+import HotPage from './pages/HotPage';
 import NotFound from './pages/NotFound';
 import './App.css';
 
@@ -52,6 +56,10 @@ function AppRoutes() {
         <Route path="/my-playlist/:id" element={<MyPlaylistDetail />} />
         <Route path="/genre/:slug" element={<GenreDetail />} />
         <Route path="/library" element={<Library />} />
+        <Route path="/lists" element={<ListsPage />} />
+        <Route path="/top10" element={<Top10Page />} />
+        <Route path="/world" element={<WorldPage />} />
+        <Route path="/hot" element={<HotPage />} />
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
