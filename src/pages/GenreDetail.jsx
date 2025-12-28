@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { genreAPI, playlistAPI } from '../services/api';
-import { FiPlay, FiHeart, FiClock } from 'react-icons/fi';
+import { FiPlay } from 'react-icons/fi';
 import './GenreDetail.css';
 
 const GenreDetail = () => {
@@ -39,14 +39,6 @@ const GenreDetail = () => {
     }
   };
 
-  const formatDate = (date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('tr-TR', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  };
 
   if (loading) {
     return (
@@ -73,89 +65,57 @@ const GenreDetail = () => {
 
   return (
     <div className="genre-detail">
-      {/* Banner */}
-      <div 
-        className="genre-banner"
-        style={{
-          backgroundImage: genre.bannerImage ? `url(${genre.bannerImage})` : 'none',
-          backgroundColor: genre.color || '#7C3AED'
-        }}
-      >
-        <div className="genre-banner-overlay">
-          <h1 className="genre-title">{genre.displayName}</h1>
-          <p className="genre-stats">{playlists.length} Playlist</p>
-        </div>
+      {/* Header */}
+      <div className="genre-detail-header">
+        <button className="back-btn-genre" onClick={() => navigate('/lists')}>
+          ←
+        </button>
+        <h1 className="genre-detail-title">{genre.displayName}</h1>
+        <button className="refresh-btn" onClick={fetchGenreData}>
+          ↻
+        </button>
       </div>
 
-      {/* Playlists Table */}
-      <div className="genre-content">
+      {/* Playlists Cards */}
+      <div className="genre-playlists">
         {playlists.length === 0 ? (
           <div className="genre-empty">
             <p>Bu kategoride henüz playlist yok</p>
           </div>
         ) : (
-          <>
-            {/* Table Header */}
-            <div className="playlist-table-header">
-              <div className="col-number">#</div>
-              <div className="col-title">TITLE</div>
-              <div className="col-tracks">TRACKS</div>
-              <div className="col-date">DATE ADDED</div>
-              <div className="col-duration"><FiClock size={18} /></div>
-            </div>
-
-            {/* Table Body */}
-            <div className="playlists-table">
-              {playlists.map((playlist, index) => (
-                <div 
-                  key={playlist._id} 
-                  className="playlist-table-row"
-                  onClick={() => navigate(`/playlist/${playlist._id}`)}
-                >
-                  {/* Number / Play */}
-                  <div className="col-number">
-                    <span className="number">{index + 1}</span>
-                    <button className="play-btn-small">
-                      <FiPlay />
-                    </button>
-                  </div>
-
-                  {/* Title + Cover */}
-                  <div className="col-title">
-                    <div className="playlist-cover-small">
-                      {playlist.coverImage ? (
-                        <img src={playlist.coverImage} alt={playlist.name} />
-                      ) : (
-                        <div className="cover-placeholder">🎵</div>
-                      )}
+          <div className="playlists-card-list">
+            {playlists.map((playlist) => (
+              <div
+                key={playlist._id}
+                className="playlist-card-item"
+                onClick={() => navigate(`/playlist/${playlist._id}`)}
+              >
+                {/* Cover Image */}
+                <div className="playlist-card-cover">
+                  {playlist.coverImage ? (
+                    <img src={playlist.coverImage} alt={playlist.name} />
+                  ) : (
+                    <div className="cover-placeholder">
+                      <FiPlay size={24} />
                     </div>
-                    <div className="playlist-info-table">
-                      <h3>{playlist.name}</h3>
-                      <p>{playlist.description || playlist.genreDisplayName}</p>
-                    </div>
-                  </div>
-
-                  {/* Tracks */}
-                  <div className="col-tracks">
-                    {playlist.musicCount} tracks
-                  </div>
-
-                  {/* Date */}
-                  <div className="col-date">
-                    {formatDate(playlist.createdAt)}
-                  </div>
-
-                  {/* Stats */}
-                  <div className="col-duration">
-                    <div className="playlist-stats-inline">
-                      <FiHeart size={14} />
-                      <span>{playlist.likes}</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </>
+
+                {/* Info */}
+                <div className="playlist-card-info">
+                  <h3 className="playlist-card-name">{playlist.name}</h3>
+                  <p className="playlist-card-tracks">{playlist.musicCount} tracks</p>
+                </div>
+
+                {/* Arrow */}
+                <div className="playlist-card-arrow">
+                  <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+                    <path d="M1 1L7 7L1 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

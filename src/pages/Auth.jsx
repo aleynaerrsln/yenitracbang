@@ -11,10 +11,10 @@ const Auth = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Zaten giriş yapmışsa home'a yönlendir
+  // Zaten giriş yapmışsa Discovery sayfasına yönlendir
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 

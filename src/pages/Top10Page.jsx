@@ -128,7 +128,7 @@ const Top10Page = () => {
     <div className="top10-page">
       <div className="top10-header">
         <h1>Top 10 Tracks</h1>
-        <p>En çok beğenilen şarkılar</p>
+        <p>En çok beğenilen şarkılar kategorilere göre</p>
       </div>
 
       <div className="genre-tabs">

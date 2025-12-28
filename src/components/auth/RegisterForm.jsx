@@ -1,10 +1,12 @@
 // src/components/auth/RegisterForm.jsx
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
 const RegisterForm = ({ onToggle }) => {
   const { register } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -38,7 +40,8 @@ const RegisterForm = ({ onToggle }) => {
 
     try {
       await register(formData);
-      // Auth context redirect yapacak
+      // Discovery sayfasına yönlendir
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Kayıt başarısız');
     } finally {

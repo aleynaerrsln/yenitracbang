@@ -80,6 +80,11 @@ const HotPage = () => {
 
   return (
     <div className="hot-page">
+      <div className="hot-header">
+        <h1>Hot Playlists</h1>
+        <p>Trend playlistler kategorilere göre</p>
+      </div>
+
       {loading ? (
         <div className="loading-state">
           {[1, 2, 3, 4].map(i => (
@@ -122,8 +127,15 @@ const HotPage = () => {
                           <FiMusic size={28} />
                         </div>
                       )}
+                      <div className="play-button-overlay">
+                        <div className="play-button">
+                          <FiMusic size={20} />
+                        </div>
+                      </div>
                     </div>
-                    <div className="playlist-name">{playlist.name}</div>
+                    <div className="playlist-info">
+                      <div className="playlist-name">{playlist.name}</div>
+                    </div>
                   </div>
                 ))}
               </div>

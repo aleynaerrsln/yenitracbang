@@ -1,10 +1,12 @@
 // src/components/auth/LoginForm.jsx
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
 const LoginForm = ({ onToggle }) => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     identifier: '', // email veya username
     password: '',
@@ -28,13 +30,14 @@ const LoginForm = ({ onToggle }) => {
     try {
       // Email mi username mi kontrol et
       const isEmail = formData.identifier.includes('@');
-      
+
       await login({
         [isEmail ? 'email' : 'username']: formData.identifier,
         password: formData.password,
       });
 
-      // Auth context redirect yapacak
+      // Discovery sayfasına yönlendir
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Giriş başarısız');
     } finally {

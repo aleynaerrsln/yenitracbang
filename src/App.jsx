@@ -15,6 +15,7 @@ import Top10Page from './pages/Top10Page';
 import WorldPage from './pages/WorldPage';
 import HotPage from './pages/HotPage';
 import NotFound from './pages/NotFound';
+
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -52,6 +53,7 @@ function AppRoutes() {
     <MainLayout>
       <Routes>
         <Route path="/" element={<MainContent />} />
+        <Route path="/profile" element={<Navigate to={`/profile/${user.username}`} replace />} />
         <Route path="/playlist/:id" element={<PlaylistDetail />} />
         <Route path="/my-playlist/:id" element={<MyPlaylistDetail />} />
         <Route path="/genre/:slug" element={<GenreDetail />} />

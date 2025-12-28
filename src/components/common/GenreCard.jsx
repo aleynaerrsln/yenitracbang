@@ -11,9 +11,11 @@ const GenreCard = ({ genre }) => {
   };
 
   return (
-    <div className="genre-card" onClick={handleClick}>
-      <img src={genre.squareImage} alt={genre.displayName} />
-      <div className="genre-card-overlay">
+    <div className="genre-card-wrapper" onClick={handleClick}>
+      <div className="genre-card">
+        <img src={genre.squareImage} alt={genre.displayName} />
+      </div>
+      <div className="genre-card-title">
         <h3>{genre.displayName}</h3>
       </div>
     </div>

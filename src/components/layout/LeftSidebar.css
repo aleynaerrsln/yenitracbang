@@ -13,6 +13,9 @@
   padding: 8px;
   gap: 8px;
   position: relative;
+}
+
+.left-sidebar.collapsed {
   transition: width 0.3s ease;
 }
 
@@ -395,4 +398,26 @@
 .spotify-meta {
   color: #b3b3b3;
   font-size: 14px;
+}
+
+/* ========== RESIZE HANDLE ========== */
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 1000;
+  background: transparent;
+  transition: background 0.2s;
+}
+
+.resize-handle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.resize-handle:active {
+  background: rgba(255, 255, 255, 0.2);
 }

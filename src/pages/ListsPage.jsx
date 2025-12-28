@@ -1,169 +1,80 @@
-// src/pages/ListsPage.jsx - User Playlists Management
+// src/pages/ListsPage.jsx - Genre Categories View
 
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiMusic, FiPlus, FiChevronRight, FiTrash2, FiEdit } from 'react-icons/fi';
-import { playlistAPI } from '../services/api';
-import { useToast } from '../context/ToastContext';
-import CreatePlaylistModal from '../components/modals/CreatePlaylistModal';
+import { FiChevronLeft } from 'react-icons/fi';
 import './ListsPage.css';
 
 const ListsPage = () => {
   const navigate = useNavigate();
-  const toast = useToast();
 
-  const [myPlaylists, setMyPlaylists] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    fetchPlaylists();
-  }, []);
-
-  const fetchPlaylists = async () => {
-    try {
-      setLoading(true);
-      const response = await playlistAPI.getMyPlaylists();
-
-      if (response.data.success) {
-        setMyPlaylists(response.data.playlists || []);
-      }
-    } catch (error) {
-      console.error('Fetch playlists error:', error);
-      toast.error('Failed to load playlists');
-    } finally {
-      setLoading(false);
+  const genres = [
+    {
+      id: 'afrohouse',
+      name: 'Afro House',
+      slug: 'afrohouse',
+      color: '#8B5CF6',
+      image: 'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=800&q=80'
+    },
+    {
+      id: 'melodichouse',
+      name: 'Melodic House',
+      slug: 'melodichouse',
+      color: '#F97316',
+      image: 'https://images.unsplash.com/photo-1598387181032-a3103a2db5b3?w=800&q=80'
+    },
+    {
+      id: 'organichouse',
+      name: 'Organic House',
+      slug: 'organichouse',
+      color: '#10B981',
+      image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80'
+    },
+    {
+      id: 'downtempo',
+      name: 'Downtempo',
+      slug: 'downtempo',
+      color: '#3B82F6',
+      image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80'
+    },
+    {
+      id: 'indiedance',
+      name: 'Indie Dance',
+      slug: 'indiedance',
+      color: '#EAB308',
+      image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80'
     }
-  };
+  ];
 
-  const handleCreatePlaylist = async (formData) => {
-    try {
-      const uploadData = new FormData();
-      uploadData.append('name', formData.name);
-      uploadData.append('description', formData.description || '');
-      uploadData.append('isPublic', formData.isPublic);
-
-      if (formData.coverImage) {
-        uploadData.append('coverImage', formData.coverImage);
-      }
-
-      const response = await playlistAPI.createPlaylist(uploadData);
-
-      if (response.data.success) {
-        setMyPlaylists(prev => [
-          { ...response.data.playlist, musicCount: 0 },
-          ...prev,
-        ]);
-
-        toast.success('Playlist created successfully');
-      }
-    } catch (error) {
-      console.error('Create playlist error:', error);
-      toast.error('Failed to create playlist');
-      throw error;
-    }
-  };
-
-  const handleDeletePlaylist = async (playlistId, e) => {
-    e.stopPropagation();
-
-    if (!window.confirm('Are you sure you want to delete this playlist?')) {
-      return;
-    }
-
-    try {
-      const response = await playlistAPI.deletePlaylist(playlistId);
-
-      if (response.data.success) {
-        setMyPlaylists(prev => prev.filter(p => p._id !== playlistId));
-        toast.success('Playlist deleted successfully');
-      }
-    } catch (error) {
-      console.error('Delete playlist error:', error);
-      toast.error('Failed to delete playlist');
-    }
+  const handleGenreClick = (slug) => {
+    navigate(`/genre/${slug}`);
   };
 
   return (
     <div className="lists-page">
       <div className="lists-header">
-        <h1>My Lists</h1>
-        <button
-          className="create-btn"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <FiPlus size={20} />
-          <span>Create Playlist</span>
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          <FiChevronLeft size={24} />
         </button>
+        <h1>Listeler</h1>
       </div>
 
-      {loading ? (
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Loading your playlists...</p>
-        </div>
-      ) : myPlaylists.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">
-            <FiMusic size={64} />
-          </div>
-          <h2>No playlists yet</h2>
-          <p>Create your first playlist to get started</p>
-          <button
-            className="create-first-btn"
-            onClick={() => setIsModalOpen(true)}
+      <div className="genre-cards">
+        {genres.map((genre) => (
+          <div
+            key={genre.id}
+            className="genre-card"
+            onClick={() => handleGenreClick(genre.slug)}
+            style={{ '--accent-color': genre.color }}
           >
-            <FiPlus size={20} />
-            Create Playlist
-          </button>
-        </div>
-      ) : (
-        <div className="playlists-grid">
-          {myPlaylists.map((playlist) => (
-            <div
-              key={playlist._id}
-              className="playlist-card"
-              onClick={() => navigate(`/my-playlist/${playlist._id}`)}
-            >
-              <div className="playlist-cover">
-                {playlist.coverImage ? (
-                  <img src={playlist.coverImage} alt={playlist.name} />
-                ) : (
-                  <div className="cover-placeholder">
-                    <FiMusic size={32} />
-                  </div>
-                )}
-
-                <div className="playlist-overlay">
-                  <button
-                    className="delete-btn"
-                    onClick={(e) => handleDeletePlaylist(playlist._id, e)}
-                    title="Delete Playlist"
-                  >
-                    <FiTrash2 size={18} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="playlist-details">
-                <h3>{playlist.name}</h3>
-                <p className="track-count">
-                  {playlist.musicCount || 0} track{playlist.musicCount !== 1 ? 's' : ''}
-                </p>
-                {playlist.description && (
-                  <p className="playlist-description">{playlist.description}</p>
-                )}
-              </div>
+            <div className="genre-card-image">
+              <img src={genre.image} alt={genre.name} />
+              <div className="genre-overlay"></div>
+              <div className="genre-accent-bar"></div>
             </div>
-          ))}
-        </div>
-      )}
-
-      <CreatePlaylistModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreatePlaylist}
-      />
+            <h2 className="genre-name">{genre.name}</h2>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

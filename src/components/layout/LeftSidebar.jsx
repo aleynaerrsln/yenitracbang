@@ -1,6 +1,6 @@
 // src/components/layout/LeftSidebar.jsx - SPOTIFY LIBRARY GİBİ
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiMusic, FiPlus, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { HiViewList } from 'react-icons/hi';
@@ -9,17 +9,56 @@ import { useToast } from '../../context/ToastContext';
 import CreatePlaylistModal from '../modals/CreatePlaylistModal';
 import './LeftSidebar.css';
 
-const LeftSidebar = ({ isCollapsed, onToggleCollapse }) => {
+const LeftSidebar = ({ isCollapsed, onToggleCollapse, onWidthChange }) => {
   const navigate = useNavigate();
   const toast = useToast();
   const [myPlaylists, setMyPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sidebarWidth, setSidebarWidth] = useState(430);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
     fetchPlaylists();
   }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing) return;
+
+      const newWidth = e.clientX - 8;
+      if (newWidth >= 300 && newWidth <= 750) {
+        setSidebarWidth(newWidth);
+        if (onWidthChange) {
+          onWidthChange(newWidth);
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
+  const handleResizeStart = () => {
+    setIsResizing(true);
+  };
 
   const fetchPlaylists = async () => {
     try {
@@ -67,7 +106,11 @@ const LeftSidebar = ({ isCollapsed, onToggleCollapse }) => {
   );
 
   return (
-    <div className={`left-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <div
+      ref={sidebarRef}
+      className={`left-sidebar ${isCollapsed ? 'collapsed' : ''}`}
+      style={!isCollapsed ? { width: `${sidebarWidth}px` } : {}}
+    >
       {/* Header */}
       <div className="sidebar-header">
         <button className="library-title" onClick={() => navigate('/library')}>
@@ -163,6 +206,14 @@ const LeftSidebar = ({ isCollapsed, onToggleCollapse }) => {
           ))
         )}
       </div>
+
+      {/* Resize Handle */}
+      {!isCollapsed && (
+        <div
+          className="resize-handle"
+          onMouseDown={handleResizeStart}
+        />
+      )}
 
       {/* Create Playlist Modal */}
       <CreatePlaylistModal

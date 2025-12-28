@@ -15,7 +15,6 @@
   display: grid;
   grid-template-columns: 430px minmax(0,1fr) 320px;  /* Spotify oranları */
   overflow: hidden;
-  transition: grid-template-columns 0.3s ease;
 }
 
 /* Left sidebar collapsed */

@@ -1,62 +1,83 @@
 // src/components/layout/RightPanel.jsx
-import { useState, useEffect } from 'react';
-import { FiTrendingUp, FiMusic } from 'react-icons/fi';
-import { genreAPI, hotAPI } from '../../services/api';
+import { useState, useEffect, useRef } from 'react';
+import { FiTrendingUp } from 'react-icons/fi';
+import { musicAPI } from '../../services/api';
 import './RightPanel.css';
 
-const RightPanel = () => {
-  const [relatedMusic, setRelatedMusic] = useState([]);
-  const [trending, setTrending] = useState([]);
-  const [djCharts, setDjCharts] = useState([]);
+const RightPanel = ({ onWidthChange }) => {
+  const [top10Tracks, setTop10Tracks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [panelWidth, setPanelWidth] = useState(320);
+  const [isResizing, setIsResizing] = useState(false);
+  const panelRef = useRef(null);
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing || !panelRef.current) return;
+
+      const panelRect = panelRef.current.getBoundingClientRect();
+      const newWidth = panelRect.right - e.clientX;
+
+      if (newWidth >= 280 && newWidth <= 600) {
+        setPanelWidth(newWidth);
+        if (onWidthChange) {
+          onWidthChange(newWidth);
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing, onWidthChange]);
+
+  const handleResizeStart = () => {
+    setIsResizing(true);
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
 
-      // Paralel API çağrıları
-      const [genresRes, hotRes] = await Promise.all([
-        genreAPI.getAllGenres(),
-        hotAPI.getHotPlaylists()
-      ]);
+      // API çağrısı
+      const top10Res = await musicAPI.getGlobalTop10();
 
-      // Genres'ten trending oluştur
-      if (genresRes.data.success) {
-        const genres = genresRes.data.genres || [];
-        const trendingData = genres.slice(0, 3).map((genre, index) => ({
-          id: genre._id,
-          name: genre.name,
-          count: `${Math.floor(Math.random() * 10) + 1} tracks`, // Backend'de track count yoksa random
-          trend: `+${12 - (index * 2)}%`
-        }));
-        setTrending(trendingData);
-      }
+      // Global Top 10 tracks - tüm kategorileri birleştir
+      if (top10Res.data.success) {
+        const top10Data = top10Res.data.data?.top10 || {};
 
-      // Hot playlists'ten related music ve DJ charts oluştur
-      if (hotRes.data.success) {
-        const playlists = hotRes.data.hotPlaylists || [];
-        
-        // Related Music (ilk 2 playlist)
-        const relatedData = playlists.slice(0, 2).map((playlist) => ({
-          id: playlist._id,
-          title: playlist.name,
-          artist: playlist.genre || 'Various',
-          cover: playlist.coverImage || '🎵',
-          isPlaying: false,
-        }));
-        setRelatedMusic(relatedData);
+        // Tüm kategorilerdeki şarkıları tek array'e çevir
+        const allTracks = [];
+        Object.values(top10Data).forEach(categoryTracks => {
+          if (Array.isArray(categoryTracks)) {
+            allTracks.push(...categoryTracks);
+          }
+        });
 
-        // DJ Charts (3 playlist)
-        const chartsData = playlists.slice(0, 3).map((playlist) => ({
-          id: playlist._id,
-          name: playlist.userId?.username || 'DJ',
-          chart: playlist.name,
-        }));
-        setDjCharts(chartsData);
+        // Beğeni sayısına göre sırala ve ilk 10'u al
+        const sortedTracks = allTracks
+          .sort((a, b) => (b.likes || 0) - (a.likes || 0))
+          .slice(0, 10);
+
+        setTop10Tracks(sortedTracks);
       }
 
     } catch (error) {
@@ -77,95 +98,53 @@ const RightPanel = () => {
   }
 
   return (
-    <div className="right-panel">
-      {/* İlgili Müzik Videoları */}
-      <section className="panel-section">
-        <h3 className="panel-title">İlgili müzik videoları</h3>
-        
-        <div className="related-music-list">
-          {relatedMusic.length === 0 ? (
-            <p style={{color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem'}}>No music available</p>
-          ) : (
-            relatedMusic.map((music) => (
-              <div key={music.id} className="related-music-item">
-                <div className="music-cover">
-                  {music.cover.startsWith('http') ? (
-                    <img src={music.cover} alt={music.title} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                  ) : (
-                    music.cover
-                  )}
-                </div>
-                <div className="music-info">
-                  <h4>{music.title}</h4>
-                  <p>{music.artist}</p>
-                </div>
-                <button className="btn-play-small">
-                  ▶️
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
+    <div
+      ref={panelRef}
+      className="right-panel"
+      style={{ width: `${panelWidth}px` }}
+    >
+      {/* Resize Handle */}
+      <div
+        className="resize-handle-right"
+        onMouseDown={handleResizeStart}
+      />
 
-      {/* Trending */}
+      {/* Top 10 Global */}
       <section className="panel-section">
-        <div className="section-header-small">
-          <h3 className="panel-title">Trending Now</h3>
-          <FiTrendingUp className="trend-icon" />
+        <div className="section-header">
+          <h3>Top 10 Tracks</h3>
+          <FiTrendingUp style={{ color: '#1ed760', fontSize: '1.2rem' }} />
         </div>
 
         <div className="trending-list">
-          {trending.length === 0 ? (
-            <p style={{color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem'}}>No trending data</p>
+          {top10Tracks.length === 0 ? (
+            <p className="empty-message">No tracks available</p>
           ) : (
-            trending.map((item, index) => (
-              <div key={item.id} className="trending-item">
+            top10Tracks.map((track, index) => (
+              <div key={track._id} className="trending-item">
                 <div className="trending-rank">#{index + 1}</div>
+
+                <div className="track-cover">
+                  {track.imageUrl ? (
+                    <img src={track.imageUrl} alt={track.title} />
+                  ) : (
+                    <div className="cover-placeholder">🎵</div>
+                  )}
+                </div>
+
                 <div className="trending-info">
-                  <h4>{item.name}</h4>
-                  <p>{item.count}</p>
+                  <h4>{track.title}</h4>
+                  <p>{track.artists?.map(a => a.name).join(', ') || track.artistNames || 'Unknown'}</p>
                 </div>
+
                 <div className="trending-badge">
-                  {item.trend}
+                  {track.likes || 0}
                 </div>
               </div>
             ))
           )}
         </div>
       </section>
-
-      {/* DJ Charts Preview */}
-      <section className="panel-section">
-        <h3 className="panel-title">Popular DJ Charts</h3>
-        
-        <div className="dj-charts-preview">
-          {djCharts.length === 0 ? (
-            <p style={{color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem'}}>No DJ charts available</p>
-          ) : (
-            djCharts.map((dj) => (
-              <div key={dj.id} className="dj-chart-mini">
-                <div className="dj-avatar">
-                  <FiMusic />
-                </div>
-                <div className="dj-info">
-                  <h4>{dj.name}</h4>
-                  <p>{dj.chart}</p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      {/* New Releases Badge */}
-      <div className="new-releases-banner">
-        <div className="banner-icon">✨</div>
-        <div className="banner-text">
-          <h4>New Releases</h4>
-          <p>Fresh tracks every week</p>
-        </div>
-      </div>
     </div>
   );
 };

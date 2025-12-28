@@ -162,6 +162,8 @@ export const musicAPI = {
     api.get('/music/top10', {
       params: { genre },
     }),
+  getGlobalTop10: () =>
+    api.get('/music/top10'),
 
   // Artist
   getMusicByArtist: (artistId, params) =>

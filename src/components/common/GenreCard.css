@@ -1,45 +1,52 @@
 /* Genre Card */
-.genre-card {
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
+.genre-card-wrapper {
   cursor: pointer;
-  transition: transform 0.3s ease;
-  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
 }
 
-.genre-card:hover {
+.genre-card-wrapper:hover {
   transform: translateY(-4px);
 }
+
+.genre-card {
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.genre-card-wrapper:hover .genre-card {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
 .genre-card img {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
   display: block;
 }
-/* Overlay kaldırıldı - isim alta taşındı */
-.genre-card-overlay {
-  position: relative;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+
+.genre-card-title {
+  margin-top: 10px;
+  padding: 0;
 }
 
-.genre-card-overlay h3 {
+.genre-card-title h3 {
   margin: 0;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #fff;
   text-align: center;
 }
 
 @media (max-width: 768px) {
-  .genre-card-overlay {
-    padding: 8px;
+  .genre-card-title {
+    margin-top: 8px;
   }
 
-  .genre-card-overlay h3 {
-    font-size: 0.75rem;
+  .genre-card-title h3 {
+    font-size: 0.8rem;
   }
 }
 .genre-card:hover .genre-image {
