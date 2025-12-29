@@ -68,6 +68,11 @@ export const AuthProvider = ({ children }) => {
     authAPI.logout().catch(() => {});
   };
 
+  const updateUser = (updatedUserData) => {
+    setUser(updatedUserData);
+    localStorage.setItem('user', JSON.stringify(updatedUserData));
+  };
+
   const value = {
     user,
     subscription,
@@ -75,6 +80,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user,
   };
 

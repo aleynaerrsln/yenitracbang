@@ -1,14 +1,19 @@
 // src/components/layout/MainContent.jsx - MİNİMALİST HEADER
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { genreAPI, hotAPI } from '../../services/api';
 import GenreCard from '../common/GenreCard';
 import PlaylistCard from '../common/PlaylistCard';
+import HotCard from '../common/HotCard';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import './MainContent.css';
 
 const MainContent = () => {
   const [genres, setGenres] = useState([]);
   const [hotPlaylists, setHotPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const genresScrollRef = useRef(null);
 
   useEffect(() => {
     fetchData();
@@ -17,7 +22,7 @@ const MainContent = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       const [genresRes, hotRes] = await Promise.all([
         genreAPI.getAllGenres(),
         hotAPI.getHotPlaylists()
@@ -27,7 +32,7 @@ const MainContent = () => {
       console.log('Hot Response:', hotRes);
 
       if (genresRes.data.success) {
-        setGenres(genresRes.data.data || []); 
+        setGenres(genresRes.data.data || []);
       }
 
       if (hotRes.data.success) {
@@ -41,6 +46,32 @@ const MainContent = () => {
     }
   };
 
+  // Check scroll position to show/hide arrows
+  const checkScrollPosition = () => {
+    const container = genresScrollRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setShowLeftArrow(scrollLeft > 0);
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+  };
+
+  // Scroll handlers
+  const scrollLeft = () => {
+    genresScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' });
+  };
+
+  const scrollRight = () => {
+    genresScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' });
+  };
+
+  // Check arrows when genres load or window resizes
+  useEffect(() => {
+    checkScrollPosition();
+    window.addEventListener('resize', checkScrollPosition);
+    return () => window.removeEventListener('resize', checkScrollPosition);
+  }, [genres]);
+
   return (
     <div className="main-content">
       {/* Main Content */}
@@ -48,7 +79,7 @@ const MainContent = () => {
         {/* Genres Section */}
         <section className="content-section">
           <h2 className="section-title">Genres</h2>
-          
+
           {loading ? (
             <div className="loading-grid">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -56,17 +87,35 @@ const MainContent = () => {
               ))}
             </div>
           ) : (
-            <div className="genres-grid">
-              {genres.map((genre) => (
-                <GenreCard
-                  key={genre._id || genre.slug}
-                  genre={{
-                    ...genre,
-                    color: genre.primaryColor || '#667eea'
-                  }}
-                  onClick={() => console.log('Genre clicked:', genre.slug)}
-                />
-              ))}
+            <div className="genres-scroll-container">
+              {showLeftArrow && (
+                <button className="scroll-arrow scroll-arrow-left" onClick={scrollLeft}>
+                  <FiChevronLeft size={24} />
+                </button>
+              )}
+
+              <div
+                className="genres-grid-scroll"
+                ref={genresScrollRef}
+                onScroll={checkScrollPosition}
+              >
+                {genres.map((genre) => (
+                  <GenreCard
+                    key={genre._id || genre.slug}
+                    genre={{
+                      ...genre,
+                      color: genre.primaryColor || '#667eea'
+                    }}
+                    onClick={() => console.log('Genre clicked:', genre.slug)}
+                  />
+                ))}
+              </div>
+
+              {showRightArrow && (
+                <button className="scroll-arrow scroll-arrow-right" onClick={scrollRight}>
+                  <FiChevronRight size={24} />
+                </button>
+              )}
             </div>
           )}
         </section>
@@ -80,20 +129,20 @@ const MainContent = () => {
 
           {loading ? (
             <div className="loading-grid">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="skeleton-card" />
               ))}
             </div>
           ) : (
-            <div className="playlists-grid">
+            <div className="hot-grid">
               {hotPlaylists
                 .filter(p => !p.isEmpty)
                 .slice(0, 6)
                 .map((playlist) => (
-                  <PlaylistCard
+                  <HotCard
                     key={playlist._id}
                     playlist={playlist}
-                    onClick={() => console.log('Playlist clicked:', playlist._id)}
+                    onLike={(id) => console.log('Liked playlist:', id)}
                   />
                 ))}
             </div>
@@ -107,26 +156,26 @@ const MainContent = () => {
             <button className="view-all-btn">View All</button>
           </div>
 
-          <div className="charts-grid">
-            {hotPlaylists
-              .filter(p => !p.isEmpty)
-              .slice(0, 3)
-              .map((playlist) => (
-                <div key={playlist._id} className="chart-card">
-                  <div className="chart-cover">
-                    {playlist.coverImage ? (
-                      <img src={playlist.coverImage} alt={playlist.name} />
-                    ) : (
-                      '🎵'
-                    )}
-                  </div>
-                  <div className="chart-info">
-                    <h4>{playlist.name}</h4>
-                    <p>{playlist.genre || 'Various'}</p>
-                  </div>
-                </div>
+          {loading ? (
+            <div className="loading-grid">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="skeleton-card" />
               ))}
-          </div>
+            </div>
+          ) : (
+            <div className="hot-grid">
+              {hotPlaylists
+                .filter(p => !p.isEmpty)
+                .slice(0, 3)
+                .map((playlist) => (
+                  <HotCard
+                    key={playlist._id}
+                    playlist={playlist}
+                    onLike={(id) => console.log('Liked playlist:', id)}
+                  />
+                ))}
+            </div>
+          )}
         </section>
       </div>
     </div>

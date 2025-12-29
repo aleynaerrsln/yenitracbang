@@ -14,6 +14,8 @@ import ListsPage from './pages/ListsPage';
 import Top10Page from './pages/Top10Page';
 import WorldPage from './pages/WorldPage';
 import HotPage from './pages/HotPage';
+import ProfilePage from './pages/ProfilePage';
+import SearchPage from './pages/SearchPage';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -53,7 +55,9 @@ function AppRoutes() {
     <MainLayout>
       <Routes>
         <Route path="/" element={<MainContent />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/profile" element={<Navigate to={`/profile/${user.username}`} replace />} />
+        <Route path="/profile/:username" element={<ProfilePage />} />
         <Route path="/playlist/:id" element={<PlaylistDetail />} />
         <Route path="/my-playlist/:id" element={<MyPlaylistDetail />} />
         <Route path="/genre/:slug" element={<GenreDetail />} />

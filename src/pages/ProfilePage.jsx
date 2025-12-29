@@ -1,21 +1,24 @@
 // src/pages/ProfilePage.jsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { userAPI } from '../services/api';
 import { FiEdit2, FiSettings } from 'react-icons/fi';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
   const { username } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, updateUser } = useAuth();
   const toast = useToast();
+  const fileInputRef = useRef(null);
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('images');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Kendi profilim mi kontrol et
   const isOwnProfile = !username || username === currentUser?.username;
@@ -42,6 +45,69 @@ const ProfilePage = () => {
       toast.error('Profil yüklenemedi');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditClick = () => {
+    if (isOwnProfile) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Dosya boyutu kontrolü (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Dosya boyutu 5MB\'dan küçük olmalıdır');
+      return;
+    }
+
+    // Dosya tipi kontrolü
+    if (!file.type.startsWith('image/')) {
+      toast.error('Sadece resim dosyaları yüklenebilir');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+
+      const formData = new FormData();
+      formData.append('profileImage', file);
+
+      // userAPI kullanarak yükle
+      const response = await userAPI.uploadProfileImage(formData);
+
+      // Backend'den sadece profileImage URL'i geliyor
+      const newProfileImageUrl = response.data.profileImage;
+
+      if (newProfileImageUrl) {
+        // Mevcut user objesini kopyala ve sadece profileImage'ı güncelle
+        const updatedUser = {
+          ...currentUser,
+          profileImage: newProfileImageUrl
+        };
+
+        // AuthContext'teki user'ı güncelle
+        updateUser(updatedUser);
+
+        // Local state'i güncelle
+        setUser(updatedUser);
+
+        toast.success('Profil resmi başarıyla güncellendi');
+      } else {
+        toast.error('Profil resmi yüklendi ama URL alınamadı');
+      }
+    } catch (error) {
+      console.error('Profil resmi yükleme hatası:', error);
+      toast.error(error.response?.data?.message || 'Profil resmi yüklenirken bir hata oluştu');
+    } finally {
+      setUploadingImage(false);
+      // Input'u temizle
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -76,13 +142,31 @@ const ProfilePage = () => {
 
         {/* Edit/Settings Button */}
         {isOwnProfile && (
-          <button className="profile-edit-btn" onClick={() => navigate('/settings')}>
-            <FiEdit2 size={20} />
-          </button>
+          <>
+            <button
+              className="profile-edit-btn"
+              onClick={handleEditClick}
+              disabled={uploadingImage}
+            >
+              <FiEdit2 size={20} />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              style={{ display: 'none' }}
+            />
+          </>
         )}
 
         {/* Profile Avatar */}
         <div className="profile-avatar-wrapper">
+          {uploadingImage && (
+            <div className="profile-avatar-uploading">
+              <div className="uploading-spinner"></div>
+            </div>
+          )}
           {user.profileImage ? (
             <img src={user.profileImage} alt={user.username} className="profile-avatar" />
           ) : (
@@ -94,8 +178,8 @@ const ProfilePage = () => {
 
         {/* User Info */}
         <div className="profile-info">
+          <small>Profil</small>
           <h1 className="profile-name">{user.fullName || user.username}</h1>
-          <p className="profile-username">@{user.username}</p>
 
           {/* Stats */}
           <div className="profile-stats">
@@ -105,7 +189,7 @@ const ProfilePage = () => {
             </div>
             <div className="profile-stat">
               <span className="profile-stat-value">{user.followingCount || 0}</span>
-              <span className="profile-stat-label">Takip</span>
+              <span className="profile-stat-label">Takip Edilen</span>
             </div>
           </div>
         </div>

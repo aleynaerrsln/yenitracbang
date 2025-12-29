@@ -1,52 +1,114 @@
-/* Genre Card */
-.genre-card-wrapper {
+/* Modern Genre Card - Spotify Inspired */
+.genre-card-wrapper-modern {
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.genre-card-wrapper:hover {
-  transform: translateY(-4px);
-}
-
-.genre-card {
-  border-radius: 8px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-}
-
-.genre-card-wrapper:hover .genre-card {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-.genre-card img {
-  width: 100%;
+.genre-card-modern {
+  position: relative;
   aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  margin-bottom: 0.75rem;
+}
+
+.genre-card-wrapper-modern:hover .genre-card-modern {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Image with overlay */
+.genre-card-image {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  display: block;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.genre-card-title {
-  margin-top: 10px;
-  padding: 0;
+.genre-card-modern:hover .genre-card-image {
+  transform: scale(1.08);
 }
 
-.genre-card-title h3 {
+/* Gradient overlay on image */
+.genre-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.4) 60%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  transition: background 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.genre-card-modern:hover .genre-card-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.5) 60%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+
+/* Gradient background for cards without image */
+.genre-card-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.genre-card-modern:hover .genre-card-gradient {
+  transform: scale(1.05);
+}
+
+/* Genre name below card */
+.genre-card-name {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: #fff;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  transition: color 0.2s ease;
   text-align: center;
 }
 
+.genre-card-wrapper-modern:hover .genre-card-name {
+  color: #1db954;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .genre-card-title {
-    margin-top: 8px;
+  .genre-card-modern {
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
   }
 
-  .genre-card-title h3 {
-    font-size: 0.8rem;
+  .genre-card-name {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .genre-card-modern {
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+  }
+
+  .genre-card-name {
+    font-size: 0.8125rem;
   }
 }
 .genre-card:hover .genre-image {

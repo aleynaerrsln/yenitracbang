@@ -215,18 +215,18 @@ export const musicAPI = {
 // ================= SEARCH =================
 export const searchAPI = {
   searchAll: (query) =>
-    api.get('/search', { params: { q: query } }),
+    api.get('/search', { params: { query } }),
   searchMusic: (query) =>
     api.get('/search/musics', {
       params: { query },
     }),
   searchPlaylists: (query) =>
     api.get('/search/playlists', {
-      params: { q: query },
+      params: { query },
     }),
   searchArtists: (query) =>
     api.get('/search/artists', {
-      params: { q: query },
+      params: { query },
     }),
 };
 
@@ -254,7 +254,7 @@ export const userAPI = {
   updateProfile: (data) =>
     api.put('/profile', data),
   uploadProfileImage: (formData) =>
-    api.post('/profile/image', formData, {
+    api.post('/upload-profile-image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
