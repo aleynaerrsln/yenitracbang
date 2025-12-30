@@ -145,7 +145,7 @@
 .sidebar-controls {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 8px 4px;
   height: 40px;
 }
@@ -172,6 +172,69 @@
 .sort-text {
   font-size: 14px;
   font-weight: 400;
+}
+
+/* ========== SEARCH INPUT ========== */
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: calc(100% - 8px);
+  background: #1a1a1a;
+  border-radius: 6px;
+  padding: 6px 10px;
+  height: 36px;
+  border: none;
+  outline: none;
+  transition: all 0.2s;
+  margin: 0 4px 8px 4px;
+}
+
+.search-input-wrapper:focus-within {
+  background: #242424;
+}
+
+.search-icon {
+  color: #b3b3b3;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  padding: 0;
+  min-width: 0;
+}
+
+.search-input::placeholder {
+  color: #a7a7a7;
+}
+
+.close-search-btn {
+  background: transparent;
+  border: none;
+  color: #a7a7a7;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.close-search-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
 }
 
 /* ========== PLAYLISTS LIST ========== */
@@ -421,3 +484,26 @@
 .resize-handle:active {
   background: rgba(255, 255, 255, 0.2);
 }
+/* Chrome'un gizli gri search input arka planını tamamen öldür */
+.search-input {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Chrome’un “search field” katmanını yok et */
+.search-input::-webkit-search-decoration,
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-results-button,
+.search-input::-webkit-search-results-decoration {
+  display: none !important;
+}
+
+/* Wrapper dışında hiçbir layer çizilmesin */
+.search-input-wrapper {
+  background-clip: padding-box !important;
+}
+

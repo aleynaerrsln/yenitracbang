@@ -16,19 +16,39 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+
     if (!token) {
       setLoading(false);
       return;
     }
 
+    // Önce localStorage'daki user'ı set et (hızlı yükleme için)
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error('Failed to parse saved user:', e);
+      }
+    }
+
     try {
+      // Backend'den güncel user bilgisini al
       const response = await authAPI.getCurrentUser();
       setUser(response.data.user);
       setSubscription(response.data.subscription);
+      // localStorage'ı güncelle
+      localStorage.setItem('user', JSON.stringify(response.data.user));
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      // Sadece 401 (Unauthorized) hatası varsa logout yap
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setSubscription(null);
+      }
+      // Diğer hatalarda (network error vs.) localStorage'daki user'ı kullan
     } finally {
       setLoading(false);
     }

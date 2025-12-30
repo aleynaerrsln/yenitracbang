@@ -310,4 +310,16 @@ export const subscriptionAPI = {
     api.get('/subscriptions/plans'),
 };
 
+// ================= ARTIST MUSIC =================
+export const artistMusicAPI = {
+  getSpotifyMetadata: (trackId) =>
+    api.get(`/artist-music/spotify-metadata/${trackId}`),
+  addMusic: (data) =>
+    api.post('/artist-music', data),
+  getUserMusic: () =>
+    api.get('/artist-music'),
+  deleteMusic: (musicId) =>
+    api.delete(`/artist-music/${musicId}`),
+};
+
 export default api;

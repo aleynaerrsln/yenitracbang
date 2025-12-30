@@ -52,8 +52,8 @@ const RegisterForm = ({ onToggle }) => {
   return (
     <div className="auth-form">
       <div className="auth-header">
-        <h1>trackbang</h1>
-        <p>Müziğin Yeni Adresi - Ücretsiz 7 Günlük Deneme!</p>
+        <img src="/logo.png" alt="TrackBang" className="auth-logo" />
+        <p>TrackBang'e ücretsiz katıl</p>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -85,9 +85,20 @@ const RegisterForm = ({ onToggle }) => {
 
         <div className="form-group">
           <input
+            type="email"
+            name="email"
+            placeholder="E-posta"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <input
             type="text"
             name="username"
-            placeholder="Kullanıcı Adı"
+            placeholder="Kullanıcı adı"
             value={formData.username}
             onChange={handleChange}
             required
@@ -97,20 +108,9 @@ const RegisterForm = ({ onToggle }) => {
 
         <div className="form-group">
           <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <input
             type="password"
             name="password"
-            placeholder="Şifre (min. 6 karakter)"
+            placeholder="Şifre"
             value={formData.password}
             onChange={handleChange}
             required
@@ -124,7 +124,7 @@ const RegisterForm = ({ onToggle }) => {
             value={formData.userTag}
             onChange={handleChange}
           >
-            <option value="none">Seçim Yok</option>
+            <option value="none">Kullanıcı Tipi Seç</option>
             <option value="dj">DJ</option>
             <option value="producer">Prodüktör</option>
             <option value="dj-producer">DJ & Prodüktör</option>
@@ -133,11 +133,11 @@ const RegisterForm = ({ onToggle }) => {
         </div>
 
         <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? 'Kayıt yapılıyor...' : 'Kayıt Ol'}
+          {loading ? 'Kayıt yapılıyor...' : 'Ücretsiz Kayıt Ol'}
         </button>
 
         <p className="trial-info">
-          ✨ 7 günlük ücretsiz deneme ile başla!
+          7 günlük ücretsiz deneme ile başla
         </p>
       </form>
 

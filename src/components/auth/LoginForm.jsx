@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
-const LoginForm = ({ onToggle }) => {
+const LoginForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -48,8 +48,8 @@ const LoginForm = ({ onToggle }) => {
   return (
     <div className="auth-form">
       <div className="auth-header">
-        <h1>trackbang</h1>
-        <p>Müziğin Yeni Adresi</p>
+        <img src="/logo.png" alt="TrackBang" className="auth-logo" />
+        <p>Müziğe giriş yap</p>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -59,7 +59,7 @@ const LoginForm = ({ onToggle }) => {
           <input
             type="text"
             name="identifier"
-            placeholder="Email veya Kullanıcı Adı"
+            placeholder="E-posta veya kullanıcı adı"
             value={formData.identifier}
             onChange={handleChange}
             required
@@ -76,6 +76,7 @@ const LoginForm = ({ onToggle }) => {
             onChange={handleChange}
             required
             autoComplete="current-password"
+            minLength="6"
           />
         </div>
 
@@ -85,12 +86,32 @@ const LoginForm = ({ onToggle }) => {
       </form>
 
       <div className="auth-footer">
-        <p>
-          Hesabın yok mu?{' '}
-          <button onClick={onToggle} className="link-button">
-            Kayıt Ol
-          </button>
+        <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.95rem', margin: '0 0 0.5rem 0', textAlign: 'center' }}>
+          Henüz hesabın yok mu?
         </p>
+        <p className="download-info">
+          Kayıt olmak için mobil uygulamayı indir
+        </p>
+        <div className="download-stores">
+          <a
+            href="https://play.google.com/store"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="store-button"
+          >
+            <span className="store-label">Download on</span>
+            <span className="store-name">Google Play</span>
+          </a>
+          <a
+            href="https://apps.apple.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="store-button"
+          >
+            <span className="store-label">Download on the</span>
+            <span className="store-name">App Store</span>
+          </a>
+        </div>
       </div>
     </div>
   );

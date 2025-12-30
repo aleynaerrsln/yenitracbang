@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiMusic, FiPlus, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import { HiViewList } from 'react-icons/hi';
-import { playlistAPI } from '../../services/api';
+import { FiMusic, FiPlus, FiSearch, FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi';
+import { playlistAPI, searchAPI } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import CreatePlaylistModal from '../modals/CreatePlaylistModal';
 import './LeftSidebar.css';
@@ -16,9 +15,14 @@ const LeftSidebar = ({ isCollapsed, onToggleCollapse, onWidthChange }) => {
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(430);
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchPlaylists();
@@ -101,9 +105,66 @@ const LeftSidebar = ({ isCollapsed, onToggleCollapse, onWidthChange }) => {
     }
   };
 
-  const filteredPlaylists = myPlaylists.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleSearchToggle = () => {
+    setIsSearching(!isSearching);
+    if (isSearching) {
+      // Clear search when closing
+      setSearchQuery('');
+      setSearchResults([]);
+    } else {
+      // Focus input when opening
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  };
+
+  const performSearch = async (query) => {
+    if (!query.trim() || query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setSearchLoading(true);
+      const response = await searchAPI.searchPlaylists(query.trim());
+
+      if (response.data.success) {
+        setSearchResults(response.data.playlists || []);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      toast.error('Search failed');
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Debounce search - wait 500ms after user stops typing
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(value);
+    }, 500);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    searchInputRef.current?.focus();
+  };
+
+  // Show search results when searching, otherwise show user's playlists
+  const displayedPlaylists = isSearching && searchQuery.trim().length >= 2
+    ? searchResults
+    : myPlaylists;
 
   return (
     <div
@@ -144,34 +205,46 @@ const LeftSidebar = ({ isCollapsed, onToggleCollapse, onWidthChange }) => {
       {!isCollapsed && (
         <div className="sidebar-tabs">
           <button className="tab-item active">Playlists</button>
+          <button className="tab-item" onClick={handleSearchToggle}>
+            <FiSearch size={14} />
+          </button>
         </div>
       )}
 
-      {/* Search & Sort */}
-      {!isCollapsed && (
-        <div className="sidebar-controls">
-          <button className="control-btn">
-            <FiSearch size={16} />
-          </button>
-          <button className="control-btn">
-            <span className="sort-text">Son çalınanlar</span>
-            <HiViewList size={16} />
+      {/* Search Input */}
+      {!isCollapsed && isSearching && (
+        <div className="search-input-wrapper">
+          <FiSearch size={16} className="search-icon" />
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Playlist ara..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="search-input"
+          />
+          <button
+            className="close-search-btn"
+            onClick={searchQuery ? handleClearSearch : handleSearchToggle}
+            title={searchQuery ? "Temizle" : "Kapat"}
+          >
+            <FiX size={16} />
           </button>
         </div>
       )}
 
       {/* Playlists List */}
       <div className="sidebar-playlists">
-        {loading ? (
+        {loading || searchLoading ? (
           [1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="playlist-skeleton" />
           ))
-        ) : filteredPlaylists.length === 0 ? (
+        ) : displayedPlaylists.length === 0 ? (
           <div className="empty-playlists">
-            <p>No playlists yet</p>
+            <p>{isSearching ? 'Playlist bulunamadı' : 'No playlists yet'}</p>
           </div>
         ) : (
-          filteredPlaylists.map((playlist) => (
+          displayedPlaylists.map((playlist) => (
 <button
   key={playlist._id}
   className="sidebar-playlist-item"

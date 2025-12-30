@@ -1,4 +1,4 @@
-/* src/components/layout/SideMenu.css - MODERN GLASSMORPHIC DESIGN */
+/* src/components/layout/SideMenu.css */
 
 .side-menu-overlay {
   position: fixed;
@@ -25,7 +25,7 @@
   position: fixed;
   top: 0;
   left: -100%;
-  width: 340px;
+  width: 380px;
   max-width: 85vw;
   height: 100vh;
   background: linear-gradient(180deg, #0a0a0a 0%, #000 100%);
@@ -69,15 +69,15 @@
 .side-menu-logo {
   height: 36px;
   width: auto;
-  filter: drop-shadow(0 2px 8px rgba(0, 212, 170, 0.3));
+  filter: drop-shadow(0 2px 8px rgba(14, 165, 233, 0.3));
 }
 
 .premium-badge {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #00d4aa 0%, #00a67e 100%);
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
   border: none;
   border-radius: 24px;
   color: #fff;
@@ -85,27 +85,18 @@
   font-weight: 700;
   cursor: pointer;
   flex: 1;
-  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
   transition: all 0.3s;
 }
 
 .premium-badge:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 212, 170, 0.4);
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
 }
 
 .star-icon {
   font-size: 1rem;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
 }
 
 .close-btn {
@@ -130,17 +121,18 @@
 
 /* Sections */
 .side-menu-section {
-  padding: 0.85rem 1.6rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 0.8rem 1.5rem 0.25rem;
 }
 
 .section-title {
-  padding: 0 0 0.100rem;
-  font-size: 0.3625rem;
-  font-weight: 300;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.8px;
+  padding: 0 0 0.5px;
+font-size: 0.45rem;  
+font-weight: 400;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.5px;
   text-transform: uppercase;
+    margin-bottom: 4px;
+
 }
 
 /* Menu Items */
@@ -171,7 +163,7 @@
   top: 0;
   bottom: 0;
   width: 3px;
-  background: linear-gradient(180deg, #00d4aa 0%, #00a67e 100%);
+  background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -218,13 +210,14 @@
 
 .badge-new {
   padding: 0.25rem 0.625rem;
-  background: linear-gradient(135deg, #00d4aa 0%, #00a67e 100%);
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
   color: #fff;
   font-size: 0.625rem;
   font-weight: 800;
   border-radius: 6px;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+  text-transform: uppercase;
 }
 
 /* Footer */
@@ -243,42 +236,25 @@
   justify-content: center;
   gap: 0.875rem;
   padding: 1rem 1.25rem;
-  border: 2px solid #E22134;
-  background: rgba(226, 33, 52, 0.05);
-  color: #E22134;
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.05);
+  color: #ef4444;
   font-size: 1rem;
   font-weight: 700;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   margin-bottom: 1rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.exit-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(226, 33, 52, 0.15), transparent);
-  transition: left 0.5s;
-}
-
-.exit-btn:hover::before {
-  left: 100%;
 }
 
 .exit-btn:hover {
-  background: rgba(226, 33, 52, 0.15);
+  background: rgba(239, 68, 68, 0.15);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(226, 33, 52, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .exit-btn:active {
-  background: rgba(226, 33, 52, 0.25);
+  background: rgba(239, 68, 68, 0.25);
   transform: translateY(0);
 }
 
@@ -311,7 +287,7 @@
 /* Responsive */
 @media (max-width: 480px) {
   .side-menu {
-    width: 300px;
+    width: 320px;
   }
 
   .side-menu-header {
@@ -319,7 +295,7 @@
   }
 
   .side-menu-section {
-    padding: 0.625rem 1.25rem;
+    padding: 1.25rem 1.25rem 0.5rem;
   }
 
   .menu-item {

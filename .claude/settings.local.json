@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(findstr:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(npm run build:*)",
+      "Bash(cat:*)",
+      "Bash(dir:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }
