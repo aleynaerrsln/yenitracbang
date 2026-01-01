@@ -1,9 +1,12 @@
 // src/App.jsx - LIBRARY ROUTE EKLENDİ
 
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
 import MainLayout from './components/layout/MainLayout';
+import ChatManager from './components/chat/ChatManager';
 import Auth from './pages/Auth';
 import MainContent from './components/layout/MainContent';
 import PlaylistDetail from './pages/PlaylistDetail';
@@ -18,6 +21,10 @@ import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import ArtistEssential from './pages/ArtistEssential';
 import ArtistPage from './pages/ArtistPage';
+import NotificationsPage from './pages/NotificationsPage';
+import SettingsPage from './pages/SettingsPage';
+import MessagesPage from './pages/MessagesPage';
+import ChatPage from './pages/ChatPage';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -43,6 +50,7 @@ const ProtectedRoute = ({ children }) => {
 
 function AppRoutes() {
   const { user } = useAuth();
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   if (!user) {
     return (
@@ -54,8 +62,9 @@ function AppRoutes() {
   }
 
   return (
-    <MainLayout>
-      <Routes>
+    <>
+      <MainLayout onOpenChat={() => setIsChatOpen(true)}>
+        <Routes>
         <Route path="/" element={<MainContent />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/profile" element={<Navigate to={`/profile/${user.username}`} replace />} />
@@ -70,6 +79,10 @@ function AppRoutes() {
         <Route path="/hot" element={<HotPage />} />
         <Route path="/artist-essential" element={<ArtistEssential />} />
         <Route path="/artist/:slug" element={<ArtistPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/messages" element={<MessagesPage />} />
+        <Route path="/messages/:userId" element={<ChatPage />} />
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
@@ -81,9 +94,11 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ToastProvider>
-          <AppRoutes />
-        </ToastProvider>
+        <SocketProvider>
+          <ToastProvider>
+            <AppRoutes />
+          </ToastProvider>
+        </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
   );

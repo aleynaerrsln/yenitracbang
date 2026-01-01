@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiHome, FiBell, FiUser, FiLogOut, FiMenu, FiSearch, FiX, FiMusic, FiDisc } from 'react-icons/fi';
+import { FiHome, FiBell, FiUser, FiLogOut, FiMenu, FiSearch, FiX, FiMusic, FiDisc, FiMessageCircle } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { searchAPI } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import SideMenu from './SideMenu';
@@ -13,6 +14,7 @@ const TopNavbar = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { user, logout } = useAuth();
+  const { unreadCount } = useSocket();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
@@ -276,7 +278,12 @@ const TopNavbar = () => {
 
       {/* Right Actions */}
       <div className="navbar-actions">
-        <button className="navbar-btn">
+        <button className="navbar-btn" onClick={() => navigate('/messages')}>
+          <FiMessageCircle size={20} />
+          {unreadCount > 0 && <span className="navbar-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+        </button>
+
+        <button className="navbar-btn" onClick={() => navigate('/notifications')}>
           <FiBell size={20} />
         </button>
 

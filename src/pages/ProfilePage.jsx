@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { userAPI } from '../services/api';
-import { FiEdit2, FiSettings } from 'react-icons/fi';
+import { FiEdit2, FiSettings, FiMessageCircle } from 'react-icons/fi';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -140,8 +140,8 @@ const ProfilePage = () => {
       <div className="profile-header">
         <div className="profile-gradient-bg"></div>
 
-        {/* Edit/Settings Button */}
-        {isOwnProfile && (
+        {/* Edit/Settings Button or Message Button */}
+        {isOwnProfile ? (
           <>
             <button
               className="profile-edit-btn"
@@ -158,6 +158,14 @@ const ProfilePage = () => {
               style={{ display: 'none' }}
             />
           </>
+        ) : (
+          <button
+            className="profile-message-btn"
+            onClick={() => navigate(`/messages/${user._id}`)}
+          >
+            <FiMessageCircle size={20} />
+            <span>Mesaj Gönder</span>
+          </button>
         )}
 
         {/* Profile Avatar */}

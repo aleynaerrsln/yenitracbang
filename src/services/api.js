@@ -47,7 +47,12 @@ export const authAPI = {
   getCurrentUser: () => api.get('/me'),
   logout: () => api.post('/logout'),
   updateProfile: (data) => api.put('/profile', data),
-  changePassword: (data) => api.put('/change-password', data),
+
+  // Settings - Account Management
+  updateProfileInfo: (data) => api.put('/profile-info', data),
+  changePassword: (data) => api.post('/change-password', data),
+  requestEmailUpdate: (data) => api.post('/request-email-update', data),
+  confirmEmailUpdate: (data) => api.post('/confirm-email-update', data),
 };
 
 // ================= GENRE =================
@@ -271,29 +276,68 @@ export const userAPI = {
 
 // ================= NOTIFICATION =================
 export const notificationAPI = {
-  getNotifications: () =>
-    api.get('/notifications'),
-  markAsRead: (id) =>
-    api.put(`/notifications/${id}/read`),
-  markAllAsRead: () =>
-    api.put('/notifications/read-all'),
-  deleteNotification: (id) =>
-    api.delete(`/notifications/${id}`),
+  // User notifications
+  getUserNotifications: (params) =>
+    api.get('/notifications/user', { params }),
+
+  // Register FCM token
+  registerToken: (data) =>
+    api.post('/notifications/register-token', data),
+
+  // Update notification settings
+  updateSettings: (settings) =>
+    api.put('/notifications/settings', settings),
+
+  // Deactivate device token
+  deactivateToken: (data) =>
+    api.post('/notifications/deactivate-token', data),
 };
 
-// ================= MESSAGE =================
+// ================= MESSAGES =================
 export const messageAPI = {
+  // Konuşma listesini getir
   getConversations: () =>
     api.get('/messages/conversations'),
+
+  // Belirli bir kullanıcı ile konuşmayı getir
+  getConversation: (otherUserId, params) =>
+    api.get(`/messages/conversation/${otherUserId}`, { params }),
+
+  // Backward compatibility için
   getMessages: (conversationId) =>
     api.get(`/messages/${conversationId}`),
-  sendMessage: (receiverId, message) =>
-    api.post('/messages', {
-      receiverId,
-      message,
-    }),
+
+  // Mesaj gönder (REST API fallback)
+  sendMessage: (data) =>
+    api.post('/messages/send', data),
+
+  // Mesajı okundu işaretle
+  markMessageAsRead: (messageId) =>
+    api.put(`/messages/read/${messageId}`),
+
+  // Konuşmayı okundu işaretle
+  markConversationAsRead: (otherUserId) =>
+    api.put(`/messages/conversation/${otherUserId}/read`),
+
+  // Backward compatibility için
   markAsRead: (conversationId) =>
     api.put(`/messages/${conversationId}/read`),
+
+  // Okunmamış mesaj sayısını getir
+  getUnreadCount: () =>
+    api.get('/messages/unread/count'),
+
+  // Mesaj sil
+  deleteMessage: (messageId) =>
+    api.delete(`/messages/${messageId}`),
+
+  // Mesaj düzenle
+  editMessage: (messageId, data) =>
+    api.put(`/messages/${messageId}`, data),
+
+  // Mesaj ara
+  searchMessages: (params) =>
+    api.get('/messages/search', { params }),
 };
 
 // ================= SUBSCRIPTION =================
@@ -308,6 +352,25 @@ export const subscriptionAPI = {
     api.post('/subscriptions/cancel'),
   getPlans: () =>
     api.get('/subscriptions/plans'),
+};
+
+// ================= SETTINGS =================
+export const settingsAPI = {
+  // Platform Preferences
+  getPlatformPreferences: () =>
+    api.get('/settings/platform-preferences'),
+  updatePlatformPreferences: (preferences) =>
+    api.put('/settings/platform-preferences', { platformPreferences: preferences }),
+
+  // App Settings
+  getAppSettings: () =>
+    api.get('/settings/app-settings'),
+  updateAppSettings: (settings) =>
+    api.put('/settings/app-settings', { appSettings: settings }),
+
+  // All Settings
+  getAllSettings: () =>
+    api.get('/settings/all'),
 };
 
 // ================= ARTIST MUSIC =================
