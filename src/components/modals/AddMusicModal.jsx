@@ -23,8 +23,9 @@ const AddMusicModal = ({ isOpen, onClose, onSave }) => {
     setSpotifyLink(value);
     setError('');
 
-    // Spotify link formatı kontrolü
-    if (value && value.includes('open.spotify.com/track/')) {
+    // Spotify link formatı kontrolü (intl-tr gibi dil kodlarını da destekle)
+    if (value && (value.includes('open.spotify.com/track/') || value.includes('open.spotify.com/intl-'))) {
+      console.log('🔍 Spotify link detected:', value);
       await fetchSpotifyMetadata(value);
     }
   };
@@ -35,8 +36,10 @@ const AddMusicModal = ({ isOpen, onClose, onSave }) => {
     setSongData(null);
 
     try {
-      // Spotify track ID'sini çıkar
-      const trackId = link.split('/track/')[1]?.split('?')[0];
+      // Spotify track ID'sini çıkar (intl-tr gibi dil kodlarını handle et)
+      // Örnek: https://open.spotify.com/intl-tr/track/0bvgWq2ZUhwwjLR1...
+      const trackIdMatch = link.match(/\/track\/([a-zA-Z0-9]+)/);
+      const trackId = trackIdMatch ? trackIdMatch[1] : null;
 
       if (!trackId) {
         setError('Geçersiz Spotify linki');
@@ -44,52 +47,70 @@ const AddMusicModal = ({ isOpen, onClose, onSave }) => {
         return;
       }
 
-      console.log('Fetching metadata for track ID:', trackId);
+      console.log('🎵 Extracted track ID:', trackId);
 
-      try {
-        // Backend'den metadata çek
-        const response = await artistMusicAPI.getSpotifyMetadata(trackId);
-        console.log('Spotify metadata response:', response.data);
-        setSongData(response.data);
-      } catch (backendError) {
-        console.warn('Backend error, using Spotify Web API directly:', backendError);
+      console.log('🎵 Fetching metadata for track ID:', trackId);
 
-        // Backend çalışmıyorsa direkt Spotify Web API'yi kullan
-        const spotifyResponse = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
-          headers: {
-            'Authorization': 'Bearer BQDi6AXHGt9C9xJKl0h_example' // Bu geçici - production'da backend kullanılmalı
-          }
-        });
+      // Backend'den metadata çek
+      const response = await artistMusicAPI.getSpotifyMetadata(trackId);
+      console.log('✅ Full Spotify response:', response);
+      console.log('✅ Response structure:', {
+        data: response.data,
+        success: response.data?.success,
+        hasData: !!response.data?.data
+      });
 
-        if (!spotifyResponse.ok) {
-          // Spotify API de çalışmazsa mock data kullan
-          console.warn('Spotify API error, using mock data');
-          setSongData({
-            spotifyId: trackId,
-            trackName: 'Cigarettes After Sex',
-            artistName: 'Cry',
-            coverImage: 'https://i.scdn.co/image/ab67616d0000b273example',
-            duration: 240000,
-            previewUrl: null,
-            spotifyUrl: link
-          });
-          return;
-        }
+      // Backend response'u parse et
+      let backendData;
 
-        const track = await spotifyResponse.json();
-        setSongData({
-          spotifyId: track.id,
-          trackName: track.name,
-          artistName: track.artists.map(artist => artist.name).join(', '),
-          coverImage: track.album.images[0]?.url || null,
-          duration: track.duration_ms,
-          previewUrl: track.preview_url,
-          spotifyUrl: track.external_urls.spotify
-        });
+      // Format 1: { success: true, data: {...} }
+      if (response.data?.success && response.data?.data) {
+        backendData = response.data.data;
       }
+      // Format 2: Direkt data dönüyor
+      else if (response.data?.id && response.data?.name) {
+        backendData = response.data;
+      }
+      // Format 3: Nested data
+      else if (response.data?.track) {
+        backendData = response.data.track;
+      }
+      else {
+        console.error('❌ Unknown response format:', response.data);
+        throw new Error('Backend response formatı tanınamadı');
+      }
+
+      console.log('📦 Parsed backend data:', backendData);
+
+      // Track ID ve title'ı normalize et (backend farklı field isimleri kullanıyor)
+      const spotifyId = backendData.trackId || backendData.id;
+      const trackName = backendData.title || backendData.name;
+      const artistName = backendData.artistNames || backendData.artist || backendData.artistName;
+
+      // Veri kontrolü
+      if (!spotifyId || !trackName || !artistName) {
+        console.error('❌ Invalid backend data:', { spotifyId, trackName, artistName, backendData });
+        throw new Error('Geçersiz Spotify verisi - eksik alanlar');
+      }
+
+      setSongData({
+        spotifyId: spotifyId,
+        trackName: trackName,
+        artistName: artistName,
+        coverImage: backendData.imageUrl || backendData.coverImage || backendData.image,
+        duration: backendData.duration || backendData.duration_ms,
+        previewUrl: backendData.previewUrl || backendData.preview_url,
+        spotifyUrl: backendData.spotifyUrl || backendData.external_urls?.spotify
+      });
+
+      console.log('✅ Song data set successfully');
     } catch (err) {
-      console.error('Spotify metadata error:', err);
-      setError('Şarkı bilgileri alınamadı. Lütfen backend ekibinizle iletişime geçin.');
+      console.error('❌ Spotify metadata error:', err);
+      console.error('❌ Error details:', err.response?.data);
+
+      // Backend'den gelen hata mesajını kullan
+      const errorMessage = err.response?.data?.message || err.message || 'Şarkı bilgileri alınamadı';
+      setError(errorMessage);
       setSongData(null);
     } finally {
       setLoading(false);
@@ -122,16 +143,27 @@ const AddMusicModal = ({ isOpen, onClose, onSave }) => {
       return;
     }
 
-    const musicData = {
-      spotifyLink,
-      appleMusicLink: appleMusicLink || null,
-      genres: selectedGenres,
-      trackName: songData.trackName,
-      artistName: songData.artistName,
-      coverImage: songData.coverImage,
-      spotifyId: songData.spotifyId
+    // Backend formatına çevir
+    const genreMap = {
+      'Afro House': 'afrohouse',
+      'Indie Dance': 'indiedance',
+      'Organic House': 'organichouse',
+      'Down Tempo': 'downtempo',
+      'Melodic House': 'melodichouse'
     };
 
+    const musicData = {
+      title: songData.trackName,
+      artists: songData.artistName, // Backend string veya array kabul ediyor
+      imageUrl: songData.coverImage,
+      genre: genreMap[selectedGenres[0]], // Backend tek genre istiyor
+      platformLinks: {
+        spotify: spotifyLink,
+        appleMusic: appleMusicLink || undefined
+      }
+    };
+
+    console.log('Saving music with data:', musicData);
     await onSave(musicData);
   };
 

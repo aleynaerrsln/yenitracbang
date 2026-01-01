@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  import.meta.env.VITE_API_URL || 'https://api.trackbangserver.com/api';
 
 // Axios instance
 const api = axios.create({
@@ -313,13 +313,13 @@ export const subscriptionAPI = {
 // ================= ARTIST MUSIC =================
 export const artistMusicAPI = {
   getSpotifyMetadata: (trackId) =>
-    api.get(`/artist-music/spotify-metadata/${trackId}`),
+    api.get(`/spotify/track/${trackId}`),
   addMusic: (data) =>
-    api.post('/artist-music', data),
-  getUserMusic: () =>
-    api.get('/artist-music'),
+    api.post('/music', data),
+  getUserMusic: (params) =>
+    api.get('/music', { params }),
   deleteMusic: (musicId) =>
-    api.delete(`/artist-music/${musicId}`),
+    api.delete(`/music/${musicId}`),
 };
 
 export default api;

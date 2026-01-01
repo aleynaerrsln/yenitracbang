@@ -4,12 +4,70 @@ import { useAuth } from '../context/AuthContext';
 import AddMusicModal from '../components/modals/AddMusicModal';
 import { artistMusicAPI } from '../services/api';
 import './ArtistEssential.css';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+
+
 
 const ArtistEssential = () => {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [myMusic, setMyMusic] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [spotifyLink, setSpotifyLink] = useState('');
+  const [autoMeta, setAutoMeta] = useState(null);
+  const [fetchingMeta, setFetchingMeta] = useState(false);
+
+const extractSpotifyTrackId = (url) => {
+  try {
+    const u = new URL(url.trim());
+    if (!u.hostname.includes("spotify.com")) return null;
+
+    const parts = u.pathname.split("/");
+    const trackIndex = parts.findIndex(p => p === "track");
+    if (trackIndex === -1) return null;
+
+    return parts[trackIndex + 1];
+  } catch {
+    return null;
+  }
+};
+
+
+const fetchSpotifyMetadata = async (link) => {
+  const trackId = extractSpotifyTrackId(link);
+  console.log("SPOTIFY FETCH ÇALIŞTI", trackId);
+
+  if (!trackId) return;
+
+  try {
+    setFetchingMeta(true);
+
+    const token = localStorage.getItem("token");
+
+const res = await axios.get(`https://api.trackbangserver.com/api/spotify/track/${trackId}`, {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`
+  }
+});
+
+
+    setAutoMeta(res.data.data);
+  } catch (err) {
+    console.error("Spotify Error:", err.response?.data || err.message);
+    toast.error("Spotify linki okunamadı");
+  } finally {
+    setFetchingMeta(false);
+  }
+};
+
+useEffect(() => {
+  console.log("ARTIST ESSENTIAL YÜKLENDİ");
+}, []);
+
+useEffect(() => {
+  if (spotifyLink.length > 20) fetchSpotifyMetadata(spotifyLink);
+}, [spotifyLink]);
 
   // Debug: Kullanıcı bilgisini konsola yazdır
   console.log('ArtistEssential - User data:', user);
@@ -36,26 +94,35 @@ const ArtistEssential = () => {
   const fetchMyMusic = async () => {
     try {
       setLoading(true);
-      const response = await artistMusicAPI.getUserMusic();
-      setMyMusic(response.data.music || []);
+      const response = await artistMusicAPI.getUserMusic({ uploadedBy: 'artist' });
+      console.log('My music response:', response.data);
+      setMyMusic(response.data.musics || response.data.data?.musics || []);
     } catch (error) {
       console.error('Failed to fetch music:', error);
+      setMyMusic([]); // Hata durumunda boş array
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSaveMusic = async (musicData) => {
-    try {
-      await artistMusicAPI.addMusic(musicData);
-      // Modal'ı kapat ve listeyi yenile
-      setIsModalOpen(false);
-      await fetchMyMusic();
-    } catch (error) {
-      console.error('Failed to save music:', error);
-      throw error;
-    }
-  };
+const handleSaveMusic = async () => {
+  if (!autoMeta) return toast.error("Spotify linki geçersiz");
+
+  await artistMusicAPI.addMusic({
+    spotifyLink,
+    artistName: autoMeta.artist,
+    trackName: autoMeta.name,
+    coverImage: autoMeta.imageUrl,
+    genres: autoMeta.genres || []
+  });
+
+  toast.success("Şarkı eklendi!");
+  setSpotifyLink('');
+  setAutoMeta(null);
+  setIsModalOpen(false);
+  fetchMyMusic();
+};
+
 
   if (hasAccess) {
     return (
@@ -115,11 +182,12 @@ const ArtistEssential = () => {
                   <div className="music-info">
                     <h4 className="music-title">{music.trackName}</h4>
                     <p className="music-artist">{music.artistName}</p>
-                    <div className="music-genres">
-                      {music.genres.map((genre, idx) => (
-                        <span key={idx} className="genre-tag">{genre}</span>
-                      ))}
-                    </div>
+<div className="music-genres">
+  {(music.genres || []).map((genre, idx) => (
+    <span key={idx} className="genre-tag">{genre}</span>
+  ))}
+</div>
+
                   </div>
                   <div className="music-actions">
                     <a href={music.spotifyLink} target="_blank" rel="noopener noreferrer" className="platform-link">
@@ -142,11 +210,26 @@ const ArtistEssential = () => {
         </div>
 
         {/* Add Music Modal */}
-        <AddMusicModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleSaveMusic}
-        />
+<AddMusicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+  <input
+    className="spotify-input"
+    placeholder="Spotify Track Linki"
+    value={spotifyLink}
+    onChange={e => setSpotifyLink(e.target.value)}
+  />
+
+  {fetchingMeta && <p>Spotify'dan bilgiler alınıyor...</p>}
+
+  {autoMeta && (
+    <div className="spotify-preview">
+<img src={autoMeta?.imageUrl} />
+      <b>{autoMeta.name}</b>
+      <span>{autoMeta.artist}</span>
+      <button onClick={handleSaveMusic}>Kaydet</button>
+    </div>
+  )}
+</AddMusicModal>
+
       </div>
     );
   }
