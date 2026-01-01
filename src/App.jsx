@@ -17,6 +17,7 @@ import HotPage from './pages/HotPage';
 import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import ArtistEssential from './pages/ArtistEssential';
+import ArtistPage from './pages/ArtistPage';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -68,6 +69,7 @@ function AppRoutes() {
         <Route path="/world" element={<WorldPage />} />
         <Route path="/hot" element={<HotPage />} />
         <Route path="/artist-essential" element={<ArtistEssential />} />
+        <Route path="/artist/:slug" element={<ArtistPage />} />
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>

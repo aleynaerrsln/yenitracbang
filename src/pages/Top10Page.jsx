@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { musicAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { FiHeart, FiPlay } from 'react-icons/fi';
+import { FiHeart, FiPlay, FiMoreVertical } from 'react-icons/fi';
+import TrackOptionsModal from '../components/modals/TrackOptionsModal';
+import SelectArtistModal from '../components/modals/SelectArtistModal';
 import './Top10Page.css';
 
 const Top10Page = () => {
@@ -14,6 +16,12 @@ const Top10Page = () => {
   const [activeGenre, setActiveGenre] = useState('all');
   const [top10Data, setTop10Data] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // Modal states
+  const [selectedTrack, setSelectedTrack] = useState(null);
+  const [showTrackOptions, setShowTrackOptions] = useState(false);
+  const [showSelectArtist, setShowSelectArtist] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
   const genres = [
     { id: 'all', name: 'All Categories', label: 'Tümü' },
@@ -76,6 +84,38 @@ const Top10Page = () => {
     console.log('Playing:', music.title);
   };
 
+  const handleOpenOptions = (music, e) => {
+    e.stopPropagation();
+
+    // 3 nokta butonunun pozisyonunu al
+    const buttonRect = e.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      top: buttonRect.top,
+      left: buttonRect.left
+    });
+
+    setSelectedTrack(music);
+    setShowTrackOptions(true);
+  };
+
+  const handleViewArtists = () => {
+    if (selectedTrack?.artists && selectedTrack.artists.length > 0) {
+      // TrackOptionsModal'ı kapat, SelectArtistModal'ı aç (aynı pozisyonda)
+      setShowTrackOptions(false);
+      setShowSelectArtist(true);
+    } else {
+      toast.error('No artists found for this track');
+    }
+  };
+
+  const handleAddToPlaylist = () => {
+    toast.info('Add to playlist feature coming soon');
+  };
+
+  const handleShare = () => {
+    toast.info('Share feature coming soon');
+  };
+
   const renderGenreSection = (genreId, genreName) => {
     const musics = top10Data[genreId] || [];
 
@@ -89,6 +129,13 @@ const Top10Page = () => {
           {musics.map((music, index) => (
             <div key={music._id} className="top10-card">
               <div className="rank-badge">#{index + 1}</div>
+
+              <button
+                className="three-dot-menu"
+                onClick={(e) => handleOpenOptions(music, e)}
+              >
+                <FiMoreVertical size={20} />
+              </button>
 
               <div className="music-artwork">
                 <img src={music.imageUrl} alt={music.title} />
@@ -166,6 +213,28 @@ const Top10Page = () => {
           renderGenreSection(activeGenre, genres.find(g => g.id === activeGenre)?.name || activeGenre)
         )}
       </div>
+
+      {/* Track Options Modal */}
+      <TrackOptionsModal
+        isOpen={showTrackOptions}
+        onClose={() => setShowTrackOptions(false)}
+        onViewArtists={handleViewArtists}
+        onAddToPlaylist={handleAddToPlaylist}
+        onShare={handleShare}
+        position={menuPosition}
+      />
+
+      {/* Select Artist Modal */}
+      <SelectArtistModal
+        isOpen={showSelectArtist}
+        onClose={() => setShowSelectArtist(false)}
+        artists={selectedTrack?.artists || []}
+        trackInfo={selectedTrack ? {
+          title: selectedTrack.title,
+          imageUrl: selectedTrack.imageUrl
+        } : null}
+        position={menuPosition}
+      />
     </div>
   );
 };

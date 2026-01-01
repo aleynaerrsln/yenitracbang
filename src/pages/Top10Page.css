@@ -127,7 +127,7 @@
 .rank-badge {
   position: absolute;
   top: 8px;
-  right: 8px;
+  left: 8px;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(10px);
   color: #1ed760;
@@ -136,6 +136,31 @@
   padding: 4px 8px;
   border-radius: 4px;
   z-index: 2;
+}
+
+/* Three Dot Menu */
+.three-dot-menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.2s;
+}
+
+.three-dot-menu:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
 }
 
 /* Music Artwork */
