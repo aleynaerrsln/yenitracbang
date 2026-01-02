@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { FaGooglePlay, FaApple } from 'react-icons/fa';
 import './Auth.css';
 
 const LoginForm = () => {
@@ -99,8 +100,11 @@ const LoginForm = () => {
             rel="noopener noreferrer"
             className="store-button"
           >
-            <span className="store-label">Download on</span>
-            <span className="store-name">Google Play</span>
+            <FaGooglePlay size={24} className="store-icon" />
+            <div className="store-text">
+              <span className="store-label">Download on</span>
+              <span className="store-name">Google Play</span>
+            </div>
           </a>
           <a
             href="https://apps.apple.com"
@@ -108,8 +112,11 @@ const LoginForm = () => {
             rel="noopener noreferrer"
             className="store-button"
           >
-            <span className="store-label">Download on the</span>
-            <span className="store-name">App Store</span>
+            <FaApple size={28} className="store-icon" />
+            <div className="store-text">
+              <span className="store-label">Download on the</span>
+              <span className="store-name">App Store</span>
+            </div>
           </a>
         </div>
       </div>

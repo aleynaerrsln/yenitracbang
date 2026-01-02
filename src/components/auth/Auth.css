@@ -223,7 +223,7 @@
 
 .store-button {
   flex: 1;
-  max-width: 160px;
+  max-width: 180px;
   padding: 12px 16px;
   background: rgba(14, 165, 233, 0.1);
   border: 1.5px solid rgba(14, 165, 233, 0.3);
@@ -235,9 +235,9 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
 }
 
 .store-button:hover {
@@ -246,16 +246,39 @@
   transform: translateY(-2px);
 }
 
+.store-button .store-icon {
+  flex-shrink: 0;
+}
+
+/* Google Play logo - orijinal yeşil renk */
+.store-button:first-child .store-icon {
+  color: #34a853;
+}
+
+/* Apple logo - beyaz renk */
+.store-button:last-child .store-icon {
+  color: #fff;
+}
+
+.store-button .store-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
 .store-button .store-label {
-  font-size: 11px;
+  font-size: 10px;
   color: rgba(255, 255, 255, 0.6);
   font-weight: 400;
+  text-align: left;
 }
 
 .store-button .store-name {
   font-size: 14px;
   color: #fff;
   font-weight: 600;
+  text-align: left;
 }
 
 /* Responsive */
