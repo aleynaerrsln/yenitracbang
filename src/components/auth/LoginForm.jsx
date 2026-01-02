@@ -50,7 +50,7 @@ const LoginForm = () => {
     <div className="auth-form">
       <div className="auth-header">
         <img src="/logo.png" alt="TrackBang" className="auth-logo" />
-        <p>Müziğe giriş yap</p>
+        <p></p>
       </div>
 
       <form onSubmit={handleSubmit}>
