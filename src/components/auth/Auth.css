@@ -252,12 +252,12 @@
 
 /* Google Play logo - orijinal yeşil renk */
 .store-button:first-child .store-icon {
-  color: #34a853;
+  color: #34a853 !important;
 }
 
 /* Apple logo - beyaz renk */
 .store-button:last-child .store-icon {
-  color: #fff;
+  color: #ffffff !important;
 }
 
 .store-button .store-text {
