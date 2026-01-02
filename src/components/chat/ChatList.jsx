@@ -8,7 +8,7 @@ import { FiMessageCircle, FiX, FiMinus, FiEdit3, FiSearch, FiArrowLeft } from 'r
 import './ChatList.css';
 
 const ChatList = ({ onSelectConversation, onClose }) => {
-  const { socket, connected, isUserOnline, unreadCount } = useSocket();
+  const { socket, connected, isUserOnline, unreadCount, markConversationAsRead } = useSocket();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -102,7 +102,6 @@ const ChatList = ({ onSelectConversation, onClose }) => {
     try {
       setSearching(true);
       const response = await searchAPI.searchUsers(query);
-      console.log('Search response:', response.data); // Debug
       if (response.data.success) {
         // Backend response: { success, users: [...] }
         const users = response.data.users || [];
@@ -110,7 +109,6 @@ const ChatList = ({ onSelectConversation, onClose }) => {
       }
     } catch (error) {
       console.error('Kullanıcı arama hatası:', error);
-      console.error('Error details:', error.response?.data); // Debug
       setSearchResults([]);
     } finally {
       setSearching(false);
@@ -134,6 +132,20 @@ const ChatList = ({ onSelectConversation, onClose }) => {
     setShowNewMessage(false);
     setSearchQuery('');
     setSearchResults([]);
+  };
+
+  const handleSelectConversation = (conversation) => {
+    // Okunmamış mesajları okundu olarak işaretle
+    if (conversation.unreadCount > 0) {
+      markConversationAsRead(conversation.otherUser._id);
+      // Local state'i güncelle
+      setConversations(prev => prev.map(conv =>
+        conv.otherUser._id === conversation.otherUser._id
+          ? { ...conv, unreadCount: 0 }
+          : conv
+      ));
+    }
+    onSelectConversation(conversation.otherUser);
   };
 
   if (isMinimized) {
@@ -258,7 +270,7 @@ const ChatList = ({ onSelectConversation, onClose }) => {
             <div
               key={conversation._id}
               className="chat-list-item"
-              onClick={() => onSelectConversation(conversation.otherUser)}
+              onClick={() => handleSelectConversation(conversation)}
             >
               <div className="chat-list-avatar">
                 <img src={getProfileImage(conversation.otherUser)} alt={conversation.otherUser.username} />

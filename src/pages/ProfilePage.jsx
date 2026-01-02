@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { userAPI } from '../services/api';
-import { FiEdit2, FiSettings, FiMessageCircle } from 'react-icons/fi';
+import { FiEdit2, FiSettings, FiMessageCircle, FiPlus, FiTrash2 } from 'react-icons/fi';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -19,6 +19,8 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('images');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingAdditionalImage, setUploadingAdditionalImage] = useState(false);
+  const additionalImageInputRef = useRef(null);
 
   // Kendi profilim mi kontrol et
   const isOwnProfile = !username || username === currentUser?.username;
@@ -108,6 +110,93 @@ const ProfilePage = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleAdditionalImageClick = () => {
+    if (isOwnProfile) {
+      additionalImageInputRef.current?.click();
+    }
+  };
+
+  const handleAdditionalImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Dosya boyutu kontrolü (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Dosya boyutu 5MB\'dan küçük olmalıdır');
+      return;
+    }
+
+    // Dosya tipi kontrolü
+    if (!file.type.startsWith('image/')) {
+      toast.error('Sadece resim dosyaları yüklenebilir');
+      return;
+    }
+
+    try {
+      setUploadingAdditionalImage(true);
+
+      const formData = new FormData();
+      formData.append('additionalImages', file);
+
+      const response = await userAPI.uploadAdditionalImage(formData);
+
+      if (response.data.success) {
+        // Backend'den gelen tüm resimler
+        const allImages = response.data.additionalImages;
+
+        // Mevcut user objesini kopyala ve additionalImages'ı güncelle
+        const updatedUser = {
+          ...currentUser,
+          additionalImages: allImages
+        };
+
+        // AuthContext'teki user'ı güncelle
+        updateUser(updatedUser);
+
+        // Local state'i güncelle
+        setUser(updatedUser);
+
+        toast.success('Resim başarıyla eklendi');
+      } else {
+        toast.error('Resim yüklendi ama bir hata oluştu');
+      }
+    } catch (error) {
+      console.error('Resim yükleme hatası:', error);
+      toast.error(error.response?.data?.message || 'Resim yüklenirken bir hata oluştu');
+    } finally {
+      setUploadingAdditionalImage(false);
+      // Input'u temizle
+      if (additionalImageInputRef.current) {
+        additionalImageInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteImage = async (imageId) => {
+    if (!confirm('Bu resmi silmek istediğinizden emin misiniz?')) return;
+
+    try {
+      await userAPI.deleteAdditionalImage(imageId);
+
+      // Mevcut user objesini kopyala ve resmi kaldır
+      const updatedUser = {
+        ...currentUser,
+        additionalImages: (currentUser.additionalImages || []).filter(img => img._id !== imageId)
+      };
+
+      // AuthContext'teki user'ı güncelle
+      updateUser(updatedUser);
+
+      // Local state'i güncelle
+      setUser(updatedUser);
+
+      toast.success('Resim başarıyla silindi');
+    } catch (error) {
+      console.error('Resim silme hatası:', error);
+      toast.error(error.response?.data?.message || 'Resim silinirken bir hata oluştu');
     }
   };
 
@@ -220,17 +309,56 @@ const ProfilePage = () => {
       <div className="profile-content">
         {activeTab === 'images' && (
           <div className="profile-images-grid">
-            {user.additionalImages && user.additionalImages.length > 0 ? (
-              user.additionalImages.map((img, index) => (
-                <div key={index} className="profile-image-card">
-                  <img src={img.url} alt={`Image ${index + 1}`} />
+            {/* Add Image Button - Only for own profile */}
+            {isOwnProfile && (
+              <>
+                <div
+                  className="profile-image-card profile-add-image-card"
+                  onClick={handleAdditionalImageClick}
+                  style={{ cursor: uploadingAdditionalImage ? 'not-allowed' : 'pointer' }}
+                >
+                  {uploadingAdditionalImage ? (
+                    <div className="uploading-spinner"></div>
+                  ) : (
+                    <>
+                      <FiPlus size={40} />
+                      <span>Resim Ekle</span>
+                    </>
+                  )}
                 </div>
-              ))
-            ) : (
+                <input
+                  ref={additionalImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAdditionalImageUpload}
+                  style={{ display: 'none' }}
+                />
+              </>
+            )}
+
+            {/* Existing Images */}
+            {user.additionalImages && user.additionalImages.length > 0 ? (
+              user.additionalImages
+                .filter(img => img && img.url)
+                .map((img, index) => (
+                  <div key={img._id || index} className="profile-image-card">
+                    <img src={img.url} alt={`Image ${index + 1}`} />
+                    {isOwnProfile && (
+                      <button
+                        className="profile-image-delete-btn"
+                        onClick={() => handleDeleteImage(img._id)}
+                        title="Resmi Sil"
+                      >
+                        <FiTrash2 size={18} />
+                      </button>
+                    )}
+                  </div>
+                ))
+            ) : !isOwnProfile ? (
               <div className="profile-empty-state">
                 <p>Henüz görsel yok</p>
               </div>
-            )}
+            ) : null}
           </div>
         )}
 

@@ -19,17 +19,21 @@ const TopNavbar = ({ onOpenChat }) => {
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState({ musics: [], playlists: [], artists: [] });
+  const [searchResults, setSearchResults] = useState({ musics: [], playlists: [], users: [] });
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeSearchTab, setActiveSearchTab] = useState('all');
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setShowSearchDropdown(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setShowUserMenu(false);
       }
     };
 
@@ -56,8 +60,10 @@ const TopNavbar = ({ onOpenChat }) => {
       setSearchLoading(true);
       const response = await searchAPI.searchAll(query);
 
+      console.log('Search response:', response.data);
       if (response.data.success) {
-        setSearchResults(response.data.results || { musics: [], playlists: [], artists: [] });
+        setSearchResults(response.data.results || { musics: [], playlists: [], users: [] });
+        console.log('Search results set:', response.data.results);
       }
     } catch (error) {
       console.error('Search error:', error);
@@ -77,7 +83,7 @@ const TopNavbar = ({ onOpenChat }) => {
 
   const handleClearSearch = () => {
     setSearchQuery('');
-    setSearchResults({ musics: [], playlists: [], artists: [] });
+    setSearchResults({ musics: [], playlists: [], users: [] });
     searchInputRef.current?.focus();
   };
 
@@ -159,8 +165,8 @@ const TopNavbar = ({ onOpenChat }) => {
                     Playlist
                   </button>
                   <button
-                    className={`filter-tab ${activeSearchTab === 'artists' ? 'active' : ''}`}
-                    onClick={() => setActiveSearchTab('artists')}
+                    className={`filter-tab ${activeSearchTab === 'users' ? 'active' : ''}`}
+                    onClick={() => setActiveSearchTab('users')}
                   >
                     Kullanıcı
                   </button>
@@ -232,19 +238,19 @@ const TopNavbar = ({ onOpenChat }) => {
                     </div>
                   )}
 
-                  {/* Artists */}
-                  {(activeSearchTab === 'all' || activeSearchTab === 'artists') && searchResults.artists?.length > 0 && (
+                  {/* Users */}
+                  {(activeSearchTab === 'all' || activeSearchTab === 'users') && searchResults.users?.length > 0 && (
                     <div className="result-group">
-                      <h4 className="result-group-title">Sanatçılar</h4>
-                      {searchResults.artists.slice(0, activeSearchTab === 'artists' ? 10 : 4).map((artist) => (
+                      <h4 className="result-group-title">Kullanıcılar</h4>
+                      {searchResults.users.slice(0, activeSearchTab === 'users' ? 10 : 4).map((user) => (
                         <div
-                          key={artist._id}
+                          key={user._id}
                           className="search-result-row"
-                          onClick={() => navigate(`/artist/${artist.slug || artist._id}`)}
+                          onClick={() => navigate(`/profile/${user.username}`)}
                         >
                           <div className="result-artwork-small round">
-                            {artist.imageUrl ? (
-                              <img src={artist.imageUrl} alt={artist.name} />
+                            {user.profileImage ? (
+                              <img src={user.profileImage} alt={user.username} />
                             ) : (
                               <div className="artwork-placeholder">
                                 <FiUser size={20} />
@@ -252,8 +258,8 @@ const TopNavbar = ({ onOpenChat }) => {
                             )}
                           </div>
                           <div className="result-info-small">
-                            <p className="result-name">{artist.name}</p>
-                            <p className="result-artist">Sanatçı</p>
+                            <p className="result-name">{user.username}</p>
+                            <p className="result-artist">Kullanıcı</p>
                           </div>
                         </div>
                       ))}
@@ -288,9 +294,9 @@ const TopNavbar = ({ onOpenChat }) => {
         </button>
 
         {/* User Profile Dropdown */}
-        <div className="navbar-profile-wrapper">
-          <div 
-            className="navbar-profile" 
+        <div className="navbar-profile-wrapper" ref={userMenuRef}>
+          <div
+            className="navbar-profile"
             onClick={() => setShowUserMenu(!showUserMenu)}
           >
             {user?.profileImage ? (
@@ -325,7 +331,7 @@ const TopNavbar = ({ onOpenChat }) => {
 
               <div className="user-menu-divider" />
 
-              <button className="user-menu-item" onClick={() => navigate('/profile')}>
+              <button className="user-menu-item" onClick={() => { navigate('/profile'); setShowUserMenu(false); }}>
                 <FiUser size={18} />
                 <span>Profile</span>
               </button>

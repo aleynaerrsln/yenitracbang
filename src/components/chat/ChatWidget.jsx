@@ -7,9 +7,9 @@ import { format, isToday } from 'date-fns';
 import { FiX, FiMinus, FiSend, FiMessageCircle, FiArrowLeft } from 'react-icons/fi';
 import './ChatWidget.css';
 
-const ChatWidget = ({ recipientId, recipientInfo, onClose, style }) => {
+const ChatWidget = ({ recipientId, recipientInfo, onBack, onClose, style }) => {
   const { user } = useAuth();
-  const { socket, connected, sendMessage: socketSendMessage, isUserOnline } = useSocket();
+  const { socket, connected, sendMessage: socketSendMessage, isUserOnline, markConversationAsRead } = useSocket();
 
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState('');
@@ -23,6 +23,10 @@ const ChatWidget = ({ recipientId, recipientInfo, onClose, style }) => {
 
   useEffect(() => {
     fetchMessages();
+    // Konuşmayı açtığımızda mesajları okundu olarak işaretle
+    if (recipientId && markConversationAsRead) {
+      markConversationAsRead(recipientId);
+    }
   }, [recipientId]);
 
   useEffect(() => {
@@ -32,6 +36,10 @@ const ChatWidget = ({ recipientId, recipientInfo, onClose, style }) => {
       if (data?.message && data.message.senderId._id === recipientId) {
         setMessages(prev => [...prev, data.message]);
         scrollToBottom();
+        // Mesaj geldiğinde hemen okundu olarak işaretle (chat açıkken)
+        if (markConversationAsRead) {
+          markConversationAsRead(recipientId);
+        }
       }
     };
 
@@ -149,7 +157,7 @@ const ChatWidget = ({ recipientId, recipientInfo, onClose, style }) => {
     <div className="chat-widget" style={style}>
       {/* Header */}
       <div className="chat-widget-header">
-        <button onClick={onClose} className="widget-btn widget-back-btn" title="Geri">
+        <button onClick={onBack} className="widget-btn widget-back-btn" title="Geri">
           <FiArrowLeft size={20} />
         </button>
         <div className="chat-widget-user">
@@ -175,6 +183,9 @@ const ChatWidget = ({ recipientId, recipientInfo, onClose, style }) => {
         <div className="chat-widget-actions">
           <button onClick={() => setIsMinimized(true)} className="widget-btn" title="Küçült">
             <FiMinus size={18} />
+          </button>
+          <button onClick={onClose} className="widget-btn" title="Kapat">
+            <FiX size={18} />
           </button>
         </div>
       </div>

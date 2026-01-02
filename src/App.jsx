@@ -47,14 +47,21 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleOpenChat = () => {
-    console.log('Opening chat, current state:', isChatOpen);
     setIsChatOpen(true);
-    console.log('Chat state set to true');
   };
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -85,8 +92,7 @@ function AppRoutes() {
           <Route path="/artist/:slug" element={<ArtistPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/404" element={<NotFound />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </MainLayout>
 

@@ -5,16 +5,14 @@ import ChatWidget from './ChatWidget';
 
 const ChatManager = ({ isOpen, onClose }) => {
   const [openChats, setOpenChats] = useState([]);
-  const [showChatList, setShowChatList] = useState(isOpen);
-
-  console.log('ChatManager render - isOpen:', isOpen, 'showChatList:', showChatList);
+  const [showChatList, setShowChatList] = useState(false);
 
   // isOpen değiştiğinde showChatList'i güncelle
   useEffect(() => {
-    console.log('ChatManager: isOpen changed to:', isOpen);
-    setShowChatList(isOpen);
-    console.log('ChatManager: showChatList set to:', isOpen);
-  }, [isOpen]);
+    if (isOpen && !showChatList) {
+      setShowChatList(true);
+    }
+  }, [isOpen, showChatList]);
 
   const handleSelectConversation = (user) => {
     // Zaten açık mı kontrol et
@@ -38,12 +36,16 @@ const ChatManager = ({ isOpen, onClose }) => {
     setOpenChats(prev => prev.filter(chat => chat._id !== userId));
   };
 
+  const handleBackToList = (userId) => {
+    // Chat widget'ı kapat ve chat listesini göster
+    setOpenChats(prev => prev.filter(chat => chat._id !== userId));
+    setShowChatList(true);
+  };
+
   const handleCloseChatList = () => {
-    console.log('ChatManager: handleCloseChatList called');
     setShowChatList(false);
-    console.log('ChatManager: showChatList set to false');
+    setOpenChats([]); // Açık tüm chatları kapat
     onClose();
-    console.log('ChatManager: onClose called');
   };
 
   // Chat widgetlarını sağdan sola sıralamak için
@@ -51,6 +53,11 @@ const ChatManager = ({ isOpen, onClose }) => {
     const chatListWidth = showChatList ? 380 : 0; // Chat list açıksa onun genişliği
     return chatListWidth + (index * 380) + 20; // Her chat 360px genişlik + 20px boşluk
   };
+
+  // Hiçbir şey açık değilse render etme
+  if (!showChatList && openChats.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -68,6 +75,7 @@ const ChatManager = ({ isOpen, onClose }) => {
           key={user._id}
           recipientId={user._id}
           recipientInfo={user}
+          onBack={() => handleBackToList(user._id)}
           onClose={() => handleCloseChat(user._id)}
           style={{ right: `${getRightPosition(index)}px` }}
         />

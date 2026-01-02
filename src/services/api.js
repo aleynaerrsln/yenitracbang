@@ -268,6 +268,14 @@ export const userAPI = {
         'Content-Type': 'multipart/form-data',
       },
     }),
+  uploadAdditionalImage: (formData) =>
+    api.post('/upload-additional-images', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
+  deleteAdditionalImage: (imageId) =>
+    api.delete(`/additional-images/${imageId}`),
   followUser: (userId) =>
     api.post(`/users/${userId}/follow`),
   unfollowUser: (userId) =>

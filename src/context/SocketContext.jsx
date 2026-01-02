@@ -47,17 +47,15 @@ export const SocketProvider = ({ children }) => {
 
     // Connection events
     newSocket.on('connect', () => {
-      console.log('✅ Socket connected:', newSocket.id);
       setConnected(true);
     });
 
     newSocket.on('disconnect', (reason) => {
-      console.log('🔴 Socket disconnected:', reason);
       setConnected(false);
     });
 
     newSocket.on('connect_error', (error) => {
-      console.error('❌ Socket connection error:', error.message);
+      console.error('Socket connection error:', error.message);
       setConnected(false);
     });
 
@@ -87,7 +85,7 @@ export const SocketProvider = ({ children }) => {
 
     // Server shutdown notification
     newSocket.on('server:shutdown', (data) => {
-      console.log('⚠️ Server shutting down:', data?.message);
+      // Server shutting down
     });
 
     // Cleanup
@@ -143,9 +141,34 @@ export const SocketProvider = ({ children }) => {
     socketRef.current.emit('message:read', { messageId, senderId });
   };
 
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.trackbangserver.com/api'}/messages/unread-count`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.count !== undefined) {
+          setUnreadCount(data.count);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
   const markConversationAsRead = (otherUserId) => {
-    if (!socketRef.current || !connected) return;
+    if (!socketRef.current || !connected) {
+      return;
+    }
     socketRef.current.emit('conversation:read', { otherUserId });
+
+    // Backend eventi göndermiyorsa, manuel olarak güncelle (non-blocking)
+    setTimeout(() => {
+      fetchUnreadCount().catch(err => console.error('Fetch unread count error:', err));
+    }, 300);
   };
 
   const startTyping = (recipientId) => {
