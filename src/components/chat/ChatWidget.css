@@ -95,11 +95,15 @@
 .chat-widget-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.5rem;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
+}
+
+.widget-back-btn {
+  margin-right: 0.25rem;
 }
 
 .chat-widget-user {

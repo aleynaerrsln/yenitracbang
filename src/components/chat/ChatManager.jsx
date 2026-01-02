@@ -1,11 +1,20 @@
 // src/components/chat/ChatManager.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ChatList from './ChatList';
 import ChatWidget from './ChatWidget';
 
 const ChatManager = ({ isOpen, onClose }) => {
   const [openChats, setOpenChats] = useState([]);
   const [showChatList, setShowChatList] = useState(isOpen);
+
+  console.log('ChatManager render - isOpen:', isOpen, 'showChatList:', showChatList);
+
+  // isOpen değiştiğinde showChatList'i güncelle
+  useEffect(() => {
+    console.log('ChatManager: isOpen changed to:', isOpen);
+    setShowChatList(isOpen);
+    console.log('ChatManager: showChatList set to:', isOpen);
+  }, [isOpen]);
 
   const handleSelectConversation = (user) => {
     // Zaten açık mı kontrol et
@@ -30,13 +39,17 @@ const ChatManager = ({ isOpen, onClose }) => {
   };
 
   const handleCloseChatList = () => {
+    console.log('ChatManager: handleCloseChatList called');
     setShowChatList(false);
+    console.log('ChatManager: showChatList set to false');
     onClose();
+    console.log('ChatManager: onClose called');
   };
 
   // Chat widgetlarını sağdan sola sıralamak için
-  const getBottomPosition = (index) => {
-    return 20 + (index * 380); // Her chat 360px genişlik + 20px boşluk
+  const getRightPosition = (index) => {
+    const chatListWidth = showChatList ? 380 : 0; // Chat list açıksa onun genişliği
+    return chatListWidth + (index * 380) + 20; // Her chat 360px genişlik + 20px boşluk
   };
 
   return (
@@ -51,17 +64,13 @@ const ChatManager = ({ isOpen, onClose }) => {
 
       {/* Open Chats */}
       {openChats.map((user, index) => (
-        <div
+        <ChatWidget
           key={user._id}
-          style={{ right: `${getBottomPosition(index)}px` }}
-          className="chat-widget-wrapper"
-        >
-          <ChatWidget
-            recipientId={user._id}
-            recipientInfo={user}
-            onClose={() => handleCloseChat(user._id)}
-          />
-        </div>
+          recipientId={user._id}
+          recipientInfo={user}
+          onClose={() => handleCloseChat(user._id)}
+          style={{ right: `${getRightPosition(index)}px` }}
+        />
       ))}
     </>
   );

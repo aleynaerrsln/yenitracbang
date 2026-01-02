@@ -4,10 +4,10 @@ import { messageAPI } from '../../services/api';
 import { useSocket } from '../../context/SocketContext';
 import { useAuth } from '../../context/AuthContext';
 import { format, isToday } from 'date-fns';
-import { FiX, FiMinus, FiSend, FiMessageCircle } from 'react-icons/fi';
+import { FiX, FiMinus, FiSend, FiMessageCircle, FiArrowLeft } from 'react-icons/fi';
 import './ChatWidget.css';
 
-const ChatWidget = ({ recipientId, recipientInfo, onClose }) => {
+const ChatWidget = ({ recipientId, recipientInfo, onClose, style }) => {
   const { user } = useAuth();
   const { socket, connected, sendMessage: socketSendMessage, isUserOnline } = useSocket();
 
@@ -124,7 +124,7 @@ const ChatWidget = ({ recipientId, recipientInfo, onClose }) => {
 
   if (isMinimized) {
     return (
-      <div className="chat-widget minimized" onClick={() => setIsMinimized(false)}>
+      <div className="chat-widget minimized" style={style} onClick={() => setIsMinimized(false)}>
         <div className="chat-widget-minimized-header">
           <div className="minimized-avatar">
             <img src={getProfileImage(recipientInfo)} alt={recipientInfo?.username} />
@@ -146,9 +146,12 @@ const ChatWidget = ({ recipientId, recipientInfo, onClose }) => {
   }
 
   return (
-    <div className="chat-widget">
+    <div className="chat-widget" style={style}>
       {/* Header */}
       <div className="chat-widget-header">
+        <button onClick={onClose} className="widget-btn widget-back-btn" title="Geri">
+          <FiArrowLeft size={20} />
+        </button>
         <div className="chat-widget-user">
           <div className="chat-widget-avatar">
             <img src={getProfileImage(recipientInfo)} alt={recipientInfo?.username} />
@@ -170,11 +173,8 @@ const ChatWidget = ({ recipientId, recipientInfo, onClose }) => {
           </div>
         </div>
         <div className="chat-widget-actions">
-          <button onClick={() => setIsMinimized(true)} className="widget-btn">
+          <button onClick={() => setIsMinimized(true)} className="widget-btn" title="Küçült">
             <FiMinus size={18} />
-          </button>
-          <button onClick={onClose} className="widget-btn">
-            <FiX size={18} />
           </button>
         </div>
       </div>

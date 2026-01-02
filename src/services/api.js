@@ -233,6 +233,10 @@ export const searchAPI = {
     api.get('/search/artists', {
       params: { query },
     }),
+  searchUsers: (query) =>
+    api.get('/search/users', {
+      params: { query },
+    }),
 };
 
 // ================= ARTIST =================

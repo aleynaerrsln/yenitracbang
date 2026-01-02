@@ -1,10 +1,10 @@
 // src/components/chat/ChatList.jsx
 import React, { useState, useEffect } from 'react';
-import { messageAPI } from '../../services/api';
+import { messageAPI, searchAPI } from '../../services/api';
 import { useSocket } from '../../context/SocketContext';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { FiMessageCircle, FiX, FiMinus } from 'react-icons/fi';
+import { FiMessageCircle, FiX, FiMinus, FiEdit3, FiSearch, FiArrowLeft } from 'react-icons/fi';
 import './ChatList.css';
 
 const ChatList = ({ onSelectConversation, onClose }) => {
@@ -12,6 +12,10 @@ const ChatList = ({ onSelectConversation, onClose }) => {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [showNewMessage, setShowNewMessage] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     fetchConversations();
@@ -88,6 +92,50 @@ const ChatList = ({ onSelectConversation, onClose }) => {
     }
   };
 
+  // Kullanıcı ara
+  const handleSearchUsers = async (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setSearching(true);
+      const response = await searchAPI.searchUsers(query);
+      console.log('Search response:', response.data); // Debug
+      if (response.data.success) {
+        // Backend response: { success, users: [...] }
+        const users = response.data.users || [];
+        setSearchResults(users);
+      }
+    } catch (error) {
+      console.error('Kullanıcı arama hatası:', error);
+      console.error('Error details:', error.response?.data); // Debug
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  // Arama debounce
+  useEffect(() => {
+    if (showNewMessage && searchQuery.trim()) {
+      const debounce = setTimeout(() => {
+        handleSearchUsers(searchQuery);
+      }, 300);
+      return () => clearTimeout(debounce);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery, showNewMessage]);
+
+  const handleSelectUser = (user) => {
+    onSelectConversation(user);
+    setShowNewMessage(false);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
   if (isMinimized) {
     return (
       <div className="chat-list minimized" onClick={() => setIsMinimized(false)}>
@@ -106,7 +154,21 @@ const ChatList = ({ onSelectConversation, onClose }) => {
   return (
     <div className="chat-list">
       <div className="chat-list-header">
-        <h3>Mesajlar</h3>
+        {showNewMessage ? (
+          <>
+            <button onClick={() => { setShowNewMessage(false); setSearchQuery(''); }} className="chat-list-back-btn">
+              <FiArrowLeft size={20} />
+            </button>
+            <h3>Yeni Mesaj</h3>
+          </>
+        ) : (
+          <>
+            <h3>Mesajlar</h3>
+            <button onClick={() => setShowNewMessage(true)} className="chat-list-new-btn" title="Yeni Mesaj">
+              <FiEdit3 size={18} />
+            </button>
+          </>
+        )}
         <div className="chat-list-actions">
           <button onClick={() => setIsMinimized(true)} className="chat-list-btn">
             <FiMinus size={18} />
@@ -117,8 +179,68 @@ const ChatList = ({ onSelectConversation, onClose }) => {
         </div>
       </div>
 
+      {/* Yeni Mesaj Modu - Arama */}
+      {showNewMessage && (
+        <div className="chat-list-search">
+          <div className="search-input-wrapper">
+            <FiSearch size={16} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Kullanıcı ara..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+            />
+          </div>
+        </div>
+      )}
+
       <div className="chat-list-content">
-        {loading ? (
+        {showNewMessage ? (
+          // Yeni Mesaj - Kullanıcı Arama Sonuçları
+          searching ? (
+            <div className="chat-list-loading">
+              <div className="spinner-small"></div>
+              <p>Aranıyor...</p>
+            </div>
+          ) : searchQuery.trim() === '' ? (
+            <div className="chat-list-empty">
+              <FiSearch size={40} />
+              <p>Kullanıcı ara</p>
+              <span style={{ fontSize: '0.8125rem', opacity: 0.7 }}>Mesaj göndermek için bir kullanıcı ara</span>
+            </div>
+          ) : searchResults.length === 0 ? (
+            <div className="chat-list-empty">
+              <FiSearch size={40} />
+              <p>Kullanıcı bulunamadı</p>
+            </div>
+          ) : (
+            searchResults.map((user) => (
+              <div
+                key={user._id}
+                className="chat-list-item"
+                onClick={() => handleSelectUser(user)}
+              >
+                <div className="chat-list-avatar">
+                  <img src={getProfileImage(user)} alt={user.username} />
+                  {isUserOnline(user._id) && <span className="online-dot-list"></span>}
+                </div>
+                <div className="chat-list-info">
+                  <div className="chat-list-top">
+                    <h4>
+                      {user.firstName && user.lastName
+                        ? `${user.firstName} ${user.lastName}`
+                        : `@${user.username}`}
+                    </h4>
+                  </div>
+                  <div className="chat-list-bottom">
+                    <p style={{ opacity: 0.6 }}>@{user.username}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )
+        ) : loading ? (
           <div className="chat-list-loading">
             <div className="spinner-small"></div>
             <p>Yükleniyor...</p>
@@ -127,6 +249,9 @@ const ChatList = ({ onSelectConversation, onClose }) => {
           <div className="chat-list-empty">
             <FiMessageCircle size={40} />
             <p>Henüz mesajınız yok</p>
+            <span style={{ fontSize: '0.8125rem', opacity: 0.7, marginTop: '0.5rem' }}>
+              Yeni mesaj göndermek için yukarıdaki ✏️ butonuna tıklayın
+            </span>
           </div>
         ) : (
           conversations.map((conversation) => (

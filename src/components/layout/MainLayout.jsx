@@ -7,7 +7,7 @@ import RightPanel from './RightPanel';
 import TopNavbar from './TopNavbar';
 import './MainLayout.css';
 
-const MainLayout = ({ children }) => {
+const MainLayout = ({ children, onOpenChat }) => {
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
   const [leftSidebarWidth, setLeftSidebarWidth] = useState(430);
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
@@ -51,7 +51,7 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="main-layout">
-      <TopNavbar />
+      <TopNavbar onOpenChat={onOpenChat} />
 
       <div
         className={`main-layout-content ${isLeftCollapsed ? 'left-collapsed' : ''}`}

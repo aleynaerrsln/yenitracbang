@@ -23,8 +23,6 @@ import ArtistEssential from './pages/ArtistEssential';
 import ArtistPage from './pages/ArtistPage';
 import NotificationsPage from './pages/NotificationsPage';
 import SettingsPage from './pages/SettingsPage';
-import MessagesPage from './pages/MessagesPage';
-import ChatPage from './pages/ChatPage';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -52,6 +50,12 @@ function AppRoutes() {
   const { user } = useAuth();
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  const handleOpenChat = () => {
+    console.log('Opening chat, current state:', isChatOpen);
+    setIsChatOpen(true);
+    console.log('Chat state set to true');
+  };
+
   if (!user) {
     return (
       <Routes>
@@ -63,30 +67,35 @@ function AppRoutes() {
 
   return (
     <>
-      <MainLayout onOpenChat={() => setIsChatOpen(true)}>
+      <MainLayout onOpenChat={handleOpenChat}>
         <Routes>
-        <Route path="/" element={<MainContent />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/profile" element={<Navigate to={`/profile/${user.username}`} replace />} />
-        <Route path="/profile/:username" element={<ProfilePage />} />
-        <Route path="/playlist/:id" element={<PlaylistDetail />} />
-        <Route path="/my-playlist/:id" element={<MyPlaylistDetail />} />
-        <Route path="/genre/:slug" element={<GenreDetail />} />
-        <Route path="/library" element={<Library />} />
-        <Route path="/lists" element={<ListsPage />} />
-        <Route path="/top10" element={<Top10Page />} />
-        <Route path="/world" element={<WorldPage />} />
-        <Route path="/hot" element={<HotPage />} />
-        <Route path="/artist-essential" element={<ArtistEssential />} />
-        <Route path="/artist/:slug" element={<ArtistPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/messages" element={<MessagesPage />} />
-        <Route path="/messages/:userId" element={<ChatPage />} />
-        <Route path="/404" element={<NotFound />} />
-        <Route path="*" element={<Navigate to="/404" replace />} />
-      </Routes>
-    </MainLayout>
+          <Route path="/" element={<MainContent />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/profile" element={<Navigate to={`/profile/${user.username}`} replace />} />
+          <Route path="/profile/:username" element={<ProfilePage />} />
+          <Route path="/playlist/:id" element={<PlaylistDetail />} />
+          <Route path="/my-playlist/:id" element={<MyPlaylistDetail />} />
+          <Route path="/genre/:slug" element={<GenreDetail />} />
+          <Route path="/library" element={<Library />} />
+          <Route path="/lists" element={<ListsPage />} />
+          <Route path="/top10" element={<Top10Page />} />
+          <Route path="/world" element={<WorldPage />} />
+          <Route path="/hot" element={<HotPage />} />
+          <Route path="/artist-essential" element={<ArtistEssential />} />
+          <Route path="/artist/:slug" element={<ArtistPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/404" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Routes>
+      </MainLayout>
+
+      {/* Instagram-style Chat Widget */}
+      <ChatManager
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+      />
+    </>
   );
 }
 

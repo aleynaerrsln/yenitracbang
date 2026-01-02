@@ -10,7 +10,7 @@ import { useToast } from '../../context/ToastContext';
 import SideMenu from './SideMenu';
 import './TopNavbar.css';
 
-const TopNavbar = () => {
+const TopNavbar = ({ onOpenChat }) => {
   const navigate = useNavigate();
   const toast = useToast();
   const { user, logout } = useAuth();
@@ -278,7 +278,7 @@ const TopNavbar = () => {
 
       {/* Right Actions */}
       <div className="navbar-actions">
-        <button className="navbar-btn" onClick={() => navigate('/messages')}>
+        <button className="navbar-btn" onClick={onOpenChat}>
           <FiMessageCircle size={20} />
           {unreadCount > 0 && <span className="navbar-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
         </button>
