@@ -124,7 +124,7 @@ const RegisterForm = ({ onToggle }) => {
             value={formData.userTag}
             onChange={handleChange}
           >
-            <option value="none">Kullanıcı Tipi Seç</option>
+            <option value="none">Kullanıcı Tipi Seçiniz.</option>
             <option value="dj">DJ</option>
             <option value="producer">Prodüktör</option>
             <option value="dj-producer">DJ & Prodüktör</option>
