@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
+import { LanguageProvider } from './context/LanguageContext';
 import MainLayout from './components/layout/MainLayout';
 import ChatManager from './components/chat/ChatManager';
 import Auth from './pages/Auth';
@@ -23,6 +24,9 @@ import ArtistEssential from './pages/ArtistEssential';
 import ArtistPage from './pages/ArtistPage';
 import NotificationsPage from './pages/NotificationsPage';
 import SettingsPage from './pages/SettingsPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import KVKK from './pages/KVKK';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -92,6 +96,9 @@ function AppRoutes() {
           <Route path="/artist/:slug" element={<ArtistPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/kvkk" element={<KVKK />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </MainLayout>
@@ -108,13 +115,15 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <SocketProvider>
-          <ToastProvider>
-            <AppRoutes />
-          </ToastProvider>
-        </SocketProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <SocketProvider>
+            <ToastProvider>
+              <AppRoutes />
+            </ToastProvider>
+          </SocketProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </BrowserRouter>
   );
 }

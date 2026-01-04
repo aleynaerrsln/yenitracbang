@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import LeftSidebar from './LeftSidebar';  // ⭐ YENİ
 import RightPanel from './RightPanel';
 import TopNavbar from './TopNavbar';
+import Footer from './Footer';
 import './MainLayout.css';
 
 const MainLayout = ({ children, onOpenChat }) => {
@@ -86,6 +87,9 @@ const MainLayout = ({ children, onOpenChat }) => {
           </div>
 
           {children}
+
+          {/* Footer */}
+          <Footer />
         </div>
 
         {/* Sağ: RightPanel (AYNEN KALDI) */}
