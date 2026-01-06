@@ -243,7 +243,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0;
+  padding: 0 4px;  /* 🔥 Minimal yan padding */
   margin-top: 0;
 }
 
@@ -251,13 +251,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px;
+  padding: 8px 12px;  /* 🔥 Daha dar yan padding - listenin kendisi geniş olacak */
   background: transparent;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s;
-  width: 100%;
+  width: calc(100% - 8px);  /* 🔥 Neredeyse tüm genişliği kullan */
+  margin: 0 4px;  /* 🔥 Minimal kenar boşluğu */
   text-align: left;
   height: 64px;
   overflow: hidden;          /* 🔥 taşmayı kökten keser */
