@@ -220,7 +220,7 @@ export const musicAPI = {
 // ================= SEARCH =================
 export const searchAPI = {
   searchAll: (query) =>
-    api.get('/search', { params: { query } }),
+    api.get('/search', { params: { query, type: 'all' } }),
   searchMusic: (query) =>
     api.get('/search/musics', {
       params: { query },
@@ -260,6 +260,7 @@ export const artistAPI = {
 // ================= USER =================
 export const userAPI = {
   getProfile: () => api.get('/profile'),
+  getUserByUsername: (username) => api.get(`/users/${username}`),
   updateProfile: (data) =>
     api.put('/profile', data),
   uploadProfileImage: (formData) =>

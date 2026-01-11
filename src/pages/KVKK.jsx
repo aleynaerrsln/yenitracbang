@@ -1,4 +1,5 @@
 // src/pages/KVKK.jsx - KVKK Aydınlatma Metni (Mobil Uygulamadaki Gerçek İçerik)
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import './LegalPage.css';
@@ -6,6 +7,11 @@ import './LegalPage.css';
 const KVKK = () => {
   const navigate = useNavigate();
   const { isEnglish, toggleLanguage } = useLanguage();
+
+  // Sayfa yüklendiğinde en üste scroll yap
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const turkishContent = `KİŞİSEL VERİLERİN KORUNMASI KANUNU KAPSAMINDA AYDINLATMA METNİ
 

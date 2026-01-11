@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { userAPI } from '../services/api';
+import { authAPI, userAPI, playlistAPI } from '../services/api';
 import { FiEdit2, FiSettings, FiMessageCircle, FiPlus, FiTrash2 } from 'react-icons/fi';
 import './ProfilePage.css';
 
@@ -22,6 +22,10 @@ const ProfilePage = () => {
   const [uploadingAdditionalImage, setUploadingAdditionalImage] = useState(false);
   const additionalImageInputRef = useRef(null);
 
+  // Playlists state
+  const [playlists, setPlaylists] = useState([]);
+  const [loadingPlaylists, setLoadingPlaylists] = useState(false);
+
   // Kendi profilim mi kontrol et
   const isOwnProfile = !username || username === currentUser?.username;
 
@@ -29,24 +33,70 @@ const ProfilePage = () => {
     fetchUserProfile();
   }, [username]);
 
+  useEffect(() => {
+    if (activeTab === 'playlists' && user) {
+      fetchPlaylists();
+    }
+  }, [activeTab, user]);
+
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
 
       if (isOwnProfile) {
-        // Kendi profilim - /api/auth/me
-        setUser(currentUser);
+        // Kendi profilim - Backend'den güncel veriyi çek (/api/me)
+        const response = await authAPI.getCurrentUser();
+        if (response.data.success) {
+          setUser(response.data.user);
+          // AuthContext'teki user'ı da güncelle
+          updateUser(response.data.user);
+        } else {
+          setUser(currentUser);
+        }
       } else {
         // Başkasının profili - /api/users/:username
-        // TODO: Backend'e username ile kullanıcı getirme endpoint'i eklenecek
-        toast.error('Kullanıcı profili henüz desteklenmiyor');
-        navigate('/');
+        const response = await userAPI.getUserByUsername(username);
+        if (response.data.success) {
+          setUser(response.data.user);
+        } else {
+          toast.error('Kullanıcı bulunamadı');
+          navigate('/');
+        }
       }
     } catch (error) {
       console.error('Profil yüklenirken hata:', error);
       toast.error('Profil yüklenemedi');
+      // Hata durumunda en azından currentUser'ı göster
+      if (isOwnProfile) {
+        setUser(currentUser);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPlaylists = async () => {
+    try {
+      setLoadingPlaylists(true);
+
+      if (isOwnProfile) {
+        // Kendi playlist'lerim
+        const response = await playlistAPI.getMyPlaylists();
+        if (response.data.success) {
+          setPlaylists(response.data.playlists || []);
+        }
+      } else {
+        // Başkasının playlist'leri
+        const response = await playlistAPI.getUserPlaylists(user._id);
+        if (response.data.success) {
+          setPlaylists(response.data.playlists || []);
+        }
+      }
+    } catch (error) {
+      console.error('Playlist yüklenirken hata:', error);
+      setPlaylists([]);
+    } finally {
+      setLoadingPlaylists(false);
     }
   };
 
@@ -364,9 +414,36 @@ const ProfilePage = () => {
 
         {activeTab === 'playlists' && (
           <div className="profile-playlists-grid">
-            <div className="profile-empty-state">
-              <p>Playlist'ler yükleniyor...</p>
-            </div>
+            {loadingPlaylists ? (
+              <div className="profile-empty-state">
+                <p>Playlist'ler yükleniyor...</p>
+              </div>
+            ) : playlists.length > 0 ? (
+              playlists.map((playlist) => (
+                <div
+                  key={playlist._id}
+                  className="profile-playlist-card"
+                  onClick={() => navigate(`/my-playlist/${playlist._id}`)}
+                >
+                  <div className="profile-playlist-cover">
+                    {playlist.coverImage ? (
+                      <img src={playlist.coverImage} alt={playlist.name} />
+                    ) : (
+                      <div className="profile-playlist-placeholder">🎵</div>
+                    )}
+                  </div>
+                  <div className="profile-playlist-info">
+                    <h3>{playlist.name}</h3>
+                    <p>{playlist.trackCount || 0} şarkı</p>
+                    {playlist.description && <p className="profile-playlist-desc">{playlist.description}</p>}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="profile-empty-state">
+                <p>Henüz playlist yok</p>
+              </div>
+            )}
           </div>
         )}
 

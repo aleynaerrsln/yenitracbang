@@ -236,6 +236,22 @@
   white-space: nowrap;
 }
 
+/* Clickable Artists */
+.clickable-artists {
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: 100%;
+}
+
+.clickable-artists:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
 /* Music Stats */
 .music-stats {
   display: flex;

@@ -119,6 +119,21 @@ const LoginForm = () => {
             </div>
           </a>
         </div>
+
+        {/* Yasal Linkler */}
+        <div className="auth-legal-links">
+          <a href="/privacy">
+            Gizlilik Politikası
+          </a>
+          <span className="separator">•</span>
+          <a href="/terms">
+            Kullanım Koşulları
+          </a>
+          <span className="separator">•</span>
+          <a href="/kvkk">
+            KVKK
+          </a>
+        </div>
       </div>
     </div>
   );

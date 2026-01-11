@@ -49,7 +49,7 @@ const TopNavbar = ({ onOpenChat }) => {
       }, 300);
       return () => clearTimeout(debounce);
     } else {
-      setSearchResults({ musics: [], playlists: [], artists: [] });
+      setSearchResults({ musics: [], playlists: [], users: [] });
     }
   }, [searchQuery]);
 
@@ -178,7 +178,7 @@ const TopNavbar = ({ onOpenChat }) => {
                   <div className="spinner-small"></div>
                   <p>Aranıyor...</p>
                 </div>
-              ) : searchQuery && (searchResults.musics?.length > 0 || searchResults.playlists?.length > 0 || searchResults.artists?.length > 0) ? (
+              ) : searchQuery && (searchResults.musics?.length > 0 || searchResults.playlists?.length > 0 || searchResults.users?.length > 0) ? (
                 <div className="search-results-dropdown">
                   {/* Musics */}
                   {(activeSearchTab === 'all' || activeSearchTab === 'musics') && searchResults.musics?.length > 0 && (

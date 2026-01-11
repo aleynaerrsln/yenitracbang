@@ -5,7 +5,21 @@ import { useAuth } from './AuthContext';
 
 const SocketContext = createContext(null);
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+// Socket URL'yi otomatik protokol ile belirle
+const getSocketURL = () => {
+  const envURL = import.meta.env.VITE_SOCKET_URL;
+  if (!envURL) return 'http://localhost:5000';
+
+  // HTTPS ise WSS'e çevir, HTTP ise WS'ye
+  if (envURL.startsWith('https://')) {
+    return envURL.replace('https://', 'wss://');
+  } else if (envURL.startsWith('http://')) {
+    return envURL.replace('http://', 'ws://');
+  }
+  return envURL;
+};
+
+const SOCKET_URL = getSocketURL();
 
 export const SocketProvider = ({ children }) => {
   const { user } = useAuth();

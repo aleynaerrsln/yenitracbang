@@ -71,6 +71,10 @@ function AppRoutes() {
     return (
       <Routes>
         <Route path="/auth" element={<Auth />} />
+        {/* Sözleşme sayfaları giriş yapmadan erişilebilir */}
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/kvkk" element={<KVKK />} />
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     );

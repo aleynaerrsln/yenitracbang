@@ -27,7 +27,8 @@ const SearchPage = () => {
     { id: 'all', label: 'Tümü', icon: FiSearch },
     { id: 'musics', label: 'Şarkılar', icon: FiMusic },
     { id: 'playlists', label: 'Playlistler', icon: FiDisc },
-    { id: 'artists', label: 'Sanatçılar', icon: FiUser }
+    { id: 'artists', label: 'Sanatçılar', icon: FiUser },
+    { id: 'users', label: 'Kullanıcılar', icon: FiUser }
   ];
 
   useEffect(() => {
@@ -58,19 +59,38 @@ const SearchPage = () => {
 
     try {
       setLoading(true);
-      const response = await searchAPI.searchAll(searchQuery);
 
-      if (response.data.success) {
-        setResults(response.data.results || {
-          musics: [],
-          playlists: [],
-          artists: [],
-          users: []
-        });
-      }
+      // Paralel olarak hem genel arama hem de kullanıcı araması yap
+      const [generalResponse, userResponse] = await Promise.all([
+        searchAPI.searchAll(searchQuery).catch(err => {
+          console.error('General search error:', err);
+          return { data: { success: false, results: {} } };
+        }),
+        searchAPI.searchUsers(searchQuery).catch(err => {
+          console.error('User search error:', err);
+          return { data: { success: false, users: [] } };
+        })
+      ]);
+
+      // Genel arama sonuçları
+      const backendResults = generalResponse.data.success
+        ? (generalResponse.data.results || {})
+        : {};
+
+      // Kullanıcı arama sonuçları
+      const users = userResponse.data.success && userResponse.data.users
+        ? userResponse.data.users
+        : (backendResults.users || []);
+
+      setResults({
+        musics: backendResults.musics || [],
+        playlists: backendResults.playlists || [],
+        artists: backendResults.artists || [],
+        users: users
+      });
     } catch (error) {
       console.error('Search error:', error);
-      toast.error('Arama yapılırken bir hata oluştu');
+      setResults({ musics: [], playlists: [], artists: [], users: [] });
     } finally {
       setLoading(false);
     }
@@ -95,7 +115,7 @@ const SearchPage = () => {
   };
 
   const handleMusicClick = (music) => {
-    console.log('Play music:', music);
+    toast.info(`Çalınıyor: ${music.title}`);
   };
 
   const handlePlaylistClick = (playlist) => {
@@ -104,6 +124,10 @@ const SearchPage = () => {
 
   const handleArtistClick = (artist) => {
     navigate(`/artist/${artist.slug || artist._id}`);
+  };
+
+  const handleUserClick = (user) => {
+    navigate(`/profile/${user.username}`);
   };
 
   const getFilteredResults = () => {
@@ -172,6 +196,25 @@ const SearchPage = () => {
     </div>
   );
 
+  const renderUserItem = (user) => (
+    <div key={user._id} className="search-result-item" onClick={() => handleUserClick(user)}>
+      <div className="result-artwork round">
+        {user.profileImage ? (
+          <img src={user.profileImage} alt={user.username} />
+        ) : (
+          <div className="result-placeholder">
+            {user.username?.[0]?.toUpperCase() || 'U'}
+          </div>
+        )}
+      </div>
+      <div className="result-info">
+        <h3 className="result-title">{user.fullName || user.username}</h3>
+        <p className="result-subtitle">@{user.username}</p>
+      </div>
+      <span className="result-type">Kullanıcı</span>
+    </div>
+  );
+
   const renderResults = () => {
     const filtered = getFilteredResults();
     const hasResults = Object.values(filtered).some(arr => arr && arr.length > 0);
@@ -181,7 +224,7 @@ const SearchPage = () => {
         <div className="search-empty">
           <FiSearch size={64} />
           <h2>Ne çalmak istiyorsun?</h2>
-          <p>Şarkı, sanatçı veya playlist ara</p>
+          <p>Şarkı, sanatçı, playlist veya kullanıcı ara</p>
         </div>
       );
     }
@@ -235,6 +278,15 @@ const SearchPage = () => {
                 </div>
               </div>
             )}
+
+            {filtered.users?.length > 0 && (
+              <div className="result-section">
+                <h2 className="section-title">Kullanıcılar</h2>
+                <div className="result-list">
+                  {filtered.users.slice(0, 5).map(renderUserItem)}
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className="result-section">
@@ -242,6 +294,7 @@ const SearchPage = () => {
               {activeTab === 'musics' && filtered.musics?.map(renderMusicItem)}
               {activeTab === 'playlists' && filtered.playlists?.map(renderPlaylistItem)}
               {activeTab === 'artists' && filtered.artists?.map(renderArtistItem)}
+              {activeTab === 'users' && filtered.users?.map(renderUserItem)}
             </div>
           </div>
         )}

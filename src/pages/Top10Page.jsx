@@ -1,6 +1,7 @@
 // src/pages/Top10Page.jsx
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { musicAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -12,6 +13,7 @@ import './Top10Page.css';
 const Top10Page = () => {
   const { user } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
 
   const [activeGenre, setActiveGenre] = useState('all');
   const [top10Data, setTop10Data] = useState({});
@@ -116,6 +118,30 @@ const Top10Page = () => {
     toast.info('Share feature coming soon');
   };
 
+  const handleArtistsClick = (music, e) => {
+    e.stopPropagation();
+
+    if (!music.artists || music.artists.length === 0) {
+      toast.error('No artists found');
+      return;
+    }
+
+    // Tek sanatçı varsa direkt git
+    if (music.artists.length === 1) {
+      const artist = music.artists[0];
+      navigate(`/artist/${artist.slug || artist._id}`);
+    } else {
+      // Birden fazla sanatçı varsa modal aç
+      const rect = e.currentTarget.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.top,
+        left: rect.left
+      });
+      setSelectedTrack(music);
+      setShowSelectArtist(true);
+    }
+  };
+
   const renderGenreSection = (genreId, genreName) => {
     const musics = top10Data[genreId] || [];
 
@@ -149,9 +175,13 @@ const Top10Page = () => {
 
               <div className="music-info">
                 <h3 className="music-title">{music.title}</h3>
-                <p className="music-artists">
+                <button
+                  className="music-artists clickable-artists"
+                  onClick={(e) => handleArtistsClick(music, e)}
+                  title="View artists"
+                >
                   {music.artists?.map(a => a.name).join(', ') || music.artistNames || 'Unknown Artist'}
-                </p>
+                </button>
               </div>
 
               <div className="music-stats">

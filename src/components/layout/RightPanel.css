@@ -184,6 +184,84 @@
   line-height: 1.2;
 }
 
+/* Clickable Artists Button */
+.trending-artists-btn {
+  font-size: 0.75rem;
+  color: #b3b3b3;
+  margin: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  line-height: 1.2;
+  position: relative;
+}
+
+.trending-artists-btn .artist-text {
+  display: inline-block;
+}
+
+/* Sadece taşan metinlerde kayan yazı */
+.trending-artists-btn.marquee-active {
+  text-overflow: clip;
+}
+
+.trending-artists-btn.marquee-active .artist-text {
+  animation: marquee-seamless 15s linear infinite;
+}
+
+.trending-artists-btn.marquee-active .artist-text::after {
+  content: ' • ' attr(data-text);
+  white-space: nowrap;
+}
+
+.trending-artists-btn:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+@keyframes marquee-seamless {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Three Dot Options Button */
+.trending-options-btn {
+  background: transparent;
+  border: none;
+  color: #b3b3b3;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.trending-item:hover .trending-options-btn {
+  opacity: 1;
+}
+
+.trending-options-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: scale(1.1);
+}
+
 .trending-badge {
   display: flex;
   align-items: center;

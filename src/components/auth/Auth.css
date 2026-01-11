@@ -281,6 +281,34 @@
   text-align: left;
 }
 
+/* Legal Links */
+.auth-legal-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.auth-legal-links a {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.auth-legal-links a:hover {
+  color: #0ea5e9;
+  text-decoration: underline;
+}
+
+.auth-legal-links .separator {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.7rem;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .auth-form {
@@ -293,5 +321,14 @@
 
   .auth-header h1 {
     font-size: 2rem;
+  }
+
+  .auth-legal-links {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .auth-legal-links a {
+    font-size: 0.75rem;
   }
 }

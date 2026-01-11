@@ -2,6 +2,8 @@
 
 .legal-page {
   min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   background: linear-gradient(180deg, #121212 0%, #0a0a0a 100%);
   padding: 2rem 1.5rem;
 }
