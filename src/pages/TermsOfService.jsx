@@ -1,12 +1,14 @@
 // src/pages/TermsOfService.jsx - Mobil Uygulamadaki Gerçek İçerik
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiGlobe } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 import './LegalPage.css';
 
 const TermsOfService = () => {
   const navigate = useNavigate();
-  const { isEnglish, toggleLanguage } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
+  const isEnglish = language === 'en';
 
   // Sayfa yüklendiğinde en üste scroll yap
   useEffect(() => {
@@ -222,18 +224,20 @@ TrackBang'i kullanarak, bu Kullanım Koşullarını okuduğunuzu, anladığını
   return (
     <div className="legal-page">
       <div className="legal-container">
-        <div className="legal-header">
-          <button className="back-button" onClick={() => navigate(-1)}>
-            ← Geri
-          </button>
-          <button className="language-toggle" onClick={toggleLanguage}>
-            {isEnglish ? 'TR' : 'EN'}
+        <button className="back-button-top" onClick={() => navigate(-1)}>
+          ← {isEnglish ? 'Back' : 'Geri'}
+        </button>
+
+        <div className="legal-title-section">
+          <h1>{isEnglish ? 'Terms of Service' : 'Kullanım Koşulları'}</h1>
+          <button className="language-toggle-content" onClick={toggleLanguage}>
+            <FiGlobe size={16} />
+            <span>{isEnglish ? 'Türkçe' : 'English'}</span>
           </button>
         </div>
 
-        <h1>{isEnglish ? 'Terms of Service' : 'Kullanım Koşulları'}</h1>
         <p className="last-updated">
-          {isEnglish ? 'January 4, 2026' : '4 Ocak 2026'}
+          {isEnglish ? 'Last Updated: January 4, 2026' : 'Son Güncelleme: 4 Ocak 2026'}
         </p>
 
         <div className="legal-content">

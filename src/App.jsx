@@ -27,6 +27,8 @@ import SettingsPage from './pages/SettingsPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import KVKK from './pages/KVKK';
+import AboutUsPage from './pages/AboutUsPage';
+import HelpSupportPage from './pages/HelpSupportPage';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -72,6 +74,8 @@ function AppRoutes() {
       <Routes>
         <Route path="/auth" element={<Auth />} />
         {/* Sözleşme sayfaları giriş yapmadan erişilebilir */}
+        <Route path="/about" element={<AboutUsPage />} />
+        <Route path="/help" element={<HelpSupportPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/kvkk" element={<KVKK />} />
@@ -100,6 +104,8 @@ function AppRoutes() {
           <Route path="/artist/:slug" element={<ArtistPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/about" element={<AboutUsPage />} />
+          <Route path="/help" element={<HelpSupportPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/kvkk" element={<KVKK />} />
