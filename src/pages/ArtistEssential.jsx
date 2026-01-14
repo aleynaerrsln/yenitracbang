@@ -17,6 +17,12 @@ const ArtistEssential = () => {
   const [myMusic, setMyMusic] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState('music'); // 'music' or 'playlists'
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Track options modal state
   const [optionsModalOpen, setOptionsModalOpen] = useState(false);
   const [optionsModalPosition, setOptionsModalPosition] = useState({ top: 0, left: 0 });
@@ -159,19 +165,36 @@ const handleSaveMusic = async (musicData) => {
   };
 
 
+  // Filter music based on search query
+  const filteredMusic = myMusic.filter(music => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      music.title?.toLowerCase().includes(query) ||
+      music.artistNames?.toLowerCase().includes(query) ||
+      music.genre?.toLowerCase().includes(query)
+    );
+  });
+
   if (hasAccess) {
     return (
       <div className="artist-essential-page verified">
         <div className="mobile-artist-content">
           {/* Top Tabs */}
           <div className="top-tabs">
-            <button className="tab-button active">
+            <button
+              className={`tab-button ${activeTab === 'music' ? 'active' : ''}`}
+              onClick={() => setActiveTab('music')}
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
               </svg>
               My Music
             </button>
-            <button className="tab-button">
+            <button
+              className={`tab-button ${activeTab === 'playlists' ? 'active' : ''}`}
+              onClick={() => setActiveTab('playlists')}
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 3l-1.1 3.3H7l2.9 2.1-1.1 3.4L12 9.7l3.2 2.1-1.1-3.4L17 6.3h-3.9L12 3zm0 3.9l.6 1.8h1.9l-1.5 1.1.6 1.8L12 11.1l-1.5 1.1.6-1.8-1.5-1.1h1.9l.6-1.8z"/>
               </svg>
@@ -185,7 +208,12 @@ const handleSaveMusic = async (musicData) => {
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>
             </svg>
-            <input type="text" placeholder="Search your music..." />
+            <input
+              type="text"
+              placeholder="Search your music..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
           {/* Add Music Button */}
@@ -195,23 +223,34 @@ const handleSaveMusic = async (musicData) => {
           </button>
 
           {/* Music List or Empty State */}
-          {loading ? (
-            <div className="empty-music-state">
-              <p>Loading...</p>
-            </div>
-          ) : myMusic.length === 0 ? (
-            <div className="empty-music-state">
-              <div className="music-icon">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                </svg>
+          {activeTab === 'music' ? (
+            loading ? (
+              <div className="empty-music-state">
+                <p>Loading...</p>
               </div>
-              <h3 className="empty-title">No music yet</h3>
-              <p className="empty-subtitle">Add your first track</p>
-            </div>
-          ) : (
-            <div className="music-list">
-              {myMusic.map((music) => (
+            ) : myMusic.length === 0 ? (
+              <div className="empty-music-state">
+                <div className="music-icon">
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                  </svg>
+                </div>
+                <h3 className="empty-title">No music yet</h3>
+                <p className="empty-subtitle">Add your first track</p>
+              </div>
+            ) : filteredMusic.length === 0 ? (
+              <div className="empty-music-state">
+                <div className="music-icon">
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                  </svg>
+                </div>
+                <h3 className="empty-title">No results found</h3>
+                <p className="empty-subtitle">Try a different search term</p>
+              </div>
+            ) : (
+              <div className="music-list">
+                {filteredMusic.map((music) => (
                 <div key={music._id} className="music-item">
                   <img src={music.imageUrl} alt={music.title} className="music-cover" />
                   <div className="music-info">
@@ -256,6 +295,17 @@ const handleSaveMusic = async (musicData) => {
                   </div>
                 </div>
               ))}
+            </div>
+            )
+          ) : (
+            <div className="empty-music-state">
+              <div className="music-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 3l-1.1 3.3H7l2.9 2.1-1.1 3.4L12 9.7l3.2 2.1-1.1-3.4L17 6.3h-3.9L12 3zm0 3.9l.6 1.8h1.9l-1.5 1.1.6 1.8L12 11.1l-1.5 1.1.6-1.8-1.5-1.1h1.9l.6-1.8z"/>
+                </svg>
+              </div>
+              <h3 className="empty-title">My Playlists</h3>
+              <p className="empty-subtitle">Playlist feature coming soon</p>
             </div>
           )}
         </div>

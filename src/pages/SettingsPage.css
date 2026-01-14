@@ -184,6 +184,42 @@
   color: #ff3b30 !important;
 }
 
+/* Danger Zone Styles */
+.danger-section {
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.danger-title {
+  color: #ef4444 !important;
+}
+
+.danger-subtitle {
+  color: rgba(239, 68, 68, 0.7) !important;
+  font-weight: 500;
+}
+
+.danger-item {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+}
+
+.danger-item:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.danger-icon {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #ef4444 !important;
+}
+
+.danger-text {
+  color: #ef4444 !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .settings-page {

@@ -1,0 +1,181 @@
+/* src/components/modals/DeleteAccountModal.css */
+
+.delete-account-modal {
+  max-width: 500px;
+}
+
+/* Danger Header */
+.danger-header {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+  border-bottom: 2px solid rgba(239, 68, 68, 0.3);
+  position: relative;
+  padding-left: 4rem;
+}
+
+.danger-header-icon {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(239, 68, 68, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+}
+
+.danger-header h2 {
+  color: #ef4444 !important;
+}
+
+/* Warning Content */
+.warning-content {
+  padding: 0.5rem 0;
+}
+
+.warning-text {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+
+.warning-text strong {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.warning-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.warning-list li {
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.08);
+  border-left: 3px solid #ef4444;
+  margin-bottom: 0.625rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+.warning-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Warning Box */
+.warning-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  margin-top: 1.5rem;
+}
+
+.warning-box.small {
+  padding: 0.75rem;
+  margin-top: 1rem;
+}
+
+.warning-box svg {
+  color: #ef4444;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.warning-box p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+}
+
+.warning-box.small p {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* Danger Text */
+.danger-text {
+  color: #ef4444 !important;
+}
+
+/* Danger Button */
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .delete-account-modal {
+    max-width: 100%;
+    margin: 0 1rem;
+  }
+
+  .danger-header {
+    padding-left: 3.5rem;
+  }
+
+  .danger-header-icon {
+    left: 1rem;
+    width: 36px;
+    height: 36px;
+  }
+
+  .warning-text {
+    font-size: 0.875rem;
+  }
+
+  .warning-list li {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .danger-header h2 {
+    font-size: 1.125rem;
+  }
+
+  .warning-box {
+    padding: 0.875rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .btn-danger,
+  .btn-secondary {
+    width: 100%;
+  }
+}

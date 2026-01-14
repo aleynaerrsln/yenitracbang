@@ -6,7 +6,8 @@ import { toast } from 'react-hot-toast';
 import ProfileInfoModal from '../components/modals/ProfileInfoModal';
 import EmailChangeModal from '../components/modals/EmailChangeModal';
 import PasswordChangeModal from '../components/modals/PasswordChangeModal';
-import { FiUser, FiMail, FiLock, FiChevronRight, FiLogOut, FiInfo } from 'react-icons/fi';
+import DeleteAccountModal from '../components/modals/DeleteAccountModal';
+import { FiUser, FiMail, FiLock, FiChevronRight, FiLogOut, FiInfo, FiTrash2 } from 'react-icons/fi';
 import './SettingsPage.css';
 
 const SettingsPage = () => {
@@ -14,6 +15,7 @@ const SettingsPage = () => {
   const [profileInfoModalOpen, setProfileInfoModalOpen] = useState(false);
   const [emailChangeModalOpen, setEmailChangeModalOpen] = useState(false);
   const [passwordChangeModalOpen, setPasswordChangeModalOpen] = useState(false);
+  const [deleteAccountModalOpen, setDeleteAccountModalOpen] = useState(false);
 
   // Platform Preferences State
   const [platformPreferences, setPlatformPreferences] = useState({
@@ -362,6 +364,32 @@ const SettingsPage = () => {
           </div>
         </div>
 
+        {/* Danger Zone Section */}
+        <div className="settings-section danger-section">
+          <h2 className="section-title danger-title">Tehlikeli Bölge</h2>
+          <p className="section-subtitle danger-subtitle">
+            Bu işlemler geri alınamaz. Lütfen dikkatli olun.
+          </p>
+
+          <div className="settings-list">
+            <button
+              className="setting-item danger-item"
+              onClick={() => setDeleteAccountModalOpen(true)}
+            >
+              <div className="setting-icon danger-icon">
+                <FiTrash2 size={20} />
+              </div>
+              <div className="setting-content">
+                <h3 className="setting-title danger-text">Hesabı Kalıcı Olarak Sil</h3>
+                <p className="setting-description">
+                  Hesabınızı ve tüm verilerinizi kalıcı olarak silin
+                </p>
+              </div>
+              <FiChevronRight size={20} className="setting-arrow" />
+            </button>
+          </div>
+        </div>
+
         {/* About Section */}
         <div className="settings-section">
           <h2 className="section-title">Hakkında</h2>
@@ -442,6 +470,11 @@ const SettingsPage = () => {
       <PasswordChangeModal
         isOpen={passwordChangeModalOpen}
         onClose={() => setPasswordChangeModalOpen(false)}
+      />
+
+      <DeleteAccountModal
+        isOpen={deleteAccountModalOpen}
+        onClose={() => setDeleteAccountModalOpen(false)}
       />
     </div>
   );

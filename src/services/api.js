@@ -53,6 +53,7 @@ export const authAPI = {
   changePassword: (data) => api.post('/change-password', data),
   requestEmailUpdate: (data) => api.post('/request-email-update', data),
   confirmEmailUpdate: (data) => api.post('/confirm-email-update', data),
+  deleteAccount: (data) => api.delete('/account', { data }),
 };
 
 // ================= GENRE =================

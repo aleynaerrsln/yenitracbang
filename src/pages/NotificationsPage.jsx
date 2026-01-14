@@ -103,7 +103,20 @@ const NotificationsPage = () => {
 
   const filteredNotifications = notifications.filter(notif => {
     if (filter === 'all') return true;
-    return notif.type === filter;
+
+    // Filtre kategorilerine göre type'ları grupla
+    switch (filter) {
+      case 'music':
+        return notif.type === 'music' || notif.type === 'new_music';
+      case 'like':
+        return notif.type === 'like';
+      case 'follow':
+        return notif.type === 'follow';
+      case 'playlist':
+        return notif.type === 'playlist' || notif.type === 'playlist_feature' || notif.type === 'top_chart';
+      default:
+        return notif.type === filter;
+    }
   });
 
   if (loading) {
