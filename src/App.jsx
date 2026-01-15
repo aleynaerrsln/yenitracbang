@@ -1,13 +1,11 @@
 // src/App.jsx - LIBRARY ROUTE EKLENDİ
 
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
 import MainLayout from './components/layout/MainLayout';
-import ChatManager from './components/chat/ChatManager';
 import Auth from './pages/Auth';
 import MainContent from './components/layout/MainContent';
 import PlaylistDetail from './pages/PlaylistDetail';
@@ -24,6 +22,7 @@ import ArtistEssential from './pages/ArtistEssential';
 import ArtistPage from './pages/ArtistPage';
 import NotificationsPage from './pages/NotificationsPage';
 import SettingsPage from './pages/SettingsPage';
+import MessagesPage from './pages/MessagesPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import KVKK from './pages/KVKK';
@@ -54,10 +53,11 @@ const ProtectedRoute = ({ children }) => {
 
 function AppRoutes() {
   const { user, loading } = useAuth();
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleOpenChat = () => {
-    setIsChatOpen(true);
+    // Mesajlar sayfasına yönlendir
+    navigate('/messages');
   };
 
   if (loading) {
@@ -104,6 +104,7 @@ function AppRoutes() {
           <Route path="/artist/:slug" element={<ArtistPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
           <Route path="/about" element={<AboutUsPage />} />
           <Route path="/help" element={<HelpSupportPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -112,12 +113,6 @@ function AppRoutes() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </MainLayout>
-
-      {/* Instagram-style Chat Widget */}
-      <ChatManager
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-      />
     </>
   );
 }
