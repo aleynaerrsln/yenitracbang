@@ -1,18 +1,20 @@
-// src/components/layout/MainLayout.jsx - SOLA YENİ ALAN EKLENDI
+// src/components/layout/MainLayout.jsx - MESAJLAŞMA PANELİ EKLENDİ
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import LeftSidebar from './LeftSidebar';  // ⭐ YENİ
+import LeftSidebar from './LeftSidebar';
 import RightPanel from './RightPanel';
 import TopNavbar from './TopNavbar';
 import Footer from './Footer';
+import MessagesPanel from '../chat/MessagesPanel';
 import './MainLayout.css';
 
-const MainLayout = ({ children, onOpenChat }) => {
+const MainLayout = ({ children }) => {
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
   const [leftSidebarWidth, setLeftSidebarWidth] = useState(430);
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMessagesPanelOpen, setIsMessagesPanelOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const centerContentRef = useRef(null);
@@ -31,6 +33,14 @@ const MainLayout = ({ children, onOpenChat }) => {
 
   const isTabActive = (path) => {
     return location.pathname === path;
+  };
+
+  const handleOpenMessages = () => {
+    setIsMessagesPanelOpen(true);
+  };
+
+  const handleCloseMessages = () => {
+    setIsMessagesPanelOpen(false);
   };
 
   // Scroll event listener
@@ -52,7 +62,7 @@ const MainLayout = ({ children, onOpenChat }) => {
 
   return (
     <div className="main-layout">
-      <TopNavbar onOpenChat={onOpenChat} />
+      <TopNavbar onOpenChat={handleOpenMessages} />
 
       <div
         className={`main-layout-content ${isLeftCollapsed ? 'left-collapsed' : ''}`}
@@ -62,14 +72,14 @@ const MainLayout = ({ children, onOpenChat }) => {
           gridTemplateColumns: `80px minmax(0,1fr) ${rightPanelWidth}px`
         }}
       >
-        {/* ⭐ YENİ: Sol Boş Alan */}
+        {/* Sol Sidebar */}
         <LeftSidebar
           isCollapsed={isLeftCollapsed}
           onToggleCollapse={setIsLeftCollapsed}
           onWidthChange={setLeftSidebarWidth}
         />
 
-        {/* Orta: MainContent (AYNEN KALDI) */}
+        {/* Orta: MainContent */}
         <div className="center-content" ref={centerContentRef}>
           {/* Navigation Tabs */}
           <div className={`main-header ${isScrolled ? 'scrolled' : ''}`}>
@@ -92,9 +102,15 @@ const MainLayout = ({ children, onOpenChat }) => {
           <Footer />
         </div>
 
-        {/* Sağ: RightPanel (AYNEN KALDI) */}
+        {/* Sağ: RightPanel */}
         <RightPanel onWidthChange={setRightPanelWidth} />
       </div>
+
+      {/* Mesajlaşma Paneli - Instagram/WhatsApp tarzı sağ panel */}
+      <MessagesPanel
+        isOpen={isMessagesPanelOpen}
+        onClose={handleCloseMessages}
+      />
     </div>
   );
 };

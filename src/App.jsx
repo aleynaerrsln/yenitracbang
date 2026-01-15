@@ -1,6 +1,6 @@
 // src/App.jsx - LIBRARY ROUTE EKLENDİ
 
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
@@ -22,7 +22,6 @@ import ArtistEssential from './pages/ArtistEssential';
 import ArtistPage from './pages/ArtistPage';
 import NotificationsPage from './pages/NotificationsPage';
 import SettingsPage from './pages/SettingsPage';
-import MessagesPage from './pages/MessagesPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import KVKK from './pages/KVKK';
@@ -53,12 +52,6 @@ const ProtectedRoute = ({ children }) => {
 
 function AppRoutes() {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  const handleOpenChat = () => {
-    // Mesajlar sayfasına yönlendir
-    navigate('/messages');
-  };
 
   if (loading) {
     return (
@@ -86,7 +79,7 @@ function AppRoutes() {
 
   return (
     <>
-      <MainLayout onOpenChat={handleOpenChat}>
+      <MainLayout>
         <Routes>
           <Route path="/" element={<MainContent />} />
           <Route path="/search" element={<SearchPage />} />
@@ -104,7 +97,6 @@ function AppRoutes() {
           <Route path="/artist/:slug" element={<ArtistPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/messages" element={<MessagesPage />} />
           <Route path="/about" element={<AboutUsPage />} />
           <Route path="/help" element={<HelpSupportPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
