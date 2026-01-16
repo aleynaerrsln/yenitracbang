@@ -204,6 +204,16 @@ export const SocketProvider = ({ children }) => {
     return onlineUsers.has(userId);
   };
 
+  // Unread count'u manuel olarak azaltma (konuşma açıldığında)
+  const decrementUnreadCount = (amount = 1) => {
+    setUnreadCount(prev => Math.max(0, prev - amount));
+  };
+
+  // Unread count'u sıfırlama
+  const resetUnreadCount = () => {
+    setUnreadCount(0);
+  };
+
   const value = {
     socket: socketRef.current,
     connected,
@@ -216,6 +226,9 @@ export const SocketProvider = ({ children }) => {
     stopTyping,
     checkOnlineStatus,
     isUserOnline,
+    decrementUnreadCount,
+    resetUnreadCount,
+    fetchUnreadCount,
   };
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

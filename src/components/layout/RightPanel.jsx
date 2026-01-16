@@ -27,6 +27,19 @@ const RightPanel = ({ onWidthChange }) => {
     fetchData();
   }, []);
 
+  // Like değiştiğinde Top 10'u yenile
+  useEffect(() => {
+    const handleTop10Update = () => {
+      fetchData();
+    };
+
+    window.addEventListener('top10Updated', handleTop10Update);
+
+    return () => {
+      window.removeEventListener('top10Updated', handleTop10Update);
+    };
+  }, []);
+
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!isResizing || !panelRef.current) return;
@@ -34,7 +47,7 @@ const RightPanel = ({ onWidthChange }) => {
       const panelRect = panelRef.current.getBoundingClientRect();
       const newWidth = panelRect.right - e.clientX;
 
-      if (newWidth >= 280 && newWidth <= 600) {
+      if (newWidth >= 280 && newWidth <= 400) {
         setPanelWidth(newWidth);
         if (onWidthChange) {
           onWidthChange(newWidth);

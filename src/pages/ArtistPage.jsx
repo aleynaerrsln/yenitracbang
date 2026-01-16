@@ -145,6 +145,9 @@ const ArtistPage = () => {
             : m
         )
       );
+
+      // RightPanel'deki Top 10'u güncellemesi için event dispatch et
+      window.dispatchEvent(new CustomEvent('top10Updated'));
     } catch (error) {
       console.error('Like error:', error);
       toast.error('Beğeni işlemi başarısız');

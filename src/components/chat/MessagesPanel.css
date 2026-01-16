@@ -3,12 +3,12 @@
 /* Overlay - Hafif karartma */
 .messages-panel-overlay {
   position: fixed;
-  top: 60px;
+  top: 0;
   left: 0;
-  right: 320px; /* Sağ menü genişliği */
+  right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.2);
-  z-index: 998;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1000;
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -17,20 +17,20 @@
   to { opacity: 1; }
 }
 
-/* Panel - Sağ menünün solunda, aşağıya dayalı */
+/* Panel - WhatsApp tarzı sağ alt köşe */
 .messages-panel {
   position: fixed;
-  bottom: 10px; /* Aşağıya dayalı */
-  right: 330px; /* Sağ menünün solunda */
-  height: 450px;
-  width: 300px;
+  bottom: 0;
+  right: 150px;
+  height: 480px;
+  width: 320px;
   background: #1d1b1b;
-  z-index: 999;
+  z-index: 1001; /* Sağ sidebar'ın üstünde */
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.25s ease-out;
 }
 
@@ -94,10 +94,13 @@
 /* Search */
 .panel-search {
   padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .panel-search input {
-  width: 100%;
+  flex: 1;
   padding: 0.5rem 0.75rem;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -115,6 +118,36 @@
 
 .panel-search input::placeholder {
   color: rgba(255, 255, 255, 0.4);
+}
+
+.search-close-btn {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.search-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* Arama bölümü başlığı */
+.search-section-title {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Conversation List */
@@ -289,26 +322,24 @@
   overflow: hidden;
 }
 
-.back-btn {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  background: rgba(255, 255, 255, 0.1);
+.panel-back-btn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  background: transparent;
   border: none;
   color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: background 0.2s;
+  transition: color 0.2s;
   flex-shrink: 0;
-  margin-top: 4px; /* Aşağı kaydır */
-  align-self: flex-start;
+  padding: 0;
 }
 
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+.panel-back-btn:hover {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .chat-user-info {
@@ -317,7 +348,7 @@
   gap: 0.5rem;
   flex: 1;
   min-width: 0;
-  margin-left: 8px; /* Sağa taşı */
+  margin-left: 4px;
 }
 
 .chat-avatar {
@@ -536,37 +567,23 @@
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
-  .messages-panel {
-    right: 10px;
-    width: 280px;
-  }
-
-  .messages-panel-overlay {
-    right: 300px;
-  }
-}
-
 @media (max-width: 768px) {
   .messages-panel {
     right: 10px;
     bottom: 10px;
     width: 300px;
-    height: 400px;
-  }
-
-  .messages-panel-overlay {
-    right: 0;
+    height: 450px;
   }
 }
 
 @media (max-width: 480px) {
   .messages-panel {
-    right: 5px;
-    left: 5px;
-    bottom: 5px;
-    width: auto;
-    height: 70vh;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 85vh;
+    border-radius: 12px 12px 0 0;
   }
 
   .conversation-avatar {

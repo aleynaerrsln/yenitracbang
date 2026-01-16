@@ -1,7 +1,7 @@
 // src/components/chat/MessagesPanel.jsx - Instagram/WhatsApp tarzı mesajlaşma paneli
 
 import React, { useState, useEffect, useRef } from 'react';
-import { messageAPI } from '../../services/api';
+import { messageAPI, searchAPI } from '../../services/api';
 import { useSocket } from '../../context/SocketContext';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
@@ -12,12 +12,15 @@ import './MessagesPanel.css';
 
 const MessagesPanel = ({ isOpen, onClose }) => {
   const { user } = useAuth();
-  const { socket, connected, sendMessage: socketSendMessage, markConversationAsRead, startTyping, stopTyping, isUserOnline } = useSocket();
+  const { socket, connected, sendMessage: socketSendMessage, markConversationAsRead, startTyping, stopTyping, isUserOnline, decrementUnreadCount } = useSocket();
 
   // Conversation list state
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Active chat state
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -31,6 +34,7 @@ const MessagesPanel = ({ isOpen, onClose }) => {
   const messagesEndRef = useRef(null);
   const messageInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
 
   // Panel açıldığında konuşmaları yükle
   useEffect(() => {
@@ -45,6 +49,41 @@ const MessagesPanel = ({ isOpen, onClose }) => {
       fetchMessages();
     }
   }, [selectedUserId]);
+
+  // Kullanıcı arama (debounced)
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (!searchQuery || searchQuery.length < 2) {
+      setSearchResults([]);
+      setSearchingUsers(false);
+      return;
+    }
+
+    setSearchingUsers(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await searchAPI.searchUsers(searchQuery);
+        if (response.data.success) {
+          // Kendini sonuçlardan çıkar
+          const filteredUsers = (response.data.users || []).filter(u => u._id !== user._id);
+          setSearchResults(filteredUsers);
+        }
+      } catch (error) {
+        console.error('Kullanıcı araması hatası:', error);
+      } finally {
+        setSearchingUsers(false);
+      }
+    }, 300);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery, user._id]);
 
   // Socket event listeners
   useEffect(() => {
@@ -167,6 +206,12 @@ const MessagesPanel = ({ isOpen, onClose }) => {
     setSelectedUserId(conversation.otherUser._id);
     setOtherUser(conversation.otherUser);
 
+    // Konuşmanın okunmamış mesaj sayısını al ve navbar'daki toplam sayıdan düş
+    const unreadInConversation = conversation.unreadCount || 0;
+    if (unreadInConversation > 0) {
+      decrementUnreadCount(unreadInConversation);
+    }
+
     setConversations(prev => prev.map(c =>
       c.otherUser._id === conversation.otherUser._id
         ? { ...c, unreadCount: 0 }
@@ -178,6 +223,28 @@ const MessagesPanel = ({ isOpen, onClose }) => {
     setSelectedUserId(null);
     setMessages([]);
     setOtherUser(null);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  // Arama sonucundan kullanıcıya tıklama (yeni konuşma başlat)
+  const handleUserClick = (selectedUser) => {
+    setSelectedUserId(selectedUser._id);
+    setOtherUser(selectedUser);
+    setSearchQuery('');
+    setSearchResults([]);
+    setIsSearchOpen(false);
+  };
+
+  // Arama kutusunu aç/kapat
+  const handleOpenSearch = () => {
+    setIsSearchOpen(true);
+  };
+
+  const handleCloseSearch = () => {
+    setIsSearchOpen(false);
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
   const handleSendMessage = async (e) => {
@@ -330,7 +397,7 @@ const MessagesPanel = ({ isOpen, onClose }) => {
             <div className="panel-header">
               <h2>Mesajlar</h2>
               <div className="panel-header-actions">
-                <button className="panel-btn">
+                <button className="panel-btn" onClick={handleOpenSearch}>
                   <FiEdit size={18} />
                 </button>
                 <button className="panel-btn close" onClick={onClose}>
@@ -339,63 +406,119 @@ const MessagesPanel = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            <div className="panel-search">
-              <input
-                type="text"
-                placeholder="Ara..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+            {isSearchOpen && (
+              <div className="panel-search">
+                <input
+                  type="text"
+                  placeholder="Kullanıcı ara..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                />
+                <button className="search-close-btn" onClick={handleCloseSearch}>
+                  <FiX size={16} />
+                </button>
+              </div>
+            )}
 
             <div className="panel-conversation-list">
-              {loadingConversations ? (
-                <div className="panel-loading">
-                  <div className="spinner"></div>
-                  <p>Yükleniyor...</p>
-                </div>
-              ) : filteredConversations.length === 0 ? (
-                <div className="panel-empty">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                  </svg>
-                  <p>{searchQuery ? 'Konuşma bulunamadı' : 'Henüz mesajınız yok'}</p>
-                </div>
-              ) : (
-                filteredConversations.map((conversation) => (
-                  <div
-                    key={conversation._id}
-                    className="panel-conversation-item"
-                    onClick={() => handleConversationClick(conversation)}
-                  >
-                    <div className="conversation-avatar">
-                      <img src={getProfileImage(conversation.otherUser)} alt="" />
-                      {isUserOnline(conversation.otherUser._id) && (
-                        <span className="online-dot"></span>
-                      )}
+              {/* Arama sonuçları */}
+              {isSearchOpen && searchQuery.length >= 2 && (
+                <>
+                  {searchingUsers ? (
+                    <div className="panel-loading">
+                      <div className="spinner"></div>
                     </div>
-                    <div className="conversation-info">
-                      <div className="conversation-top">
-                        <span className="conversation-name">
-                          {conversation.otherUser.firstName && conversation.otherUser.lastName
-                            ? `${conversation.otherUser.firstName} ${conversation.otherUser.lastName}`
-                            : `@${conversation.otherUser.username}`}
-                        </span>
-                        <span className="conversation-time">
-                          {formatTime(conversation.lastMessage?.createdAt)}
-                        </span>
-                      </div>
-                      <div className="conversation-bottom">
-                        <p className={`last-message ${conversation.unreadCount > 0 ? 'unread' : ''}`}>
-                          {conversation.lastMessage?.message}
-                        </p>
-                        {conversation.unreadCount > 0 && (
-                          <span className="unread-badge">{conversation.unreadCount}</span>
-                        )}
-                      </div>
+                  ) : searchResults.length > 0 ? (
+                    <>
+                      <div className="search-section-title">Kullanıcılar</div>
+                      {searchResults.map((searchUser) => (
+                        <div
+                          key={searchUser._id}
+                          className="panel-conversation-item"
+                          onClick={() => handleUserClick(searchUser)}
+                        >
+                          <div className="conversation-avatar">
+                            <img src={getProfileImage(searchUser)} alt="" />
+                            {isUserOnline(searchUser._id) && (
+                              <span className="online-dot"></span>
+                            )}
+                          </div>
+                          <div className="conversation-info">
+                            <div className="conversation-top">
+                              <span className="conversation-name">
+                                {searchUser.firstName && searchUser.lastName
+                                  ? `${searchUser.firstName} ${searchUser.lastName}`
+                                  : `@${searchUser.username}`}
+                              </span>
+                            </div>
+                            <div className="conversation-bottom">
+                              <p className="last-message">@{searchUser.username}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="panel-empty">
+                      <p>Kullanıcı bulunamadı</p>
                     </div>
-                  </div>
-                ))
+                  )}
+                </>
+              )}
+
+              {/* Mevcut konuşmalar */}
+              {(!isSearchOpen || !searchQuery) && (
+                <>
+                  {loadingConversations ? (
+                    <div className="panel-loading">
+                      <div className="spinner"></div>
+                      <p>Yükleniyor...</p>
+                    </div>
+                  ) : filteredConversations.length === 0 ? (
+                    <div className="panel-empty">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      </svg>
+                      <p>Henüz mesajınız yok</p>
+                    </div>
+                  ) : (
+                    filteredConversations.map((conversation) => (
+                      <div
+                        key={conversation._id}
+                        className="panel-conversation-item"
+                        onClick={() => handleConversationClick(conversation)}
+                      >
+                        <div className="conversation-avatar">
+                          <img src={getProfileImage(conversation.otherUser)} alt="" />
+                          {isUserOnline(conversation.otherUser._id) && (
+                            <span className="online-dot"></span>
+                          )}
+                        </div>
+                        <div className="conversation-info">
+                          <div className="conversation-top">
+                            <span className="conversation-name">
+                              {conversation.otherUser.firstName && conversation.otherUser.lastName
+                                ? `${conversation.otherUser.firstName} ${conversation.otherUser.lastName}`
+                                : `@${conversation.otherUser.username}`}
+                            </span>
+                            <span className="conversation-time">
+                              {formatTime(conversation.lastMessage?.createdAt)}
+                            </span>
+                          </div>
+                          <div className="conversation-bottom">
+                            <p className={`last-message ${conversation.unreadCount > 0 ? 'unread' : ''}`}>
+                              {conversation.lastMessage?.message}
+                            </p>
+                            {conversation.unreadCount > 0 && (
+                              <span className="unread-badge">{conversation.unreadCount}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -403,8 +526,8 @@ const MessagesPanel = ({ isOpen, onClose }) => {
           // Chat View
           <div className="panel-chat">
             <div className="chat-header">
-              <button className="back-btn" onClick={handleBackToList}>
-                <FiArrowLeft size={16} />
+              <button className="panel-back-btn" onClick={handleBackToList}>
+                <FiArrowLeft size={18} />
               </button>
               <div className="chat-user-info">
                 <div className="chat-avatar">

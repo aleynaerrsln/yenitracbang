@@ -129,6 +129,9 @@ const handleSaveMusic = async (musicData) => {
         )
       );
 
+      // RightPanel'deki Top 10'u güncellemesi için event dispatch et
+      window.dispatchEvent(new CustomEvent('top10Updated'));
+
       toast.success(myMusic.find(m => m._id === musicId)?.isLiked ? 'Beğeni kaldırıldı' : 'Beğenildi');
     } catch (error) {
       console.error('Like error:', error);
