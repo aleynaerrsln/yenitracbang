@@ -480,7 +480,7 @@
 .fab-button {
   position: fixed;
   bottom: 2rem;
-  right: 1.5rem;
+  left: 65rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -555,7 +555,8 @@
 
   .fab-button {
     bottom: 1.5rem;
-    right: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
     padding: 0.85rem 1.25rem;
     font-size: 0.9rem;
     border-radius: 14px;
