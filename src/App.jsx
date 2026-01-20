@@ -27,6 +27,7 @@ import TermsOfService from './pages/TermsOfService';
 import KVKK from './pages/KVKK';
 import AboutUsPage from './pages/AboutUsPage';
 import HelpSupportPage from './pages/HelpSupportPage';
+import StorePage from './pages/StorePage';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -93,6 +94,7 @@ function AppRoutes() {
           <Route path="/top10" element={<Top10Page />} />
           <Route path="/world" element={<WorldPage />} />
           <Route path="/hot" element={<HotPage />} />
+          <Route path="/store" element={<StorePage />} />
           <Route path="/artist-essential" element={<ArtistEssential />} />
           <Route path="/artist/:slug" element={<ArtistPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />

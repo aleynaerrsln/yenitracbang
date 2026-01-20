@@ -399,4 +399,51 @@ export const artistMusicAPI = {
     api.delete(`/music/${musicId}`),
 };
 
+// ================= STORE =================
+export const storeAPI = {
+  // İlanları getir (sayfalı, filtrelenebilir)
+  getListings: (params) =>
+    api.get('/store/listings', { params }),
+
+  // Tek ilan detayı
+  getListingById: (id) =>
+    api.get(`/store/listings/${id}`),
+
+  // Yeni ilan oluştur
+  createListing: (formData) =>
+    api.post('/store/listings', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  // İlan güncelle
+  updateListing: (id, formData) =>
+    api.put(`/store/listings/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  // İlan sil
+  deleteListing: (id) =>
+    api.delete(`/store/listings/${id}`),
+
+  // İlanı yenile (30 gün uzat)
+  renewListing: (id) =>
+    api.post(`/store/listings/${id}/renew`),
+
+  // Kullanıcının ilanları
+  getMyListings: () =>
+    api.get('/store/my-listings'),
+
+  // Kullanıcı ilan haklarını getir
+  getUserRights: () =>
+    api.get('/store/rights'),
+
+  // İlan hakkı satın al
+  purchaseRights: (data) =>
+    api.post('/store/rights/purchase', data),
+
+  // İlan sahibine iletişim (view artırma)
+  contactListing: (id) =>
+    api.post(`/store/listings/${id}/contact`),
+};
+
 export default api;
