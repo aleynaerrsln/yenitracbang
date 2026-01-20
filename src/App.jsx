@@ -29,6 +29,8 @@ import AboutUsPage from './pages/AboutUsPage';
 import HelpSupportPage from './pages/HelpSupportPage';
 import StorePage from './pages/StorePage';
 import CreateListingPage from './pages/CreateListingPage';
+import ListingDetailPage from './pages/ListingDetailPage';
+import MessagesPage from './pages/MessagesPage';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -97,6 +99,9 @@ function AppRoutes() {
           <Route path="/hot" element={<HotPage />} />
           <Route path="/store" element={<StorePage />} />
           <Route path="/store/create" element={<CreateListingPage />} />
+          <Route path="/store/:id" element={<ListingDetailPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/messages/:userId" element={<MessagesPage />} />
           <Route path="/artist-essential" element={<ArtistEssential />} />
           <Route path="/artist/:slug" element={<ArtistPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />

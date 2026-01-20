@@ -461,15 +461,18 @@ const StorePage = () => {
                   <div className="listing-image">
                     {listing.images && listing.images.length > 0 ? (
                       <img
-                        src={listing.images[0].url || listing.images[0].filename}
+                        src={`https://api.trackbangserver.com${listing.images[0].url}`}
                         alt={listing.title}
                         loading="lazy"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
                       />
-                    ) : (
-                      <div className="no-image">
-                        <FiPackage size={32} />
-                      </div>
-                    )}
+                    ) : null}
+                    <div className="no-image" style={{ display: listing.images?.length > 0 ? 'none' : 'flex' }}>
+                      <FiPackage size={32} />
+                    </div>
                     {listing.featured && (
                       <span className="featured-badge">Öne Çıkan</span>
                     )}
@@ -482,10 +485,10 @@ const StorePage = () => {
                     </p>
 
                     <div className="listing-meta">
-                      {listing.location?.city && (
+                      {listing.location?.province && (
                         <span className="meta-item">
                           <FiMapPin size={12} />
-                          {listing.location.city}
+                          {listing.location.province}
                         </span>
                       )}
                       <span className="meta-item">
@@ -497,7 +500,7 @@ const StorePage = () => {
                     <div className="listing-stats">
                       <span className="stat-item">
                         <FiEye size={12} />
-                        {listing.views || 0}
+                        {listing.viewCount || listing.views || 0}
                       </span>
                       <span className="stat-item">
                         <FiHeart size={12} />
