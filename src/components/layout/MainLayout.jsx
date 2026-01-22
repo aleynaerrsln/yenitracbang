@@ -11,7 +11,7 @@ import './MainLayout.css';
 
 const MainLayout = ({ children }) => {
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
-  const [leftSidebarWidth, setLeftSidebarWidth] = useState(430);
+  const [leftSidebarWidth, setLeftSidebarWidth] = useState(380);
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMessagesPanelOpen, setIsMessagesPanelOpen] = useState(false);

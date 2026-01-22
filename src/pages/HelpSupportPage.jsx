@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FiChevronDown, FiChevronUp, FiMessageSquare, FiMail, FiGlobe, FiClock, FiPhone, FiX, FiPlus, FiTrash2, FiSend, FiLogIn } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { supportAPI } from '../services/api';
 import { toast } from 'react-hot-toast';
@@ -11,9 +10,12 @@ import './HelpSupportPage.css';
 
 const HelpSupportPage = () => {
   const navigate = useNavigate();
-  const { language, toggleLanguage } = useLanguage();
   const { user } = useAuth();
   const isLoggedIn = !!user;
+
+  // Bu sayfa için kendi dil state'i - varsayılan İngilizce
+  const [language, setLanguage] = useState('en');
+  const toggleLanguage = () => setLanguage(prev => prev === 'tr' ? 'en' : 'tr');
 
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(false);

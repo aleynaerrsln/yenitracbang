@@ -18,7 +18,7 @@ const LeftSidebar = ({ isCollapsed, onToggleCollapse, onWidthChange }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(430);
+  const [sidebarWidth, setSidebarWidth] = useState(380);
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -33,7 +33,7 @@ const LeftSidebar = ({ isCollapsed, onToggleCollapse, onWidthChange }) => {
       if (!isResizing) return;
 
       const newWidth = e.clientX - 8;
-      if (newWidth >= 300 && newWidth <= 750) {
+      if (newWidth >= 300 && newWidth <= 380) {
         setSidebarWidth(newWidth);
         if (onWidthChange) {
           onWidthChange(newWidth);

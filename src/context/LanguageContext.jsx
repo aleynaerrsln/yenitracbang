@@ -13,8 +13,8 @@ export const useLanguage = () => {
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
-    // Load from localStorage or default to Turkish
-    return localStorage.getItem('app_language') || 'tr';
+    // Load from localStorage or default to English
+    return localStorage.getItem('app_language') || 'en';
   });
 
   useEffect(() => {
