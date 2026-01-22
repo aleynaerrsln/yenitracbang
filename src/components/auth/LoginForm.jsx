@@ -133,6 +133,10 @@ const LoginForm = () => {
           <a href="/kvkk">
             KVKK
           </a>
+          <span className="separator">•</span>
+          <a href="/help">
+            Destek
+          </a>
         </div>
       </div>
     </div>

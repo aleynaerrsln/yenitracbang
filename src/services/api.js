@@ -399,6 +399,29 @@ export const artistMusicAPI = {
     api.delete(`/music/${musicId}`),
 };
 
+// ================= SUPPORT =================
+export const supportAPI = {
+  // Destek talebi oluştur
+  createTicket: (data) =>
+    api.post('/support/tickets', data),
+
+  // Kullanıcının taleplerini getir
+  getMyTickets: () =>
+    api.get('/support/tickets'),
+
+  // Tek talep detayı
+  getTicketById: (id) =>
+    api.get(`/support/tickets/${id}`),
+
+  // Talebe yanıt ver
+  replyToTicket: (id, data) =>
+    api.post(`/support/tickets/${id}/reply`, data),
+
+  // Talebi sil
+  deleteTicket: (id) =>
+    api.delete(`/support/tickets/${id}`),
+};
+
 // ================= STORE =================
 export const storeAPI = {
   // İlanları getir (sayfalı, filtrelenebilir)

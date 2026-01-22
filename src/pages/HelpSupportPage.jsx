@@ -1,15 +1,36 @@
 // src/pages/HelpSupportPage.jsx
 
-import { useState } from 'react';
-import { FiChevronDown, FiChevronUp, FiMessageSquare, FiMail, FiGlobe, FiClock, FiPhone } from 'react-icons/fi';
+import { useState, useEffect, useRef } from 'react';
+import { FiChevronDown, FiChevronUp, FiMessageSquare, FiMail, FiGlobe, FiClock, FiPhone, FiX, FiPlus, FiTrash2, FiSend, FiLogIn } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { supportAPI } from '../services/api';
+import { toast } from 'react-hot-toast';
 import './HelpSupportPage.css';
 
 const HelpSupportPage = () => {
   const navigate = useNavigate();
   const { language, toggleLanguage } = useLanguage();
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+
   const [expandedFaq, setExpandedFaq] = useState(null);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [tickets, setTickets] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  // Ticket form state
+  const [ticketForm, setTicketForm] = useState({
+    category: 'general',
+    subject: '',
+    message: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
 
   const content = {
     tr: {
@@ -50,7 +71,42 @@ const HelpSupportPage = () => {
       contactUs: 'Bize Ulaşın',
       email: 'support@trackbang.com',
       website: 'www.trackbang.com',
-      responseTime: 'Yanıt süresi: 24-48 saat'
+      responseTime: 'Yanıt süresi: 24-48 saat',
+      // Modal
+      createSupportTicket: 'Destek Talebi Oluştur',
+      category: 'Kategori',
+      subject: 'Konu',
+      message: 'Mesaj',
+      subjectPlaceholder: 'Sorununuzu kısaca açıklayın',
+      messagePlaceholder: 'Sorununuzu detaylı olarak açıklayın...',
+      submitTicket: 'Talebi Gönder',
+      categories: {
+        general: 'Genel',
+        billing: 'Fatura',
+        bug: 'Hata Raporu',
+        suggestion: 'Öneri',
+        account: 'Hesap',
+        other: 'Diğer'
+      },
+      ticketStatus: {
+        open: 'Açık',
+        in_progress: 'İşlemde',
+        resolved: 'Çözüldü',
+        closed: 'Kapatıldı'
+      },
+      ticketCreated: 'Destek talebiniz oluşturuldu',
+      ticketError: 'Talep oluşturulamadı',
+      deleteTicket: 'Talebi Sil',
+      ticketDeleted: 'Talep silindi',
+      viewDetails: 'Detayları Gör',
+      adminResponse: 'Destek Yanıtı',
+      yourMessage: 'Sizin Mesajınız',
+      supportTeam: 'Yanıtınız',
+      replyPlaceholder: 'Yanıtınızı yazın...',
+      sendReply: 'Gönder',
+      waitingForReply: 'Destek ekibinin yanıtını bekliyorsunuz...',
+      replySent: 'Yanıtınız gönderildi',
+      canReplyNow: 'Yanıt verebilirsiniz'
     },
     en: {
       title: 'Help & Support',
@@ -90,19 +146,242 @@ const HelpSupportPage = () => {
       contactUs: 'Contact Us',
       email: 'support@trackbang.com',
       website: 'www.trackbang.com',
-      responseTime: 'Response time: 24-48 hours'
+      responseTime: 'Response time: 24-48 hours',
+      // Modal
+      createSupportTicket: 'Create Support Ticket',
+      category: 'Category',
+      subject: 'Subject',
+      message: 'Message',
+      subjectPlaceholder: 'Brief description of your issue',
+      messagePlaceholder: 'Please describe your issue in detail...',
+      submitTicket: 'Submit Ticket',
+      categories: {
+        general: 'General',
+        billing: 'Billing',
+        bug: 'Bug Report',
+        suggestion: 'Suggestion',
+        account: 'Account',
+        other: 'Other'
+      },
+      ticketStatus: {
+        open: 'Open',
+        in_progress: 'In Progress',
+        resolved: 'Resolved',
+        closed: 'Closed'
+      },
+      ticketCreated: 'Your support ticket has been created',
+      ticketError: 'Failed to create ticket',
+      deleteTicket: 'Delete Ticket',
+      ticketDeleted: 'Ticket deleted',
+      viewDetails: 'View Details',
+      adminResponse: 'Support Response',
+      yourMessage: 'Your Message',
+      supportTeam: 'Your Reply',
+      replyPlaceholder: 'Write your reply...',
+      sendReply: 'Send',
+      waitingForReply: 'Waiting for support team response...',
+      replySent: 'Your reply has been sent',
+      canReplyNow: 'You can reply now'
     }
   };
 
   const t = content[language];
+
+  // Talepleri yükle ve periyodik güncelle (sadece giriş yapmışsa)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    fetchTickets();
+
+    // Her 30 saniyede talepleri güncelle (sayfa açıkken)
+    const listPollInterval = setInterval(() => {
+      fetchTickets();
+    }, 30000);
+
+    return () => clearInterval(listPollInterval);
+  }, [isLoggedIn]);
+
+  // Mesajlar değiştiğinde en alta kaydır
+  useEffect(() => {
+    if (selectedTicket && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedTicket]);
+
+  // Ticket açıkken polling ile güncelle (her 5 saniyede)
+  useEffect(() => {
+    if (!selectedTicket || !isLoggedIn) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await supportAPI.getTicketById(selectedTicket._id);
+        if (response.data.ticket) {
+          const newTicket = response.data.ticket;
+          // Sadece mesaj sayısı değiştiyse güncelle
+          if (newTicket.messages?.length !== selectedTicket.messages?.length) {
+            setSelectedTicket(newTicket);
+            // Liste'yi de güncelle
+            fetchTickets();
+          }
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, 5000); // 5 saniyede bir kontrol et
+
+    return () => clearInterval(pollInterval);
+  }, [selectedTicket?._id, selectedTicket?.messages?.length, isLoggedIn]);
+
+  const fetchTickets = async () => {
+    try {
+      setLoadingTickets(true);
+      const response = await supportAPI.getMyTickets();
+      if (response.data.tickets) {
+        setTickets(response.data.tickets);
+      }
+    } catch (error) {
+      console.error('Talepler yüklenemedi:', error);
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
 
   const toggleFaq = (index) => {
     setExpandedFaq(expandedFaq === index ? null : index);
   };
 
   const handleTopicClick = (topic) => {
-    // Handle topic selection for creating ticket
-    console.log('Selected topic:', topic);
+    setTicketForm(prev => ({ ...prev, category: topic }));
+    setShowTicketModal(true);
+  };
+
+  const handleSubmitTicket = async (e) => {
+    e.preventDefault();
+
+    if (!ticketForm.subject.trim() || !ticketForm.message.trim()) {
+      toast.error(language === 'tr' ? 'Lütfen tüm alanları doldurun' : 'Please fill all fields');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await supportAPI.createTicket(ticketForm);
+      toast.success(t.ticketCreated);
+      setShowTicketModal(false);
+      setTicketForm({ category: 'general', subject: '', message: '' });
+      fetchTickets();
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || t.ticketError;
+      toast.error(errorMsg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId) => {
+    try {
+      await supportAPI.deleteTicket(ticketId);
+      toast.success(t.ticketDeleted);
+      setSelectedTicket(null);
+      fetchTickets();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Hata oluştu');
+    }
+  };
+
+  // Kullanıcı yanıt gönder
+  const handleSendReply = async () => {
+    if (!replyText.trim() || sendingReply) return;
+
+    try {
+      setSendingReply(true);
+      const response = await supportAPI.replyToTicket(selectedTicket._id, { message: replyText.trim() });
+
+      if (response.data.success) {
+        toast.success(t.replySent);
+        setReplyText('');
+        // Ticket'ı güncelle
+        setSelectedTicket(response.data.ticket);
+        // Liste'yi de güncelle
+        fetchTickets();
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || 'Yanıt gönderilemedi';
+      toast.error(errorMsg);
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  // Kullanıcı yanıt verebilir mi kontrol et
+  const canUserReply = () => {
+    if (!selectedTicket) return false;
+    if (selectedTicket.status === 'closed') return false;
+
+    // Mesaj yoksa yanıt veremez (ilk mesaj zaten ticket.message)
+    if (!selectedTicket.messages || selectedTicket.messages.length === 0) {
+      return false; // Admin henüz yanıt vermedi
+    }
+
+    // Son mesaj admin'den mi kontrol et
+    const lastMessage = selectedTicket.messages[selectedTicket.messages.length - 1];
+    return lastMessage.sender === 'admin';
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return language === 'tr' ? 'Şimdi' : 'Just now';
+    if (diffMins < 60) return `${diffMins}${language === 'tr' ? 'd önce' : 'm ago'}`;
+    if (diffHours < 24) return `${diffHours}${language === 'tr' ? 's önce' : 'h ago'}`;
+    if (diffDays < 7) return `${diffDays}${language === 'tr' ? 'g önce' : 'd ago'}`;
+
+    return date.toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
+      day: 'numeric',
+      month: 'short'
+    });
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'open': return '#fbbf24';
+      case 'in_progress': return '#3b82f6';
+      case 'resolved': return '#10b981';
+      case 'closed': return '#6b7280';
+      default: return '#6b7280';
+    }
+  };
+
+  // Ticket detay modalını açtığında
+  const handleOpenTicketDetail = async (ticket) => {
+    try {
+      // Güncel ticket bilgisini al
+      const response = await supportAPI.getTicketById(ticket._id);
+      if (response.data.ticket) {
+        setSelectedTicket(response.data.ticket);
+      } else {
+        setSelectedTicket(ticket);
+      }
+    } catch (error) {
+      setSelectedTicket(ticket);
+    }
+    setReplyText('');
   };
 
   return (
@@ -176,19 +455,64 @@ const HelpSupportPage = () => {
           </div>
         </div>
 
-        {/* My Tickets Section */}
-        <div className="tickets-section">
-          <div className="section-header">
-            <FiMessageSquare size={20} />
-            <h3>{t.myTickets}</h3>
-          </div>
+        {/* My Tickets Section - Only for logged in users */}
+        {isLoggedIn ? (
+          <div className="tickets-section">
+            <div className="section-header">
+              <FiMessageSquare size={20} />
+              <h3>{t.myTickets}</h3>
+            </div>
 
-          <div className="no-tickets">
-            <FiMessageSquare size={48} />
-            <p className="no-tickets-title">{t.noTickets}</p>
-            <p className="no-tickets-subtitle">{t.createTicket}</p>
+            {loadingTickets ? (
+              <div className="tickets-loading">
+                <div className="spinner"></div>
+              </div>
+            ) : tickets.length === 0 ? (
+              <div className="no-tickets">
+                <FiMessageSquare size={48} />
+                <p className="no-tickets-title">{t.noTickets}</p>
+                <p className="no-tickets-subtitle">{t.createTicket}</p>
+              </div>
+            ) : (
+              <div className="tickets-list">
+                {tickets.map((ticket) => (
+                  <div
+                    key={ticket._id}
+                    className="ticket-item"
+                    onClick={() => handleOpenTicketDetail(ticket)}
+                  >
+                    <div className="ticket-header">
+                      <span className="ticket-category">
+                        {t.categories[ticket.category] || ticket.category}
+                      </span>
+                      <span
+                        className="ticket-status"
+                        style={{ backgroundColor: getStatusColor(ticket.status) }}
+                      >
+                        {t.ticketStatus[ticket.status] || ticket.status}
+                      </span>
+                    </div>
+                    <h4 className="ticket-subject">{ticket.subject}</h4>
+                    <p className="ticket-message">{ticket.message}</p>
+                    <span className="ticket-date">{formatTime(ticket.createdAt)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="login-required-section">
+            <div className="login-required-content">
+              <FiLogIn size={40} />
+              <h3>{language === 'tr' ? 'Destek Talebi Oluşturmak İçin' : 'To Create Support Ticket'}</h3>
+              <p>{language === 'tr' ? 'Destek talebi oluşturmak ve taleplerinizi takip etmek için giriş yapmanız gerekmektedir.' : 'You need to login to create support tickets and track your requests.'}</p>
+              <button className="login-btn" onClick={() => navigate('/auth')}>
+                <FiLogIn size={18} />
+                <span>{language === 'tr' ? 'Giriş Yap' : 'Login'}</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Contact Us Section */}
         <div className="contact-section">
@@ -213,12 +537,182 @@ const HelpSupportPage = () => {
           </div>
         </div>
 
-        {/* New Ticket Button */}
-        <button className="new-ticket-btn">
-          <span>+</span>
-          <span>{t.newTicket}</span>
-        </button>
+        {/* New Ticket Button - Only for logged in users */}
+        {isLoggedIn && (
+          <button className="new-ticket-btn" onClick={() => setShowTicketModal(true)}>
+            <FiPlus size={20} />
+            <span>{t.newTicket}</span>
+          </button>
+        )}
       </div>
+
+      {/* Create Ticket Modal */}
+      {showTicketModal && (
+        <div className="ticket-modal-overlay" onClick={() => setShowTicketModal(false)}>
+          <div className="ticket-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="ticket-modal-header">
+              <h2>{t.createSupportTicket}</h2>
+              <button className="modal-close-btn" onClick={() => setShowTicketModal(false)}>
+                <FiX size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitTicket} className="ticket-form">
+              <div className="form-group">
+                <label>{t.category}</label>
+                <select
+                  value={ticketForm.category}
+                  onChange={(e) => setTicketForm(prev => ({ ...prev, category: e.target.value }))}
+                >
+                  <option value="general">{t.categories.general}</option>
+                  <option value="billing">{t.categories.billing}</option>
+                  <option value="bug">{t.categories.bug}</option>
+                  <option value="suggestion">{t.categories.suggestion}</option>
+                  <option value="account">{t.categories.account}</option>
+                  <option value="other">{t.categories.other}</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>{t.subject}</label>
+                <input
+                  type="text"
+                  value={ticketForm.subject}
+                  onChange={(e) => setTicketForm(prev => ({ ...prev, subject: e.target.value }))}
+                  placeholder={t.subjectPlaceholder}
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>{t.message}</label>
+                <textarea
+                  value={ticketForm.message}
+                  onChange={(e) => setTicketForm(prev => ({ ...prev, message: e.target.value }))}
+                  placeholder={t.messagePlaceholder}
+                  rows={5}
+                  maxLength={1000}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="submit-ticket-btn"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <div className="spinner-small"></div>
+                ) : (
+                  t.submitTicket
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Ticket Detail Modal - Chat Style */}
+      {selectedTicket && (
+        <div className="ticket-modal-overlay" onClick={() => setSelectedTicket(null)}>
+          <div className="ticket-modal ticket-chat-modal" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="ticket-chat-header">
+              <div className="ticket-chat-info">
+                <h2>{selectedTicket.subject}</h2>
+                <div className="ticket-chat-meta">
+                  <span
+                    className="ticket-status"
+                    style={{ backgroundColor: getStatusColor(selectedTicket.status) }}
+                  >
+                    {t.ticketStatus[selectedTicket.status] || selectedTicket.status}
+                  </span>
+                  <span className="ticket-category">
+                    {t.categories[selectedTicket.category] || selectedTicket.category}
+                  </span>
+                </div>
+              </div>
+              <div className="ticket-chat-actions">
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDeleteTicket(selectedTicket._id)}
+                  title={t.deleteTicket}
+                >
+                  <FiTrash2 size={18} />
+                </button>
+                <button className="close-btn" onClick={() => setSelectedTicket(null)}>
+                  <FiX size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Messages Area */}
+            <div className="ticket-chat-messages">
+              {/* İlk mesaj (ticket oluşturulurken yazılan) */}
+              <div className="chat-message user-message">
+                <div className="message-label">{t.yourMessage}</div>
+                <div className="message-bubble">
+                  <p>{selectedTicket.message}</p>
+                </div>
+                <span className="message-time">{formatTime(selectedTicket.createdAt)}</span>
+              </div>
+
+              {/* Sonraki mesajlar */}
+              {selectedTicket.messages && selectedTicket.messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`chat-message ${msg.sender === 'admin' ? 'admin-message' : 'user-message'}`}
+                >
+                  <div className="message-label">
+                    {msg.sender === 'admin' ? t.supportTeam : t.yourMessage}
+                  </div>
+                  <div className="message-bubble">
+                    <p>{msg.message}</p>
+                  </div>
+                  <span className="message-time">{formatTime(msg.createdAt)}</span>
+                </div>
+              ))}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Footer - Reply Input or Waiting Message */}
+            <div className="ticket-chat-footer">
+              {selectedTicket.status === 'closed' ? (
+                <div className="ticket-closed-notice">
+                  {language === 'tr' ? 'Bu talep kapatılmış.' : 'This ticket is closed.'}
+                </div>
+              ) : canUserReply() ? (
+                <div className="reply-input-container">
+                  <input
+                    type="text"
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder={t.replyPlaceholder}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendReply()}
+                    disabled={sendingReply}
+                  />
+                  <button
+                    className="send-reply-btn"
+                    onClick={handleSendReply}
+                    disabled={!replyText.trim() || sendingReply}
+                  >
+                    {sendingReply ? (
+                      <div className="spinner-small"></div>
+                    ) : (
+                      <FiSend size={18} />
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="waiting-notice">
+                  <FiClock size={16} />
+                  <span>{t.waitingForReply}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
