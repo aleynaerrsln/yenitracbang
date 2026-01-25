@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useChat } from '../context/ChatContext';
 import { authAPI, userAPI, playlistAPI } from '../services/api';
-import { FiEdit2, FiSettings, FiMessageCircle, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiEdit2, FiSettings, FiMessageCircle, FiPlus, FiTrash2, FiChevronLeft } from 'react-icons/fi';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -13,6 +14,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const { user: currentUser, updateUser } = useAuth();
   const toast = useToast();
+  const { openChatWithUser } = useChat();
   const fileInputRef = useRef(null);
 
   const [user, setUser] = useState(null);
@@ -27,7 +29,7 @@ const ProfilePage = () => {
   const [loadingPlaylists, setLoadingPlaylists] = useState(false);
 
   // Kendi profilim mi kontrol et
-  const isOwnProfile = !username || username === currentUser?.username;
+  const isOwnProfile = !username || username === currentUser?.username || username === currentUser?._id;
 
   useEffect(() => {
     fetchUserProfile();
@@ -54,10 +56,22 @@ const ProfilePage = () => {
           setUser(currentUser);
         }
       } else {
-        // Başkasının profili - /api/users/:username
-        const response = await userAPI.getUserByUsername(username);
-        if (response.data.success) {
-          setUser(response.data.user);
+        // Başkasının profili - Backend /api/user/:id endpoint'i kullanıyor
+        let userData = null;
+
+        // Önce ID olarak dene (MongoDB ID veya başka format olabilir)
+        try {
+          const response = await userAPI.getUserById(username);
+          // Backend farklı response formatları döndürebilir
+          if (response.data) {
+            userData = response.data.user || response.data;
+          }
+        } catch (err) {
+          console.log('getUserById failed:', err.response?.status, err.message);
+        }
+
+        if (userData && userData._id) {
+          setUser(userData);
         } else {
           toast.error('Kullanıcı bulunamadı');
           navigate('/');
@@ -275,6 +289,11 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
+      {/* Back Button */}
+      <button className="profile-back-btn" onClick={() => navigate(-1)}>
+        <FiChevronLeft size={24} />
+      </button>
+
       {/* Header with Gradient Background */}
       <div className="profile-header">
         <div className="profile-gradient-bg"></div>
@@ -299,10 +318,14 @@ const ProfilePage = () => {
           </>
         ) : (
           <button
-            className="profile-message-btn"
-            onClick={() => navigate(`/messages/${user._id}`)}
+            className="profile-message-btn-minimal"
+            onClick={() => openChatWithUser({
+              _id: user._id,
+              username: user.username,
+              profileImage: user.profileImage
+            })}
           >
-            <FiMessageCircle size={20} />
+            <FiMessageCircle size={14} />
             <span>Mesaj Gönder</span>
           </button>
         )}

@@ -8,7 +8,6 @@ import {
   FiClock,
   FiEye,
   FiHeart,
-  FiPhone,
   FiMessageCircle,
   FiShare2,
   FiChevronRight,
@@ -16,12 +15,12 @@ import {
   FiUser,
   FiTag,
   FiInfo,
-  FiCheck,
   FiX
 } from 'react-icons/fi';
 import { storeAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useChat } from '../context/ChatContext';
 import './ListingDetailPage.css';
 
 const ListingDetailPage = () => {
@@ -29,13 +28,13 @@ const ListingDetailPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const toast = useToast();
+  const { openChatWithUser } = useChat();
 
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFullscreen, setShowFullscreen] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
 
   // İlan detayını getir
   useEffect(() => {
@@ -114,16 +113,15 @@ const ListingDetailPage = () => {
     }
   };
 
-  // İletişime geç
-  const handleContact = () => {
-    setShowContactModal(true);
-  };
-
   // Mesaj gönder
   const handleMessage = () => {
-    if (listing?.userId?._id || listing?.userId) {
-      const sellerId = listing.userId._id || listing.userId;
-      navigate(`/messages/${sellerId}`);
+    const seller = listing?.userId;
+    if (seller) {
+      openChatWithUser({
+        _id: seller._id || seller,
+        username: seller.username || 'Satıcı',
+        profileImage: seller.profileImage
+      });
     }
   };
 
@@ -158,9 +156,15 @@ const ListingDetailPage = () => {
     );
   }
 
-  const seller = listing.userId || {};
+  // userId bir obje mi yoksa sadece ID string mi kontrol et
+  const rawSeller = listing.userId;
+  const seller = typeof rawSeller === 'object' && rawSeller !== null
+    ? rawSeller
+    : { _id: rawSeller };
+  const sellerId = seller._id || rawSeller;
+
   const hasImages = listing.images && listing.images.length > 0;
-  const isOwnListing = user && (seller._id === user._id || seller === user._id);
+  const isOwnListing = user && (sellerId === user._id);
 
   return (
     <div className="listing-detail-page">
@@ -331,33 +335,6 @@ const ListingDetailPage = () => {
           <p>{listing.description}</p>
         </div>
 
-        {/* Seller Info */}
-        <div className="seller-card">
-          <div className="seller-info">
-            <div className="seller-avatar">
-              {seller.profileImage ? (
-                <img src={seller.profileImage} alt={seller.username} />
-              ) : (
-                <FiUser size={24} />
-              )}
-            </div>
-            <div className="seller-details">
-              <span className="seller-name">{seller.username || 'Satıcı'}</span>
-              <span className="seller-joined">
-                {seller.createdAt && `${formatDate(seller.createdAt)} tarihinden beri üye`}
-              </span>
-            </div>
-          </div>
-          {!isOwnListing && (
-            <button
-              className="view-profile-btn"
-              onClick={() => seller.username && navigate(`/profile/${seller.username}`)}
-            >
-              Profili Gör
-            </button>
-          )}
-        </div>
-
         {/* Tags */}
         {listing.tags && listing.tags.length > 0 && (
           <div className="listing-tags">
@@ -367,19 +344,38 @@ const ListingDetailPage = () => {
           </div>
         )}
 
-        {/* Action Buttons - Inside Content */}
-        {!isOwnListing && (
-          <div className="listing-action-buttons">
-            <button className="action-btn secondary" onClick={handleMessage}>
-              <FiMessageCircle size={18} />
-              <span>Mesaj Gönder</span>
-            </button>
-            <button className="action-btn primary" onClick={handleContact}>
-              <FiPhone size={18} />
-              <span>İletişime Geç</span>
+        {/* Seller Info */}
+        <div className="seller-card">
+          <div className="seller-info">
+            <div className="seller-avatar">
+              {seller.profileImage ? (
+                <img src={seller.profileImage} alt={seller.username} />
+              ) : (
+                <FiUser size={20} />
+              )}
+            </div>
+            <span className="seller-name">{seller.username || 'Satıcı'}</span>
+          </div>
+          <div className="seller-actions">
+            {!isOwnListing && (
+              <button className="message-btn" onClick={handleMessage}>
+                <FiMessageCircle size={14} />
+                <span>Mesaj Gönder</span>
+              </button>
+            )}
+            <button
+              className="view-profile-btn"
+              onClick={() => {
+                // Her zaman sellerId kullan (backend sadece ID ile çalışıyor)
+                if (sellerId) {
+                  navigate(`/profile/${sellerId}`);
+                }
+              }}
+            >
+              Profili Ziyaret Et
             </button>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Fullscreen Gallery Modal */}
@@ -410,52 +406,6 @@ const ListingDetailPage = () => {
         </div>
       )}
 
-      {/* Contact Modal */}
-      {showContactModal && (
-        <div className="contact-modal-overlay" onClick={() => setShowContactModal(false)}>
-          <div className="contact-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="contact-modal-header">
-              <h3>İletişim Bilgileri</h3>
-              <button onClick={() => setShowContactModal(false)}>
-                <FiX size={24} />
-              </button>
-            </div>
-            <div className="contact-modal-content">
-              {listing.contact?.phone && (
-                <a href={`tel:${listing.contact.phone}`} className="contact-item">
-                  <FiPhone size={20} />
-                  <span>{listing.contact.phone}</span>
-                </a>
-              )}
-              {listing.contact?.whatsapp && (
-                <a
-                  href={`https://wa.me/${listing.contact.whatsapp.replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="contact-item whatsapp"
-                >
-                  <FiMessageCircle size={20} />
-                  <span>WhatsApp ile İletişim</span>
-                </a>
-              )}
-              {listing.contact?.email && (
-                <a href={`mailto:${listing.contact.email}`} className="contact-item">
-                  <FiMessageCircle size={20} />
-                  <span>{listing.contact.email}</span>
-                </a>
-              )}
-              {!listing.contact?.phone && !listing.contact?.whatsapp && !listing.contact?.email && (
-                <div className="no-contact">
-                  <p>İletişim bilgisi paylaşılmamış.</p>
-                  <button onClick={() => { setShowContactModal(false); handleMessage(); }}>
-                    Mesaj Gönder
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

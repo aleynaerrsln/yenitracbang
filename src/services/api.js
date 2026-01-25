@@ -262,6 +262,7 @@ export const artistAPI = {
 export const userAPI = {
   getProfile: () => api.get('/profile'),
   getUserByUsername: (username) => api.get(`/users/${username}`),
+  getUserById: (id) => api.get(`/user/${id}`),
   updateProfile: (data) =>
     api.put('/profile', data),
   uploadProfileImage: (formData) =>

@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ChatProvider } from './context/ChatContext';
 import MainLayout from './components/layout/MainLayout';
 import Auth from './pages/Auth';
 import MainContent from './components/layout/MainContent';
@@ -125,7 +126,9 @@ function App() {
         <AuthProvider>
           <SocketProvider>
             <ToastProvider>
-              <AppRoutes />
+              <ChatProvider>
+                <AppRoutes />
+              </ChatProvider>
             </ToastProvider>
           </SocketProvider>
         </AuthProvider>

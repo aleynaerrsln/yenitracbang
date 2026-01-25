@@ -7,6 +7,7 @@ import RightPanel from './RightPanel';
 import TopNavbar from './TopNavbar';
 import Footer from './Footer';
 import MessagesPanel from '../chat/MessagesPanel';
+import { useChat } from '../../context/ChatContext';
 import './MainLayout.css';
 
 const MainLayout = ({ children }) => {
@@ -14,7 +15,7 @@ const MainLayout = ({ children }) => {
   const [leftSidebarWidth, setLeftSidebarWidth] = useState(380);
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMessagesPanelOpen, setIsMessagesPanelOpen] = useState(false);
+  const { isMessagesPanelOpen, openMessagesPanel, closeMessagesPanel, targetUser } = useChat();
   const navigate = useNavigate();
   const location = useLocation();
   const centerContentRef = useRef(null);
@@ -33,14 +34,6 @@ const MainLayout = ({ children }) => {
 
   const isTabActive = (path) => {
     return location.pathname === path;
-  };
-
-  const handleOpenMessages = () => {
-    setIsMessagesPanelOpen(true);
-  };
-
-  const handleCloseMessages = () => {
-    setIsMessagesPanelOpen(false);
   };
 
   // Scroll event listener
@@ -62,7 +55,7 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="main-layout">
-      <TopNavbar onOpenChat={handleOpenMessages} />
+      <TopNavbar onOpenChat={openMessagesPanel} />
 
       <div
         className={`main-layout-content ${isLeftCollapsed ? 'left-collapsed' : ''}`}
@@ -109,7 +102,8 @@ const MainLayout = ({ children }) => {
       {/* Mesajlaşma Paneli - Instagram/WhatsApp tarzı sağ panel */}
       <MessagesPanel
         isOpen={isMessagesPanelOpen}
-        onClose={handleCloseMessages}
+        onClose={closeMessagesPanel}
+        targetUser={targetUser}
       />
     </div>
   );

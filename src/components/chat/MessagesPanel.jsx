@@ -4,15 +4,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { messageAPI, searchAPI } from '../../services/api';
 import { useSocket } from '../../context/SocketContext';
 import { useAuth } from '../../context/AuthContext';
+import { useChat } from '../../context/ChatContext';
 import { toast } from 'react-hot-toast';
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { FiArrowLeft, FiSend, FiEdit, FiX } from 'react-icons/fi';
 import './MessagesPanel.css';
 
-const MessagesPanel = ({ isOpen, onClose }) => {
+const MessagesPanel = ({ isOpen, onClose, targetUser }) => {
   const { user } = useAuth();
   const { socket, connected, sendMessage: socketSendMessage, markConversationAsRead, startTyping, stopTyping, isUserOnline, decrementUnreadCount } = useSocket();
+  const { clearTargetUser } = useChat();
 
   // Conversation list state
   const [conversations, setConversations] = useState([]);
@@ -42,6 +44,15 @@ const MessagesPanel = ({ isOpen, onClose }) => {
       fetchConversations();
     }
   }, [isOpen]);
+
+  // targetUser geldiğinde o kullanıcıyla sohbeti aç
+  useEffect(() => {
+    if (isOpen && targetUser && targetUser._id) {
+      setSelectedUserId(targetUser._id);
+      setOtherUser(targetUser);
+      clearTargetUser(); // Kullanıldıktan sonra temizle
+    }
+  }, [isOpen, targetUser]);
 
   // Seçili kullanıcı değişince mesajları yükle
   useEffect(() => {
