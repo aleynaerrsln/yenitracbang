@@ -15,7 +15,9 @@ import {
   FiUser,
   FiTag,
   FiInfo,
-  FiX
+  FiX,
+  FiShield,
+  FiExternalLink
 } from 'react-icons/fi';
 import { storeAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -336,10 +338,15 @@ const ListingDetailPage = () => {
           </div>
         )}
 
-        {/* Description */}
+        {/* Description - Modern */}
         <div className="listing-description">
-          <h3>Açıklama</h3>
-          <p>{listing.description}</p>
+          <div className="listing-description-header">
+            <FiInfo size={16} />
+            <h3>Açıklama</h3>
+          </div>
+          <div className="listing-description-body">
+            <p>{listing.description}</p>
+          </div>
         </div>
 
         {/* Tags */}
@@ -351,38 +358,54 @@ const ListingDetailPage = () => {
           </div>
         )}
 
-        {/* Seller Info */}
-        <div className="seller-card">
-          <div className="seller-info">
-            <div className="seller-avatar">
-              {seller.profileImage ? (
-                <img src={seller.profileImage} alt={seller.username} />
-              ) : (
-                <FiUser size={20} />
-              )}
-            </div>
-            <span className="seller-name">{seller.username || 'Satıcı'}</span>
+        {/* Modern Seller Card */}
+        <div className="seller-card-modern">
+          <div className="seller-card-header">
+            <span className="seller-card-title">Satıcı</span>
           </div>
-          <div className="seller-actions">
-            {!isOwnListing && (
-              <button className="message-btn" onClick={handleMessage}>
-                <FiMessageCircle size={14} />
-                <span>Mesaj Gönder</span>
-              </button>
-            )}
-            <button
-              className="view-profile-btn"
-              onClick={() => {
-                // Her zaman sellerId kullan (backend sadece ID ile çalışıyor)
-                if (sellerId) {
-                  navigate(`/profile/${sellerId}`);
-                }
-              }}
+          
+          <div className="seller-card-body">
+            <div 
+              className="seller-profile-section"
+              onClick={() => sellerId && navigate(`/profile/${sellerId}`)}
             >
-              Profili Ziyaret Et
-            </button>
+              <div className="seller-avatar-modern">
+                {seller.profileImage ? (
+                  <img src={seller.profileImage} alt={seller.username} />
+                ) : (
+                  <FiUser size={24} />
+                )}
+              </div>
+              
+              <div className="seller-details">
+                <span className="seller-username">{seller.username || 'Satıcı'}</span>
+                <div className="seller-badge">
+                  <FiShield size={11} />
+                  <span>Doğrulanmış Üye</span>
+                </div>
+              </div>
+              
+              <FiChevronRight size={18} className="seller-arrow" />
+            </div>
+
+            {!isOwnListing && (
+              <div className="seller-actions-modern">
+                <button className="seller-action-btn message" onClick={handleMessage}>
+                  <FiMessageCircle size={16} />
+                  <span>Mesaj Gönder</span>
+                </button>
+                <button 
+                  className="seller-action-btn profile"
+                  onClick={() => sellerId && navigate(`/profile/${sellerId}`)}
+                >
+                  <FiExternalLink size={16} />
+                  <span>Profil</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
+
       </div>
 
       {/* Fullscreen Gallery Modal */}
