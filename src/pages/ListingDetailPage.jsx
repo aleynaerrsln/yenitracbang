@@ -215,9 +215,6 @@ const ListingDetailPage = () => {
               <button className="gallery-nav next" onClick={(e) => { e.stopPropagation(); nextImage(); }}>
                 <FiChevronRight size={20} />
               </button>
-              <div className="gallery-counter">
-                {currentImageIndex + 1} / {listing.images.length}
-              </div>
             </>
           )}
 
@@ -244,6 +241,13 @@ const ListingDetailPage = () => {
           </div>
         )}
 
+        {/* Image Counter - Below thumbnails, above price */}
+        {hasImages && listing.images.length > 1 && (
+          <div className="gallery-counter">
+            {currentImageIndex + 1} / {listing.images.length}
+          </div>
+        )}
+
         {/* Price - Below Image */}
         <p className="listing-price">{formatPrice(listing.price, listing.currency)}</p>
       </div>
@@ -267,67 +271,70 @@ const ListingDetailPage = () => {
           </div>
         </div>
 
-        {/* Info Cards */}
-        <div className="listing-info-cards">
-          {/* Category & Condition */}
-          <div className="info-card">
-            <div className="info-item">
+        {/* Info Card - 3 Column Grid */}
+        <div className="listing-info-card">
+          {/* Kategori */}
+          <div className="info-row">
+            <div className="info-row-icon">
               <FiTag size={18} />
-              <div>
-                <span className="info-label">Kategori</span>
-                <span className="info-value">{listing.category}</span>
-              </div>
             </div>
-            <div className="info-item">
-              <FiInfo size={18} />
-              <div>
-                <span className="info-label">Durum</span>
-                <span className="info-value">{listing.condition}</span>
-              </div>
-            </div>
+            <span className="info-row-label">Kategori</span>
+            <span className="info-row-value">{listing.category}</span>
           </div>
 
-          {/* Location */}
-          {(listing.location?.province || listing.location?.district) && (
-            <div className="info-card">
-              <div className="info-item full">
-                <FiMapPin size={18} />
-                <div>
-                  <span className="info-label">Konum</span>
-                  <span className="info-value">
-                    {[listing.location.province, listing.location.district]
-                      .filter(Boolean)
-                      .join(', ')}
-                  </span>
-                </div>
-              </div>
+          {/* Durum */}
+          <div className="info-row">
+            <div className="info-row-icon">
+              <FiInfo size={18} />
             </div>
-          )}
+            <span className="info-row-label">Durum</span>
+            <span className="info-row-value">{listing.condition}</span>
+          </div>
 
-          {/* Specifications */}
-          {listing.specifications && (listing.specifications.brand || listing.specifications.model) && (
-            <div className="info-card">
-              {listing.specifications.brand && (
-                <div className="info-item">
-                  <span className="info-label">Marka</span>
-                  <span className="info-value">{listing.specifications.brand}</span>
-                </div>
-              )}
-              {listing.specifications.model && (
-                <div className="info-item">
-                  <span className="info-label">Model</span>
-                  <span className="info-value">{listing.specifications.model}</span>
-                </div>
-              )}
-              {listing.specifications.year && (
-                <div className="info-item">
-                  <span className="info-label">Yıl</span>
-                  <span className="info-value">{listing.specifications.year}</span>
-                </div>
-              )}
+          {/* Konum */}
+          <div className="info-row">
+            <div className="info-row-icon">
+              <FiMapPin size={18} />
             </div>
-          )}
+            <span className="info-row-label">Konum</span>
+            <span className="info-row-value">
+              {listing.location?.district || listing.location?.province || '-'}
+            </span>
+          </div>
         </div>
+
+        {/* Extra Info - Marka, Model, Yıl */}
+        {listing.specifications && (listing.specifications.brand || listing.specifications.model || listing.specifications.year) && (
+          <div className="listing-info-card-extra">
+            {listing.specifications.brand && (
+              <div className="info-row">
+                <div className="info-row-icon">
+                  <FiPackage size={18} />
+                </div>
+                <span className="info-row-label">Marka</span>
+                <span className="info-row-value">{listing.specifications.brand}</span>
+              </div>
+            )}
+            {listing.specifications.model && (
+              <div className="info-row">
+                <div className="info-row-icon">
+                  <FiPackage size={18} />
+                </div>
+                <span className="info-row-label">Model</span>
+                <span className="info-row-value">{listing.specifications.model}</span>
+              </div>
+            )}
+            {listing.specifications.year && (
+              <div className="info-row">
+                <div className="info-row-icon">
+                  <FiClock size={18} />
+                </div>
+                <span className="info-row-label">Yıl</span>
+                <span className="info-row-value">{listing.specifications.year}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Description */}
         <div className="listing-description">
