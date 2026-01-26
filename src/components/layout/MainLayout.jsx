@@ -1,4 +1,4 @@
-// src/components/layout/MainLayout.jsx - MESAJLAŞMA PANELİ EKLENDİ
+// src/components/layout/MainLayout.jsx - MESAJLAŞMA PANELİ + MOBİL NAV EKLENDİ
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -7,6 +7,7 @@ import RightPanel from './RightPanel';
 import TopNavbar from './TopNavbar';
 import Footer from './Footer';
 import MessagesPanel from '../chat/MessagesPanel';
+import MobileBottomNav from './MobileBottomNav';
 import { useChat } from '../../context/ChatContext';
 import './MainLayout.css';
 
@@ -94,6 +95,7 @@ const MainLayout = ({ children }) => {
           isCollapsed={isLeftCollapsed}
           onToggleCollapse={setIsLeftCollapsed}
           onWidthChange={setLeftSidebarWidth}
+          onMobileClose={() => setIsMobileSidebarOpen(false)}
         />
 
         {/* Orta: MainContent */}
@@ -129,6 +131,9 @@ const MainLayout = ({ children }) => {
         onClose={closeMessagesPanel}
         targetUser={targetUser}
       />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 /* src/pages/HelpSupportPage.css */
 
 .help-support-page {
-  min-height: 100vh;
+  min-height: 100%;
   background: linear-gradient(180deg, #121212 0%, #0a0a0a 100%);
   padding: 3rem 1rem 6rem;
   position: relative;
@@ -1080,6 +1080,39 @@
   color: #9ca3af;
   font-size: 0.8125rem;
   font-weight: 500;
+}
+
+.guest-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  color: #60a5fa;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Guest Email Warning in Create Ticket Modal */
+.guest-email-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 12px;
+  color: #fbbf24;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.4;
 }
 
 /* Mobile adjustments for modal */

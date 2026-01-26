@@ -540,8 +540,18 @@
 }
 
 @media (max-width: 768px) {
+  .top-navbar {
+    height: 56px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .navbar-left {
+    gap: 8px;
+  }
+
   .navbar-logo img {
-    height: 35px;
+    height: 28px;
   }
 
   .hamburger-btn {
@@ -550,71 +560,177 @@
   }
 
   .navbar-center {
-    gap: 0.75rem;
+    flex: 1;
+    gap: 8px;
+    max-width: none;
+    margin: 0;
   }
 
   .nav-home-btn {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
   }
 
   .navbar-search {
-    max-width: 400px;
+    flex: 1;
+    max-width: none;
   }
 
   .navbar-search input {
-    height: 44px;
-    font-size: 0.8125rem;
+    height: 40px;
+    font-size: 14px;
+    padding: 0 40px;
+    border-radius: 20px;
   }
 
+  .search-icon-left {
+    left: 12px;
+  }
+
+  .search-clear-btn {
+    right: 8px;
+  }
+
+  .navbar-actions {
+    gap: 4px;
+  }
+
+  .navbar-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .navbar-profile {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Search Dropdown Mobile */
   .search-dropdown {
-    max-height: 400px;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    max-height: calc(100vh - 56px - 64px);
+    max-height: calc(100dvh - 56px - 64px);
+    border-radius: 0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
   }
 
   .search-dropdown-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    padding: 12px 16px;
   }
 
   .search-filter-tabs {
     width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .search-filter-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .filter-tab {
-    font-size: 11px;
-    padding: 4px 10px;
+    font-size: 12px;
+    padding: 6px 12px;
+    flex-shrink: 0;
   }
 
   .result-artwork-small {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 
   .result-name {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .result-artist {
-    font-size: 11px;
+    font-size: 12px;
+  }
+
+  .search-result-row {
+    padding: 10px 16px;
+  }
+
+  /* User Menu Mobile */
+  .user-menu {
+    position: fixed;
+    top: auto;
+    bottom: 64px;
+    right: 8px;
+    left: 8px;
+    min-width: auto;
+    max-width: none;
+    border-radius: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .top-navbar {
-    padding: 0 1rem;
+    padding: 0 8px;
+    height: 52px;
   }
 
-  .navbar-search {
-    max-width: none;
+  .navbar-logo img {
+    height: 24px;
+  }
+
+  .hamburger-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .nav-home-btn {
+    width: 36px;
+    height: 36px;
+    display: none; /* Ana sayfa mobil navda */
+  }
+
+  .navbar-search input {
+    height: 36px;
+    font-size: 13px;
+    padding: 0 36px;
+  }
+
+  .search-icon-left {
+    left: 10px;
+  }
+
+  .navbar-actions {
+    gap: 2px;
+  }
+
+  .navbar-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .navbar-badge {
+    min-width: 16px;
+    height: 16px;
+    font-size: 10px;
+    padding: 0 4px;
+  }
+
+  .navbar-profile {
+    width: 26px;
+    height: 26px;
   }
 
   .search-dropdown {
-    max-height: 350px;
+    top: 52px;
+    max-height: calc(100vh - 52px - 64px);
   }
 
   .search-dropdown-header h3 {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .clear-recent-btn {
@@ -623,9 +739,16 @@
 
   .result-group-title {
     font-size: 11px;
+    padding: 6px 16px;
   }
 
   .search-result-row {
-    padding: 6px 16px;
+    padding: 8px 12px;
+    gap: 10px;
+  }
+
+  .result-artwork-small {
+    width: 40px;
+    height: 40px;
   }
 }

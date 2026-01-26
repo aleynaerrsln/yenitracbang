@@ -361,30 +361,268 @@
 @media (max-width: 768px) {
   .top10-page {
     padding: 16px;
+    padding-bottom: 80px; /* Bottom nav için */
+  }
+
+  .top10-header {
+    margin-bottom: 16px;
   }
 
   .top10-header h1 {
-    font-size: 32px;
+    font-size: 24px;
+  }
+
+  .top10-header p {
+    font-size: 12px;
+  }
+
+  /* Genre tabs horizontal scroll */
+  .genre-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .genre-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .genre-tab {
+    padding: 8px 14px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .genre-section {
+    margin-bottom: 32px;
   }
 
   .genre-title {
     font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .top10-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   .top10-card {
     padding: 12px;
+    gap: 10px;
+  }
+
+  .rank-badge {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+
+  .three-dot-menu {
+    width: 28px;
+    height: 28px;
   }
 
   .music-title {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .music-artists {
+    font-size: 11px;
+  }
+
+  .music-stats {
+    padding-top: 6px;
+    gap: 8px;
+  }
+
+  .like-btn {
+    font-size: 12px;
+    padding: 3px 6px;
+    gap: 4px;
+  }
+
+  .views-count {
+    font-size: 11px;
+  }
+
+  /* Play overlay always visible on mobile */
+  .play-overlay {
+    width: 36px;
+    height: 36px;
+    opacity: 1;
+    transform: translateY(-50%) translateX(-50%) scale(1);
+  }
+
+  /* Skeleton */
+  .skeleton-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .skeleton-card {
+    height: 240px;
+  }
+
+  .skeleton-title {
+    width: 150px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top10-page {
+    padding: 12px;
+    padding-bottom: 76px;
+  }
+
+  .top10-header h1 {
+    font-size: 20px;
+  }
+
+  .top10-header p {
+    font-size: 11px;
+  }
+
+  .genre-tabs {
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .genre-tab {
+    padding: 7px 12px;
     font-size: 12px;
   }
 
+  .genre-section {
+    margin-bottom: 24px;
+  }
+
+  .genre-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .top10-grid {
+    gap: 10px;
+  }
+
+  .top10-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .rank-badge {
+    font-size: 11px;
+    padding: 2px 5px;
+    top: 6px;
+    left: 6px;
+  }
+
+  .three-dot-menu {
+    width: 26px;
+    height: 26px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .three-dot-menu svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .music-title {
+    font-size: 12px;
+  }
+
+  .music-artists {
+    font-size: 10px;
+  }
+
+  .music-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .like-btn {
+    font-size: 11px;
+  }
+
+  .views-count {
+    font-size: 10px;
+  }
+
   .play-overlay {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .play-overlay svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .skeleton-card {
+    height: 200px;
+  }
+}
+
+@media (max-width: 360px) {
+  .top10-page {
+    padding: 10px;
+    padding-bottom: 72px;
+  }
+
+  .top10-header h1 {
+    font-size: 18px;
+  }
+
+  .genre-tab {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .genre-title {
+    font-size: 16px;
+  }
+
+  .top10-grid {
+    gap: 8px;
+  }
+
+  .top10-card {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .rank-badge {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+
+  .music-title {
+    font-size: 11px;
+  }
+
+  .music-artists {
+    font-size: 9px;
+  }
+
+  .like-btn {
+    font-size: 10px;
+  }
+
+  .views-count {
+    font-size: 9px;
+  }
+
+  .play-overlay {
+    width: 28px;
+    height: 28px;
   }
 }

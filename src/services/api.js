@@ -5,8 +5,16 @@ import axios from 'axios';
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://api.trackbangserver.com/api';
 
-// Axios instance
+// Axios instance (authenticated)
 const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Public axios instance (no auth redirect)
+const publicApi = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -38,6 +46,18 @@ api.interceptors.response.use(
     }
     return Promise.reject(error);
   }
+);
+
+// Public API - token ekle ama 401'de redirect yapma
+publicApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
 // ================= AUTH =================
@@ -402,9 +422,14 @@ export const artistMusicAPI = {
 
 // ================= SUPPORT =================
 export const supportAPI = {
-  // Destek talebi oluştur
+  // Destek talebi oluştur (giriş yapmış kullanıcılar için)
   createTicket: (data) =>
     api.post('/support/tickets', data),
+
+  // Guest destek talebi oluştur (giriş yapmamış kullanıcılar için - email gerekli)
+  // Yanıtlar e-posta ile gönderilecek, panel üzerinden takip yapılmayacak
+  createGuestTicket: (data) =>
+    publicApi.post('/support/tickets/guest', data),
 
   // Kullanıcının taleplerini getir
   getMyTickets: () =>
@@ -414,7 +439,7 @@ export const supportAPI = {
   getTicketById: (id) =>
     api.get(`/support/tickets/${id}`),
 
-  // Talebe yanıt ver
+  // Talebe yanıt ver (sadece giriş yapmış kullanıcılar)
   replyToTicket: (id, data) =>
     api.post(`/support/tickets/${id}/reply`, data),
 

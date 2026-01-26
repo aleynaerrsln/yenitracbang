@@ -1,7 +1,7 @@
 // src/pages/HelpSupportPage.jsx
 
 import { useState, useEffect, useRef } from 'react';
-import { FiChevronDown, FiChevronUp, FiMessageSquare, FiMail, FiGlobe, FiClock, FiPhone, FiX, FiPlus, FiTrash2, FiSend, FiLogIn } from 'react-icons/fi';
+import { FiChevronDown, FiChevronUp, FiMessageSquare, FiMail, FiGlobe, FiClock, FiPhone, FiX, FiPlus, FiTrash2, FiSend } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supportAPI } from '../services/api';
@@ -25,12 +25,14 @@ const HelpSupportPage = () => {
   const [replyText, setReplyText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
   const messagesEndRef = useRef(null);
+  const selectedTicketIdRef = useRef(null);
 
   // Ticket form state
   const [ticketForm, setTicketForm] = useState({
     category: 'general',
     subject: '',
-    message: ''
+    message: '',
+    email: '' // Guest kullanıcılar için
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -79,9 +81,14 @@ const HelpSupportPage = () => {
       category: 'Kategori',
       subject: 'Konu',
       message: 'Mesaj',
+      emailLabel: 'E-posta Adresi',
+      emailPlaceholder: 'ornek@email.com',
+      emailRequired: 'E-posta adresi gereklidir',
+      emailInvalid: 'Geçerli bir e-posta adresi girin',
       subjectPlaceholder: 'Sorununuzu kısaca açıklayın',
       messagePlaceholder: 'Sorununuzu detaylı olarak açıklayın...',
       submitTicket: 'Talebi Gönder',
+      guestTicketCreated: 'Destek talebiniz alındı. Yanıtımız e-posta adresinize gönderilecektir.',
       categories: {
         general: 'Genel',
         billing: 'Fatura',
@@ -108,7 +115,10 @@ const HelpSupportPage = () => {
       sendReply: 'Gönder',
       waitingForReply: 'Destek ekibinin yanıtını bekliyorsunuz...',
       replySent: 'Yanıtınız gönderildi',
-      canReplyNow: 'Yanıt verebilirsiniz'
+      canReplyNow: 'Yanıt verebilirsiniz',
+      guestCannotReply: 'Yanıt vermek için giriş yapmanız gerekiyor. E-posta ile yanıt alacaksınız.',
+      guestEmailNotice: 'Yanıtlar e-posta yoluyla size gönderilecektir.',
+      guestTicketNote: 'Bu talep için yanıtlar e-posta adresinize gönderilecektir.'
     },
     en: {
       title: 'Help & Support',
@@ -154,9 +164,14 @@ const HelpSupportPage = () => {
       category: 'Category',
       subject: 'Subject',
       message: 'Message',
+      emailLabel: 'Email Address',
+      emailPlaceholder: 'example@email.com',
+      emailRequired: 'Email address is required',
+      emailInvalid: 'Please enter a valid email address',
       subjectPlaceholder: 'Brief description of your issue',
       messagePlaceholder: 'Please describe your issue in detail...',
       submitTicket: 'Submit Ticket',
+      guestTicketCreated: 'Your support ticket has been received. Our response will be sent to your email address.',
       categories: {
         general: 'General',
         billing: 'Billing',
@@ -183,24 +198,28 @@ const HelpSupportPage = () => {
       sendReply: 'Send',
       waitingForReply: 'Waiting for support team response...',
       replySent: 'Your reply has been sent',
-      canReplyNow: 'You can reply now'
+      canReplyNow: 'You can reply now',
+      guestCannotReply: 'You need to log in to reply. You will receive responses via email.',
+      guestEmailNotice: 'Responses will be sent to you via email.',
+      guestTicketNote: 'Responses for this ticket will be sent to your email address.'
     }
   };
 
   const t = content[language];
 
-  // Talepleri yükle ve periyodik güncelle (sadece giriş yapmışsa)
+  // Talepleri yükle ve periyodik güncelle (sadece giriş yapmış kullanıcılar için)
   useEffect(() => {
-    if (!isLoggedIn) return;
-
-    fetchTickets();
-
-    // Her 30 saniyede talepleri güncelle (sayfa açıkken)
-    const listPollInterval = setInterval(() => {
+    if (isLoggedIn) {
       fetchTickets();
-    }, 30000);
 
-    return () => clearInterval(listPollInterval);
+      // Her 10 saniyede talepleri güncelle (sayfa açıkken)
+      const listPollInterval = setInterval(() => {
+        fetchTickets(true); // silent: true - loading gösterme
+      }, 10000);
+
+      return () => clearInterval(listPollInterval);
+    }
+    // Guest kullanıcılar için ticket listesi boş kalacak
   }, [isLoggedIn]);
 
   // Mesajlar değiştiğinde en alta kaydır
@@ -208,35 +227,55 @@ const HelpSupportPage = () => {
     if (selectedTicket && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [selectedTicket]);
+  }, [selectedTicket?.messages?.length]);
 
-  // Ticket açıkken polling ile güncelle (her 5 saniyede)
+  // selectedTicket ID'sini ref'te tut
+  useEffect(() => {
+    selectedTicketIdRef.current = selectedTicket?._id || null;
+  }, [selectedTicket?._id]);
+
+  // Ticket açıkken polling ile güncelle (sadece giriş yapmış kullanıcılar için)
   useEffect(() => {
     if (!selectedTicket || !isLoggedIn) return;
 
-    const pollInterval = setInterval(async () => {
+    const ticketId = selectedTicket._id;
+
+    const pollTicket = async () => {
+      // Modal hala açık mı kontrol et
+      if (selectedTicketIdRef.current !== ticketId) return;
+
       try {
-        const response = await supportAPI.getTicketById(selectedTicket._id);
+        const response = await supportAPI.getTicketById(ticketId);
+
         if (response.data.ticket) {
           const newTicket = response.data.ticket;
-          // Sadece mesaj sayısı değiştiyse güncelle
-          if (newTicket.messages?.length !== selectedTicket.messages?.length) {
-            setSelectedTicket(newTicket);
-            // Liste'yi de güncelle
-            fetchTickets();
-          }
+          // Her zaman güncelle - React zaten aynıysa render etmez
+          setSelectedTicket(prev => {
+            // Mesaj sayısı veya status değiştiyse güncelle
+            if (prev?.messages?.length !== newTicket.messages?.length ||
+                prev?.status !== newTicket.status) {
+              return newTicket;
+            }
+            return prev;
+          });
         }
       } catch (error) {
         console.error('Polling error:', error);
       }
-    }, 5000); // 5 saniyede bir kontrol et
+    };
+
+    // İlk yükleme
+    pollTicket();
+
+    // Her 3 saniyede bir kontrol et
+    const pollInterval = setInterval(pollTicket, 3000);
 
     return () => clearInterval(pollInterval);
-  }, [selectedTicket?._id, selectedTicket?.messages?.length, isLoggedIn]);
+  }, [selectedTicket?._id, isLoggedIn]);
 
-  const fetchTickets = async () => {
+  const fetchTickets = async (silent = false) => {
     try {
-      setLoadingTickets(true);
+      if (!silent) setLoadingTickets(true);
       const response = await supportAPI.getMyTickets();
       if (response.data.tickets) {
         setTickets(response.data.tickets);
@@ -244,7 +283,7 @@ const HelpSupportPage = () => {
     } catch (error) {
       console.error('Talepler yüklenemedi:', error);
     } finally {
-      setLoadingTickets(false);
+      if (!silent) setLoadingTickets(false);
     }
   };
 
@@ -265,14 +304,48 @@ const HelpSupportPage = () => {
       return;
     }
 
+    // Guest kullanıcılar için email validasyonu
+    if (!isLoggedIn) {
+      if (!ticketForm.email.trim()) {
+        toast.error(t.emailRequired);
+        return;
+      }
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(ticketForm.email.trim())) {
+        toast.error(t.emailInvalid);
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
-      await supportAPI.createTicket(ticketForm);
-      toast.success(t.ticketCreated);
+
+      let response;
+      if (isLoggedIn) {
+        // Giriş yapmış kullanıcı - normal endpoint
+        response = await supportAPI.createTicket({
+          category: ticketForm.category,
+          subject: ticketForm.subject,
+          message: ticketForm.message
+        });
+        toast.success(t.ticketCreated);
+        fetchTickets();
+      } else {
+        // Guest kullanıcı - guest endpoint (email ile)
+        // Yanıtlar e-posta ile gönderilecek, panel üzerinden takip yapılmayacak
+        await supportAPI.createGuestTicket({
+          email: ticketForm.email.trim(),
+          category: ticketForm.category,
+          subject: ticketForm.subject,
+          message: ticketForm.message
+        });
+        toast.success(t.guestTicketCreated);
+      }
+
       setShowTicketModal(false);
-      setTicketForm({ category: 'general', subject: '', message: '' });
-      fetchTickets();
+      setTicketForm({ category: 'general', subject: '', message: '', email: '' });
     } catch (error) {
+      console.error('Ticket creation error:', error);
       const errorMsg = error.response?.data?.error || t.ticketError;
       toast.error(errorMsg);
     } finally {
@@ -281,11 +354,13 @@ const HelpSupportPage = () => {
   };
 
   const handleDeleteTicket = async (ticketId) => {
+    if (!isLoggedIn) return; // Guest kullanıcılar ticket silemez
+
     try {
       await supportAPI.deleteTicket(ticketId);
+      fetchTickets();
       toast.success(t.ticketDeleted);
       setSelectedTicket(null);
-      fetchTickets();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Hata oluştu');
     }
@@ -315,9 +390,9 @@ const HelpSupportPage = () => {
     }
   };
 
-  // Kullanıcı yanıt verebilir mi kontrol et
+  // Kullanıcı yanıt verebilir mi kontrol et (sadece giriş yapmış kullanıcılar için)
   const canUserReply = () => {
-    if (!selectedTicket) return false;
+    if (!selectedTicket || !isLoggedIn) return false;
     if (selectedTicket.status === 'closed') return false;
 
     // Mesaj yoksa yanıt veremez (ilk mesaj zaten ticket.message)
@@ -370,19 +445,23 @@ const HelpSupportPage = () => {
     }
   };
 
-  // Ticket detay modalını açtığında
+  // Ticket detay modalını açtığında (sadece giriş yapmış kullanıcılar için)
   const handleOpenTicketDetail = async (ticket) => {
+    if (!isLoggedIn) return; // Guest kullanıcılar ticket detayı göremez
+
     try {
-      // Güncel ticket bilgisini al
       const response = await supportAPI.getTicketById(ticket._id);
+
       if (response.data.ticket) {
         setSelectedTicket(response.data.ticket);
       } else {
         setSelectedTicket(ticket);
       }
     } catch (error) {
+      console.error('Ticket detail fetch error:', error);
       setSelectedTicket(ticket);
     }
+
     setReplyText('');
   };
 
@@ -458,7 +537,7 @@ const HelpSupportPage = () => {
         </div>
 
         {/* My Tickets Section - Only for logged in users */}
-        {isLoggedIn ? (
+        {isLoggedIn && (
           <div className="tickets-section">
             <div className="section-header">
               <FiMessageSquare size={20} />
@@ -502,18 +581,6 @@ const HelpSupportPage = () => {
               </div>
             )}
           </div>
-        ) : (
-          <div className="login-required-section">
-            <div className="login-required-content">
-              <FiLogIn size={40} />
-              <h3>{language === 'tr' ? 'Destek Talebi Oluşturmak İçin' : 'To Create Support Ticket'}</h3>
-              <p>{language === 'tr' ? 'Destek talebi oluşturmak ve taleplerinizi takip etmek için giriş yapmanız gerekmektedir.' : 'You need to login to create support tickets and track your requests.'}</p>
-              <button className="login-btn" onClick={() => navigate('/auth')}>
-                <FiLogIn size={18} />
-                <span>{language === 'tr' ? 'Giriş Yap' : 'Login'}</span>
-              </button>
-            </div>
-          </div>
         )}
 
         {/* Contact Us Section */}
@@ -539,13 +606,11 @@ const HelpSupportPage = () => {
           </div>
         </div>
 
-        {/* New Ticket Button - Only for logged in users */}
-        {isLoggedIn && (
-          <button className="new-ticket-btn" onClick={() => setShowTicketModal(true)}>
-            <FiPlus size={20} />
-            <span>{t.newTicket}</span>
-          </button>
-        )}
+        {/* New Ticket Button - Always visible */}
+        <button className="new-ticket-btn" onClick={() => setShowTicketModal(true)}>
+          <FiPlus size={20} />
+          <span>{t.newTicket}</span>
+        </button>
       </div>
 
       {/* Create Ticket Modal */}
@@ -560,6 +625,21 @@ const HelpSupportPage = () => {
             </div>
 
             <form onSubmit={handleSubmitTicket} className="ticket-form">
+              {/* Email field - only for guest users */}
+              {!isLoggedIn && (
+                <div className="form-group">
+                  <label>{t.emailLabel}</label>
+                  <input
+                    type="email"
+                    value={ticketForm.email}
+                    onChange={(e) => setTicketForm(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder={t.emailPlaceholder}
+                    maxLength={100}
+                    required
+                  />
+                </div>
+              )}
+
               <div className="form-group">
                 <label>{t.category}</label>
                 <select
@@ -596,6 +676,14 @@ const HelpSupportPage = () => {
                   maxLength={1000}
                 />
               </div>
+
+              {/* Guest kullanıcılar için e-posta uyarısı */}
+              {!isLoggedIn && (
+                <div className="guest-email-warning">
+                  <FiMail size={16} />
+                  <span>{t.guestEmailNotice}</span>
+                </div>
+              )}
 
               <button
                 type="submit"

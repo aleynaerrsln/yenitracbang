@@ -104,11 +104,26 @@
 @media (max-width: 480px) {
   .genre-card-modern {
     border-radius: 8px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
   }
 
   .genre-card-name {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .genre-card-wrapper-modern {
+    min-width: 0;
+  }
+
+  .genre-card-modern {
+    border-radius: 6px;
+    margin-bottom: 0.35rem;
+  }
+
+  .genre-card-name {
+    font-size: 0.6875rem;
   }
 }
 .genre-card:hover .genre-image {

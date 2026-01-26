@@ -8,7 +8,7 @@ import { useToast } from '../../context/ToastContext';
 import CreatePlaylistModal from '../modals/CreatePlaylistModal';
 import './LeftSidebar.css';
 
-const LeftSidebar = ({ isCollapsed, onToggleCollapse, onWidthChange }) => {
+const LeftSidebar = ({ isCollapsed, onToggleCollapse, onWidthChange, onMobileClose }) => {
   const navigate = useNavigate();
   const toast = useToast();
   const [myPlaylists, setMyPlaylists] = useState([]);
@@ -172,6 +172,13 @@ const LeftSidebar = ({ isCollapsed, onToggleCollapse, onWidthChange }) => {
       className={`left-sidebar ${isCollapsed ? 'collapsed' : ''}`}
       style={!isCollapsed ? { width: `${sidebarWidth}px` } : {}}
     >
+      {/* Mobile Close Button */}
+      {onMobileClose && (
+        <button className="mobile-sidebar-close" onClick={onMobileClose}>
+          <FiX size={20} />
+        </button>
+      )}
+
       {/* Header */}
       <div className="sidebar-header">
         <button className="library-title" onClick={() => navigate('/library')}>

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { playlistAPI } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { FiMusic, FiUser, FiEye } from 'react-icons/fi';
+import { FiMusic, FiUser, FiEye, FiHeart, FiPlay, FiMoreVertical } from 'react-icons/fi';
 import './WorldPage.css';
 
 const WorldPage = () => {
@@ -120,6 +120,23 @@ const WorldPage = () => {
                   className="world-playlist-card"
                   onClick={() => handlePlaylistClick(playlist._id)}
                 >
+                  {/* Track Count Badge */}
+                  <div className="track-badge">
+                    {playlist.musicCount || 0} tracks
+                  </div>
+
+                  {/* Three Dot Menu */}
+                  <button
+                    className="three-dot-menu"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Menu functionality can be added later
+                    }}
+                  >
+                    <FiMoreVertical size={20} />
+                  </button>
+
+                  {/* Playlist Cover */}
                   <div className="playlist-cover">
                     {playlist.coverImage ? (
                       <img src={playlist.coverImage} alt={playlist.name} />
@@ -128,36 +145,33 @@ const WorldPage = () => {
                         <FiMusic size={32} />
                       </div>
                     )}
-                    <div className="playlist-overlay">
-                      <span className="track-count">
-                        {playlist.musicCount || 0} tracks
-                      </span>
-                    </div>
+                    {/* Play Overlay */}
+                    <button
+                      className="play-overlay"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlaylistClick(playlist._id);
+                      }}
+                    >
+                      <FiPlay size={24} />
+                    </button>
                   </div>
 
+                  {/* Playlist Info */}
                   <div className="playlist-info">
                     <h3 className="playlist-name">{playlist.name}</h3>
+                    <p className="playlist-owner">
+                      {playlist.owner?.displayName || playlist.owner?.username || 'Unknown'}
+                    </p>
+                  </div>
 
-                    {playlist.owner && (
-                      <div className="playlist-owner">
-                        <FiUser size={14} />
-                        <span>{playlist.owner.displayName || playlist.owner.username}</span>
-                      </div>
-                    )}
-
-                    {playlist.description && (
-                      <p className="playlist-description">{playlist.description}</p>
-                    )}
-
-                    <div className="playlist-stats">
-                      <span className="stat-item">
-                        <FiEye size={14} />
-                        {playlist.views || 0}
-                      </span>
-                      {playlist.genreDisplayName && (
-                        <span className="genre-badge">{playlist.genreDisplayName}</span>
-                      )}
-                    </div>
+                  {/* Playlist Stats */}
+                  <div className="playlist-stats">
+                    <button className="like-btn">
+                      <FiHeart size={16} />
+                      <span>{playlist.likes || 0}</span>
+                    </button>
+                    <span className="views-count">{playlist.views || 0} views</span>
                   </div>
                 </div>
               ))}
