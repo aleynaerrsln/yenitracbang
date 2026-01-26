@@ -15,10 +15,28 @@ const MainLayout = ({ children }) => {
   const [leftSidebarWidth, setLeftSidebarWidth] = useState(380);
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { isMessagesPanelOpen, openMessagesPanel, closeMessagesPanel, targetUser } = useChat();
   const navigate = useNavigate();
   const location = useLocation();
   const centerContentRef = useRef(null);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Prevent body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (isMobileSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileSidebarOpen]);
 
   const tabs = [
     { label: 'Discovery', path: '/' },
@@ -55,10 +73,16 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="main-layout">
-      <TopNavbar onOpenChat={openMessagesPanel} />
+      <TopNavbar onOpenChat={openMessagesPanel} onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)} />
+
+      {/* Mobile Sidebar Overlay */}
+      <div
+        className={`mobile-sidebar-overlay ${isMobileSidebarOpen ? 'active' : ''}`}
+        onClick={() => setIsMobileSidebarOpen(false)}
+      />
 
       <div
-        className={`main-layout-content ${isLeftCollapsed ? 'left-collapsed' : ''}`}
+        className={`main-layout-content ${isLeftCollapsed ? 'left-collapsed' : ''} ${isMobileSidebarOpen ? 'mobile-sidebar-open sidebar-visible' : ''}`}
         style={!isLeftCollapsed ? {
           gridTemplateColumns: `${leftSidebarWidth}px minmax(0,1fr) ${rightPanelWidth}px`
         } : {
