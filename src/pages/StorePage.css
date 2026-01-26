@@ -16,12 +16,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(20px);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
 }
 
 .back-button {
@@ -497,7 +492,7 @@
 .fab-button {
   position: fixed;
   bottom: 2rem;
-  left: 65rem;
+  right: 340px;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -572,8 +567,9 @@
 
   .fab-button {
     bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
+    left: auto;
+    right: 1.5rem;
+    transform: none;
     padding: 0.85rem 1.25rem;
     font-size: 0.9rem;
     border-radius: 14px;

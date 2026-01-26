@@ -6,11 +6,11 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useChat } from '../context/ChatContext';
 import { authAPI, userAPI, playlistAPI } from '../services/api';
-import { FiEdit2, FiSettings, FiMessageCircle, FiPlus, FiTrash2, FiChevronLeft } from 'react-icons/fi';
+import { FiEdit2, FiSettings, FiMessageCircle, FiPlus, FiTrash2, FiChevronLeft, FiCamera } from 'react-icons/fi';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
-  const { username } = useParams();
+  const { username: userId } = useParams(); // userId olarak kullanılıyor artık
   const navigate = useNavigate();
   const { user: currentUser, updateUser } = useAuth();
   const toast = useToast();
@@ -21,19 +21,21 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('images');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingBackgroundImage, setUploadingBackgroundImage] = useState(false);
   const [uploadingAdditionalImage, setUploadingAdditionalImage] = useState(false);
   const additionalImageInputRef = useRef(null);
+  const backgroundImageInputRef = useRef(null);
 
   // Playlists state
   const [playlists, setPlaylists] = useState([]);
   const [loadingPlaylists, setLoadingPlaylists] = useState(false);
 
   // Kendi profilim mi kontrol et
-  const isOwnProfile = !username || username === currentUser?.username || username === currentUser?._id;
+  const isOwnProfile = !userId || userId === currentUser?.username || userId === currentUser?._id;
 
   useEffect(() => {
     fetchUserProfile();
-  }, [username]);
+  }, [userId]);
 
   useEffect(() => {
     if (activeTab === 'playlists' && user) {
@@ -59,9 +61,9 @@ const ProfilePage = () => {
         // Başkasının profili - Backend /api/user/:id endpoint'i kullanıyor
         let userData = null;
 
-        // Önce ID olarak dene (MongoDB ID veya başka format olabilir)
+        // User ID ile kullanıcıyı getir
         try {
-          const response = await userAPI.getUserById(username);
+          const response = await userAPI.getUserById(userId);
           // Backend farklı response formatları döndürebilir
           if (response.data) {
             userData = response.data.user || response.data;
@@ -173,6 +175,70 @@ const ProfilePage = () => {
       // Input'u temizle
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleBackgroundImageClick = () => {
+    if (isOwnProfile) {
+      backgroundImageInputRef.current?.click();
+    }
+  };
+
+  const handleBackgroundImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Dosya boyutu kontrolü (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Dosya boyutu 5MB\'dan küçük olmalıdır');
+      return;
+    }
+
+    // Dosya tipi kontrolü
+    if (!file.type.startsWith('image/')) {
+      toast.error('Sadece resim dosyaları yüklenebilir');
+      return;
+    }
+
+    try {
+      setUploadingBackgroundImage(true);
+
+      const formData = new FormData();
+      formData.append('coverImage', file);
+
+      // userAPI kullanarak yükle
+      const response = await userAPI.uploadBackgroundImage(formData);
+
+      // Backend'den coverImage veya backgroundImage URL'i geliyor
+      const newBackgroundImageUrl = response.data.coverImage || response.data.backgroundImage;
+
+      if (newBackgroundImageUrl) {
+        // Mevcut user objesini kopyala ve backgroundImage/coverImage'ı güncelle
+        const updatedUser = {
+          ...currentUser,
+          backgroundImage: newBackgroundImageUrl,
+          coverImage: newBackgroundImageUrl
+        };
+
+        // AuthContext'teki user'ı güncelle
+        updateUser(updatedUser);
+
+        // Local state'i güncelle
+        setUser(updatedUser);
+
+        toast.success('Arka plan resmi başarıyla güncellendi');
+      } else {
+        toast.error('Arka plan resmi yüklendi ama URL alınamadı');
+      }
+    } catch (error) {
+      console.error('Arka plan resmi yükleme hatası:', error);
+      toast.error(error.response?.data?.message || 'Arka plan resmi yüklenirken bir hata oluştu');
+    } finally {
+      setUploadingBackgroundImage(false);
+      // Input'u temizle
+      if (backgroundImageInputRef.current) {
+        backgroundImageInputRef.current.value = '';
       }
     }
   };
@@ -294,17 +360,46 @@ const ProfilePage = () => {
         <FiChevronLeft size={24} />
       </button>
 
-      {/* Header with Gradient Background */}
+      {/* Header with Background Image */}
       <div className="profile-header">
-        <div className="profile-gradient-bg"></div>
+        <div
+          className="profile-background-image"
+          style={(user.backgroundImage || user.coverImage) ? { backgroundImage: `url(${user.backgroundImage || user.coverImage})` } : {}}
+        >
+          {uploadingBackgroundImage && (
+            <div className="background-uploading-overlay">
+              <div className="uploading-spinner"></div>
+            </div>
+          )}
+          {isOwnProfile && (
+            <>
+              <button
+                className="profile-background-edit-btn"
+                onClick={handleBackgroundImageClick}
+                disabled={uploadingBackgroundImage}
+                title="Arka plan resmini değiştir"
+              >
+                <FiCamera size={18} />
+              </button>
+              <input
+                ref={backgroundImageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleBackgroundImageUpload}
+                style={{ display: 'none' }}
+              />
+            </>
+          )}
+        </div>
 
-        {/* Edit/Settings Button or Message Button */}
+        {/* Edit Profile Image Button or Message Button */}
         {isOwnProfile ? (
           <>
             <button
               className="profile-edit-btn"
               onClick={handleEditClick}
               disabled={uploadingImage}
+              title="Profil resmini değiştir"
             >
               <FiEdit2 size={20} />
             </button>

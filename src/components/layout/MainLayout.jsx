@@ -22,9 +22,13 @@ const MainLayout = ({ children }) => {
   const location = useLocation();
   const centerContentRef = useRef(null);
 
-  // Close mobile sidebar on route change
+  // Close mobile sidebar on route change & scroll to top
   useEffect(() => {
     setIsMobileSidebarOpen(false);
+    // Center content'i en üste scroll yap
+    if (centerContentRef.current) {
+      centerContentRef.current.scrollTop = 0;
+    }
   }, [location.pathname]);
 
   // Prevent body scroll when mobile sidebar is open

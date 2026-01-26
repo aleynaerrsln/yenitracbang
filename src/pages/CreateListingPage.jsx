@@ -44,6 +44,15 @@ const CATEGORIES = [
   'Diğer'
 ];
 
+// Ürün durumu seçenekleri (Backend enum değerleri)
+const CONDITIONS = [
+  { value: 'Yeni', label: 'Yeni' },
+  { value: 'Az Kullanılmış', label: 'Az Kullanılmış' },
+  { value: 'İyi Durumda', label: 'İyi Durumda' },
+  { value: 'Orta Durumda', label: 'Orta Durumda' },
+  { value: 'Tamir Gerekir', label: 'Tamir Gerekir' }
+];
+
 const CreateListingPage = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -53,6 +62,7 @@ const CreateListingPage = () => {
   const [formData, setFormData] = useState({
     title: '',
     category: '',
+    condition: '',
     price: '',
     description: '',
     province: '',
@@ -70,6 +80,7 @@ const CreateListingPage = () => {
 
   // Dropdown states
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showConditionDropdown, setShowConditionDropdown] = useState(false);
   const [showProvinceDropdown, setShowProvinceDropdown] = useState(false);
 
   // Kullanıcı haklarını yükle
@@ -155,6 +166,10 @@ const CreateListingPage = () => {
       newErrors.category = 'Kategori seçiniz';
     }
 
+    if (!formData.condition) {
+      newErrors.condition = 'Ürün durumu seçiniz';
+    }
+
     if (!formData.price) {
       newErrors.price = 'Fiyat zorunludur';
     } else if (isNaN(formData.price) || parseFloat(formData.price) < 0) {
@@ -203,6 +218,7 @@ const CreateListingPage = () => {
       const submitData = new FormData();
       submitData.append('title', formData.title.trim());
       submitData.append('category', formData.category);
+      submitData.append('condition', formData.condition);
       submitData.append('price', formData.price);
       submitData.append('description', formData.description.trim());
       submitData.append('province', formData.province);
@@ -225,7 +241,21 @@ const CreateListingPage = () => {
       }
     } catch (error) {
       console.error('Error creating listing:', error);
-      const message = error.response?.data?.message || 'İlan oluşturulurken hata oluştu';
+      console.error('Error response:', error.response);
+      console.error('Error response data:', error.response?.data);
+
+      let message = 'İlan oluşturulurken hata oluştu';
+
+      if (error.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        message = error.response.data.error;
+      } else if (error.response?.status === 500) {
+        message = 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+      } else if (error.code === 'ERR_NETWORK') {
+        message = 'Bağlantı hatası. İnternet bağlantınızı kontrol edin.';
+      }
+
       showToast(message, 'error');
     } finally {
       setLoading(false);
@@ -337,6 +367,45 @@ const CreateListingPage = () => {
               )}
             </div>
             {errors.category && <span className="error-text">{errors.category}</span>}
+          </div>
+
+          {/* Ürün Durumu */}
+          <div className="form-group">
+            <label className="form-label">
+              <FiTag size={16} />
+              Ürün Durumu
+            </label>
+            <div className="form-dropdown">
+              <button
+                type="button"
+                className={`dropdown-trigger ${errors.condition ? 'error' : ''}`}
+                onClick={() => setShowConditionDropdown(!showConditionDropdown)}
+              >
+                <span className={formData.condition ? 'selected' : 'placeholder'}>
+                  {CONDITIONS.find(c => c.value === formData.condition)?.label || 'Ürün durumu seçin'}
+                </span>
+                <FiChevronDown className={showConditionDropdown ? 'rotated' : ''} />
+              </button>
+              {showConditionDropdown && (
+                <div className="dropdown-menu">
+                  {CONDITIONS.map(cond => (
+                    <button
+                      key={cond.value}
+                      type="button"
+                      className={`dropdown-item ${formData.condition === cond.value ? 'selected' : ''}`}
+                      onClick={() => {
+                        handleInputChange('condition', cond.value);
+                        setShowConditionDropdown(false);
+                      }}
+                    >
+                      {cond.label}
+                      {formData.condition === cond.value && <FiCheck size={16} />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {errors.condition && <span className="error-text">{errors.condition}</span>}
           </div>
 
           {/* Fiyat */}

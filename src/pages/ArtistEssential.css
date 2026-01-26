@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1d1b1b;
+  background: linear-gradient(180deg, #0a0a0a 0%, #000 100%);
   overflow: hidden;
 }
 

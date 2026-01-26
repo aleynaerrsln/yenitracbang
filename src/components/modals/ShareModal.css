@@ -1,0 +1,195 @@
+/* src/components/modals/ShareModal.css */
+
+.share-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 9999;
+}
+
+.share-modal {
+  position: fixed;
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 1rem;
+  min-width: 260px;
+  max-width: 300px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  transform: translateX(8px) translateY(8px);
+  animation: shareModalFadeIn 0.15s ease-out;
+  z-index: 10000;
+}
+
+@keyframes shareModalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(8px) translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(8px) translateY(8px) scale(1);
+  }
+}
+
+.share-header {
+  margin-bottom: 0.75rem;
+}
+
+.share-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+/* Track Preview */
+.share-track-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.share-track-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.share-track-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.share-track-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.share-track-artist {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Share Options */
+.share-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.share-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+  width: 100%;
+}
+
+.share-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.share-option svg {
+  flex-shrink: 0;
+}
+
+.share-option span {
+  flex: 1;
+}
+
+/* Platform Colors */
+.share-option.copy svg {
+  color: #b3b3b3;
+}
+
+.share-option.copy.copied {
+  color: #1ed760;
+}
+
+.share-option.whatsapp svg {
+  color: #25D366;
+}
+
+.share-option.whatsapp:hover {
+  background: rgba(37, 211, 102, 0.15);
+}
+
+.share-option.telegram svg {
+  color: #0088cc;
+}
+
+.share-option.telegram:hover {
+  background: rgba(0, 136, 204, 0.15);
+}
+
+.share-option.twitter svg {
+  color: #1DA1F2;
+}
+
+.share-option.twitter:hover {
+  background: rgba(29, 161, 242, 0.15);
+}
+
+.share-option.facebook svg {
+  color: #1877F2;
+}
+
+.share-option.facebook:hover {
+  background: rgba(24, 119, 242, 0.15);
+}
+
+.share-option.native svg {
+  color: #b3b3b3;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .share-modal {
+    min-width: 240px;
+    padding: 0.875rem;
+  }
+
+  .share-option {
+    padding: 0.65rem;
+    font-size: 0.875rem;
+  }
+
+  .share-track-image {
+    width: 40px;
+    height: 40px;
+  }
+
+  .share-track-title {
+    font-size: 0.8125rem;
+  }
+
+  .share-track-artist {
+    font-size: 0.6875rem;
+  }
+}

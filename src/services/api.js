@@ -291,6 +291,12 @@ export const userAPI = {
         'Content-Type': 'multipart/form-data',
       },
     }),
+  uploadBackgroundImage: (formData) =>
+    api.post('/upload-cover-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
   uploadAdditionalImage: (formData) =>
     api.post('/upload-additional-images', formData, {
       headers: {

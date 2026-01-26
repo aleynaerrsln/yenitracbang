@@ -127,7 +127,7 @@ const SearchPage = () => {
   };
 
   const handleUserClick = (user) => {
-    navigate(`/profile/${user.username}`);
+    navigate(`/profile/${user._id}`);
   };
 
   const getFilteredResults = () => {

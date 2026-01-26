@@ -50,17 +50,79 @@
   min-height: 280px;
 }
 
-/* Gradient Background Effect */
-.profile-gradient-bg {
+/* Background Image */
+.profile-background-image {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  opacity: 0.4;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   z-index: 0;
-  filter: blur(80px);
+}
+
+.profile-background-image::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(18,18,18,0.8) 70%, #121212 100%);
+  z-index: 1;
+}
+
+/* Default gradient when no background image */
+.profile-background-image:not([style*="background-image"]) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #5e3a9b 100%);
+}
+
+/* Background Edit Button */
+.profile-background-edit-btn {
+  position: absolute;
+  top: 1rem;
+  left: 4rem;
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  z-index: 10;
+}
+
+.profile-background-edit-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.1);
+}
+
+.profile-background-edit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Background Upload Overlay */
+.background-uploading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
 }
 
 /* Edit Button */
@@ -711,6 +773,12 @@
   .profile-edit-btn {
     width: 36px;
     height: 36px;
+  }
+
+  .profile-background-edit-btn {
+    width: 32px;
+    height: 32px;
+    left: 3.5rem;
   }
 
   .profile-stats {

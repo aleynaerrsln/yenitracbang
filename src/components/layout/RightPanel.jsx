@@ -6,6 +6,7 @@ import { musicAPI } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import TrackOptionsModal from '../modals/TrackOptionsModal';
 import SelectArtistModal from '../modals/SelectArtistModal';
+import ShareModal from '../modals/ShareModal';
 import './RightPanel.css';
 
 const RightPanel = ({ onWidthChange }) => {
@@ -21,6 +22,7 @@ const RightPanel = ({ onWidthChange }) => {
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [showTrackOptions, setShowTrackOptions] = useState(false);
   const [showSelectArtist, setShowSelectArtist] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
@@ -140,7 +142,8 @@ const RightPanel = ({ onWidthChange }) => {
   };
 
   const handleShare = () => {
-    toast.info('Share feature coming soon');
+    setShowTrackOptions(false);
+    setShowShareModal(true);
   };
 
   const handleArtistsClick = (track, e) => {
@@ -278,6 +281,19 @@ const RightPanel = ({ onWidthChange }) => {
         artists={selectedTrack?.artists || []}
         trackInfo={selectedTrack ? {
           title: selectedTrack.title,
+          imageUrl: selectedTrack.imageUrl
+        } : null}
+        position={menuPosition}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        trackInfo={selectedTrack ? {
+          id: selectedTrack._id,
+          title: selectedTrack.title,
+          artist: selectedTrack.artists?.map(a => a.name).join(', ') || selectedTrack.artistNames || 'Unknown Artist',
           imageUrl: selectedTrack.imageUrl
         } : null}
         position={menuPosition}

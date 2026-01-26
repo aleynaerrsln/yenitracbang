@@ -1,6 +1,7 @@
 // src/App.jsx - LIBRARY ROUTE EKLENDİ
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useLayoutEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
@@ -35,6 +36,19 @@ import MessagesPage from './pages/MessagesPage';
 import NotFound from './pages/NotFound';
 
 import './App.css';
+
+// Her sayfa değişikliğinde en üste scroll yap
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [pathname]);
+
+  return null;
+};
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -122,6 +136,7 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <LanguageProvider>
         <AuthProvider>
           <SocketProvider>

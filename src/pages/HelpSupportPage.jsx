@@ -470,9 +470,6 @@ const HelpSupportPage = () => {
       <div className="help-support-container">
         {/* Header with Language Toggle */}
         <div className="help-header">
-          <button className="back-btn" onClick={() => navigate(-1)}>
-            ←
-          </button>
           <h1 className="help-title">{t.title}</h1>
           <button className="language-toggle-help" onClick={toggleLanguage}>
             <FiGlobe size={18} />

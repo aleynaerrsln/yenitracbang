@@ -1,22 +1,32 @@
 // src/pages/PlaylistDetail.jsx - MOBİL GİBİ KART LAYOUT
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { playlistAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { FaPlay, FaRandom, FaHeart, FaRegHeart, FaShare } from 'react-icons/fa';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { BsSpotify, BsApple, BsSoundwave } from 'react-icons/bs';
 import { SiBeatport } from 'react-icons/si';
+import { FiMoreVertical } from 'react-icons/fi';
+import TrackOptionsModal from '../components/modals/TrackOptionsModal';
+import SelectArtistModal from '../components/modals/SelectArtistModal';
+import ShareModal from '../components/modals/ShareModal';
 import './PlaylistDetail.css';
 
 const PlaylistDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  
+  const location = useLocation();
+  const passedPlaylist = location.state?.playlist;
+
   const [playlist, setPlaylist] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
   const [error, setError] = useState(null);
+
+  // Modal states
+  const [selectedTrack, setSelectedTrack] = useState(null);
+  const [showTrackOptions, setShowTrackOptions] = useState(false);
+  const [showSelectArtist, setShowSelectArtist] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     fetchPlaylistDetails();
@@ -26,12 +36,11 @@ const PlaylistDetail = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await playlistAPI.getPlaylistById(id);
-      
+
       if (response.data.success) {
         setPlaylist(response.data.playlist);
-        setIsLiked(response.data.playlist.userLikes?.includes(user?._id));
       } else {
         setError('Playlist bulunamadı');
       }
@@ -43,38 +52,46 @@ const PlaylistDetail = () => {
     }
   };
 
-  const handleLike = async () => {
-    if (!user) {
-      navigate('/auth');
-      return;
+  const handleOpenOptions = (track, e) => {
+    e.stopPropagation();
+
+    const buttonRect = e.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      top: buttonRect.top,
+      left: buttonRect.left
+    });
+
+    setSelectedTrack(track);
+    setShowTrackOptions(true);
+  };
+
+  const handleViewArtists = () => {
+    if (selectedTrack?.artists && selectedTrack.artists.length > 0) {
+      // TrackOptionsModal'ı kapat, SelectArtistModal'ı aç
+      setShowTrackOptions(false);
+      setShowSelectArtist(true);
+    } else {
+      console.log('No artists found for this track');
     }
-    setIsLiked(!isLiked);
+  };
+
+  const handleAddToPlaylist = () => {
+    console.log('Add to Playlist:', selectedTrack?.title);
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: playlist.name,
-        text: `${playlist.name} - ${playlist.genre}`,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link kopyalandı!');
-    }
-  };
-
-  const formatNumber = (num) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num;
+    // TrackOptionsModal'ı kapat, ShareModal'ı aç
+    setShowTrackOptions(false);
+    setShowShareModal(true);
   };
 
   if (loading) {
     return (
       <div className="playlist-detail">
         <div className="playlist-header skeleton">
-          <div className="skeleton-cover"></div>
+          <div className="cover-container">
+            <div className="skeleton-cover"></div>
+          </div>
           <div className="skeleton-info">
             <div className="skeleton-line"></div>
             <div className="skeleton-line"></div>
@@ -101,10 +118,14 @@ const PlaylistDetail = () => {
     <div className="playlist-detail">
       {/* Playlist Header */}
       <div className="playlist-header">
+        <button className="btn-back-arrow" onClick={() => navigate(-1)}>
+          ‹
+        </button>
+
         <div className="cover-container">
           {playlist.coverImage ? (
-            <img 
-              src={playlist.coverImage} 
+            <img
+              src={playlist.coverImage}
               alt={playlist.name}
               className="playlist-cover"
             />
@@ -116,68 +137,36 @@ const PlaylistDetail = () => {
         </div>
 
         <div className="playlist-info">
-          <span className="playlist-type">
-            {playlist.isAdminPlaylist && '👑 OFFICIAL PLAYLIST'}
-            {playlist.isArtistEssential && '⭐ ARTIST ESSENTIAL'}
-            {!playlist.isAdminPlaylist && !playlist.isArtistEssential && '📁 PUBLIC PLAYLIST'}
-          </span>
-          
           <h1 className="playlist-name">{playlist.name}</h1>
-          
-          {playlist.description && (
-            <p className="playlist-description">{playlist.description}</p>
-          )}
 
           <div className="playlist-meta">
-            <div className="meta-item">
+            <div className="meta-item owner-row">
               <div className="owner-avatar">
-                {playlist.owner?.profileImage ? (
-                  <img src={playlist.owner.profileImage} alt={playlist.owner.displayName} />
+                {(passedPlaylist?.owner?.profileImage || playlist.owner?.profileImage) ? (
+                  <img
+                    src={passedPlaylist?.owner?.profileImage || playlist.owner?.profileImage}
+                    alt={(passedPlaylist?.owner?.displayName && passedPlaylist.owner.displayName !== 'User' ? passedPlaylist.owner.displayName : null) ||
+                         (playlist.owner?.displayName && playlist.owner.displayName !== 'User' ? playlist.owner.displayName : null) ||
+                         passedPlaylist?.owner?.username || playlist.owner?.username || 'Owner'}
+                  />
                 ) : (
-                  <span>{playlist.owner?.displayName?.charAt(0) || 'A'}</span>
+                  <span>{((passedPlaylist?.owner?.displayName && passedPlaylist.owner.displayName !== 'User' ? passedPlaylist.owner.displayName : null) ||
+                         (playlist.owner?.displayName && playlist.owner.displayName !== 'User' ? playlist.owner.displayName : null) ||
+                         passedPlaylist?.owner?.username || playlist.owner?.username || 'U').charAt(0).toUpperCase()}</span>
                 )}
               </div>
-              <span className="owner-name">{playlist.owner?.displayName || 'Admin User'}</span>
+              <span className="owner-name">
+                {(passedPlaylist?.owner?.displayName && passedPlaylist.owner.displayName !== 'User' ? passedPlaylist.owner.displayName : null) ||
+                 (playlist.owner?.displayName && playlist.owner.displayName !== 'User' ? playlist.owner.displayName : null) ||
+                 passedPlaylist?.owner?.username || playlist.owner?.username || 'Unknown'}
+              </span>
             </div>
+          </div>
 
-            <span className="meta-separator">•</span>
-            <span className="meta-item">
-              {playlist.musicCount || playlist.musics?.length || 0} tracks
-            </span>
-
-            <span className="meta-separator">•</span>
-            <span className="meta-item">
-              ❤️ {formatNumber(playlist.likes || 0)} likes
-            </span>
-
-            <span className="meta-separator">•</span>
-            <span className="meta-item">
-              👁️ {formatNumber(playlist.views || 0)} views
-            </span>
+          <div className="track-count">
+            {playlist.musicCount || playlist.musics?.length || 0} tracks
           </div>
         </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="action-buttons">
-        <button className="btn-play">
-          <FaPlay />
-        </button>
-
-        <button className="btn-shuffle">
-          <FaRandom />
-        </button>
-
-        <button 
-          className={`btn-like ${isLiked ? 'liked' : ''}`}
-          onClick={handleLike}
-        >
-          {isLiked ? <FaHeart /> : <FaRegHeart />}
-        </button>
-
-        <button className="btn-share" onClick={handleShare}>
-          <FaShare />
-        </button>
       </div>
 
       {/* Track List */}
@@ -189,9 +178,10 @@ const PlaylistDetail = () => {
         <div className="track-list">
           {playlist.musics && playlist.musics.length > 0 ? (
             playlist.musics.map((track) => (
-              <TrackCard 
-                key={track._id} 
+              <TrackCard
+                key={track._id}
                 track={track}
+                onOpenOptions={handleOpenOptions}
               />
             ))
           ) : (
@@ -201,12 +191,47 @@ const PlaylistDetail = () => {
           )}
         </div>
       </div>
+
+      {/* Track Options Modal */}
+      <TrackOptionsModal
+        isOpen={showTrackOptions}
+        onClose={() => setShowTrackOptions(false)}
+        onViewArtists={handleViewArtists}
+        onAddToPlaylist={handleAddToPlaylist}
+        onShare={handleShare}
+        position={menuPosition}
+      />
+
+      {/* Select Artist Modal */}
+      <SelectArtistModal
+        isOpen={showSelectArtist}
+        onClose={() => setShowSelectArtist(false)}
+        artists={selectedTrack?.artists || []}
+        trackInfo={selectedTrack ? {
+          title: selectedTrack.title,
+          imageUrl: selectedTrack.imageUrl
+        } : null}
+        position={menuPosition}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        trackInfo={selectedTrack ? {
+          id: selectedTrack._id,
+          title: selectedTrack.title,
+          artist: selectedTrack.artist || selectedTrack.artistNames || 'Unknown Artist',
+          imageUrl: selectedTrack.imageUrl
+        } : null}
+        position={menuPosition}
+      />
     </div>
   );
 };
 
 // Track Card Component (Mobil Benzeri)
-const TrackCard = ({ track }) => {
+const TrackCard = ({ track, onOpenOptions }) => {
   const [isLiked, setIsLiked] = useState(false);
 
   const platformIcons = {
@@ -219,7 +244,7 @@ const TrackCard = ({ track }) => {
 
   const getPlatformLinks = () => {
     if (!track.platformLinks) return [];
-    
+
     return Object.entries(track.platformLinks)
       .filter(([_, url]) => url && url.trim() !== '')
       .map(([platform, url]) => ({
@@ -274,7 +299,7 @@ const TrackCard = ({ track }) => {
 
       {/* Like Button */}
       <div className="track-like">
-        <button 
+        <button
           className={`btn-track-like ${isLiked ? 'liked' : ''}`}
           onClick={handleLike}
         >
@@ -282,6 +307,14 @@ const TrackCard = ({ track }) => {
         </button>
         <span className="like-count">{track.likes || 0}</span>
       </div>
+
+      {/* 3-Dot Menu */}
+      <button
+        className="btn-track-menu"
+        onClick={(e) => onOpenOptions(track, e)}
+      >
+        <FiMoreVertical size={20} />
+      </button>
     </div>
   );
 };

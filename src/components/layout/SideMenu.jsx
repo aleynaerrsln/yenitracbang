@@ -1,10 +1,10 @@
 // src/components/layout/SideMenu.jsx
 
 import { useNavigate } from 'react-router-dom';
-import { 
-  FiList, FiMusic, FiShoppingBag, FiStar, 
-  FiBell, FiSettings, FiCreditCard, 
-  FiInfo, FiHelpCircle, FiLogOut, FiX 
+import {
+  FiList, FiShoppingBag, FiStar,
+  FiBell, FiSettings,
+  FiInfo, FiHelpCircle, FiLogOut, FiX
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import './SideMenu.css';
@@ -53,12 +53,6 @@ const SideMenu = ({ isOpen, onClose }) => {
             <span className="arrow">›</span>
           </button>
 
-          <button className="menu-item" onClick={() => handleNavigate('/sample-bank')}>
-            <FiMusic size={20} />
-            <span>Sample Bank</span>
-            <span className="arrow">›</span>
-          </button>
-
           <button className="menu-item" onClick={() => handleNavigate('/store')}>
             <FiShoppingBag size={20} />
             <span>Store</span>
@@ -85,13 +79,6 @@ const SideMenu = ({ isOpen, onClose }) => {
           <button className="menu-item" onClick={() => handleNavigate('/settings')}>
             <FiSettings size={20} />
             <span>Settings</span>
-            <span className="arrow">›</span>
-          </button>
-
-          <button className="menu-item" onClick={() => handleNavigate('/subscription')}>
-            <FiCreditCard size={20} />
-            <span>Subscription</span>
-            <span className="badge-new">NEW</span>
             <span className="arrow">›</span>
           </button>
         </div>

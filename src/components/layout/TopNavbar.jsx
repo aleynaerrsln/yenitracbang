@@ -246,7 +246,11 @@ const TopNavbar = ({ onOpenChat }) => {
                         <div
                           key={user._id}
                           className="search-result-row"
-                          onClick={() => navigate(`/profile/${user.username}`)}
+                          onClick={() => {
+                            navigate(`/profile/${user._id}`);
+                            setShowSearchDropdown(false);
+                            setSearchQuery('');
+                          }}
                         >
                           <div className="result-artwork-small round">
                             {user.profileImage ? (

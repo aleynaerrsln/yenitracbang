@@ -2,7 +2,7 @@
 
 .help-support-page {
   min-height: 100%;
-  background: linear-gradient(180deg, #121212 0%, #0a0a0a 100%);
+  background: linear-gradient(180deg, #0a0a0a 0%, #000 100%);
   padding: 3rem 1rem 6rem;
   position: relative;
   display: flex;
@@ -19,39 +19,18 @@
 .help-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0.5rem 0 1.5rem;
   margin-bottom: 1rem;
-}
-
-.back-btn {
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 50%;
-  color: #fff;
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  margin-top: -2.4rem;
-  transition: all 0.2s ease;
-}
-
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.05);
+  position: relative;
 }
 
 .help-title {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #fff;
   margin: 0;
+  text-align: center;
 }
 
 .language-toggle-help {
@@ -67,16 +46,22 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .language-toggle-help:hover {
   background: rgba(14, 165, 233, 0.2);
-  transform: translateY(-2px);
 }
 
 /* Help Topics Section */
 .help-topics-section {
-  background: linear-gradient(135deg, #1e293b 0%, #1e3a8a 100%);
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -291,7 +276,7 @@
 .new-ticket-btn {
   position: fixed;
   bottom: 1.5rem;
-  right: calc(50% - 310px);
+  right: 340px;
   display: flex;
   align-items: center;
   justify-content: center;

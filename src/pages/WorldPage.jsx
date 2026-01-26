@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { playlistAPI } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { FiMusic, FiUser, FiEye, FiHeart, FiPlay, FiMoreVertical } from 'react-icons/fi';
+import { FiMusic, FiHeart, FiPlay } from 'react-icons/fi';
 import './WorldPage.css';
 
 const WorldPage = () => {
@@ -74,8 +74,8 @@ const WorldPage = () => {
     setPage(1);
   };
 
-  const handlePlaylistClick = (playlistId) => {
-    navigate(`/playlist/${playlistId}`);
+  const handlePlaylistClick = (playlist) => {
+    navigate(`/playlist/${playlist._id}`, { state: { playlist } });
   };
 
   return (
@@ -118,26 +118,15 @@ const WorldPage = () => {
                 <div
                   key={playlist._id}
                   className="world-playlist-card"
-                  onClick={() => handlePlaylistClick(playlist._id)}
+                  onClick={() => handlePlaylistClick(playlist)}
                 >
-                  {/* Track Count Badge */}
-                  <div className="track-badge">
-                    {playlist.musicCount || 0} tracks
-                  </div>
-
-                  {/* Three Dot Menu */}
-                  <button
-                    className="three-dot-menu"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Menu functionality can be added later
-                    }}
-                  >
-                    <FiMoreVertical size={20} />
-                  </button>
-
                   {/* Playlist Cover */}
                   <div className="playlist-cover">
+                    {/* Track Count Badge - Inside cover for overlay effect */}
+                    <div className="track-badge">
+                      {playlist.musicCount || 0} tracks
+                    </div>
+
                     {playlist.coverImage ? (
                       <img src={playlist.coverImage} alt={playlist.name} />
                     ) : (
@@ -150,7 +139,7 @@ const WorldPage = () => {
                       className="play-overlay"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handlePlaylistClick(playlist._id);
+                        handlePlaylistClick(playlist);
                       }}
                     >
                       <FiPlay size={24} />

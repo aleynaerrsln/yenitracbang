@@ -1,5 +1,5 @@
 // src/pages/PrivacyPolicy.jsx - Mobil Uygulamadaki Gerçek İçerik
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiGlobe } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
@@ -10,9 +10,11 @@ const PrivacyPolicy = () => {
   const { language, toggleLanguage } = useLanguage();
   const isEnglish = language === 'en';
 
-  // Sayfa yüklendiğinde en üste scroll yap
-  useEffect(() => {
+  // Sayfa yüklendiğinde en üste scroll yap (useLayoutEffect paint'ten önce çalışır)
+  useLayoutEffect(() => {
     window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }, []);
 
   const englishContent = `1. INTRODUCTION
