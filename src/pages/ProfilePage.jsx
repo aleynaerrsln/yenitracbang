@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import { useChat } from '../context/ChatContext';
 import { authAPI, userAPI, playlistAPI } from '../services/api';
 import { FiEdit2, FiSettings, FiMessageCircle, FiPlus, FiTrash2, FiChevronLeft, FiCamera, FiX } from 'react-icons/fi';
+import ImageCropperModal from '../components/modals/ImageCropperModal';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -26,6 +27,10 @@ const ProfilePage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const additionalImageInputRef = useRef(null);
   const backgroundImageInputRef = useRef(null);
+
+  // Image Cropper state
+  const [showCropper, setShowCropper] = useState(false);
+  const [cropperImage, setCropperImage] = useState(null);
 
   // Playlists state
   const [playlists, setPlaylists] = useState([]);
@@ -202,9 +207,9 @@ const ProfilePage = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Dosya boyutu kontrolü (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Dosya boyutu 5MB\'dan küçük olmalıdır');
+    // Dosya boyutu kontrolü (10MB - kırpma öncesi daha büyük olabilir)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Dosya boyutu 10MB\'dan küçük olmalıdır');
       return;
     }
 
@@ -214,62 +219,60 @@ const ProfilePage = () => {
       return;
     }
 
+    // Dosyayı base64'e çevir ve cropper'ı aç
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = () => {
+      setCropperImage(reader.result);
+      setShowCropper(true);
+      // Input'u temizle
+      if (backgroundImageInputRef.current) {
+        backgroundImageInputRef.current.value = '';
+      }
+    };
+
+    reader.onerror = () => {
+      toast.error('Dosya okunamadı');
+    };
+  };
+
+  // Kırpılmış resmi yükle
+  const handleCroppedImageUpload = async (croppedImage) => {
     try {
       setUploadingBackgroundImage(true);
 
-      // Dosyayı base64'e çevir
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
+      // PUT /profile endpoint'ini kullan (bannerImage base64 kabul ediyor)
+      const response = await authAPI.updateProfile({ bannerImage: croppedImage });
 
-      reader.onload = async () => {
-        try {
-          const base64Image = reader.result;
+      // Backend'den bannerImage URL'i geliyor
+      const newBackgroundImageUrl = response.data.user?.bannerImage || response.data.bannerImage;
 
-          // PUT /profile endpoint'ini kullan (bannerImage base64 kabul ediyor)
-          const response = await authAPI.updateProfile({ bannerImage: base64Image });
+      if (newBackgroundImageUrl) {
+        // Mevcut user objesini kopyala ve tüm image alanlarını güncelle
+        const updatedUser = {
+          ...currentUser,
+          bannerImage: newBackgroundImageUrl,
+          backgroundImage: newBackgroundImageUrl,
+          coverImage: newBackgroundImageUrl
+        };
 
-          // Backend'den bannerImage URL'i geliyor
-          const newBackgroundImageUrl = response.data.user?.bannerImage || response.data.bannerImage;
+        // AuthContext'teki user'ı güncelle
+        updateUser(updatedUser);
 
-          if (newBackgroundImageUrl) {
-            // Mevcut user objesini kopyala ve tüm image alanlarını güncelle
-            const updatedUser = {
-              ...currentUser,
-              bannerImage: newBackgroundImageUrl,
-              backgroundImage: newBackgroundImageUrl,
-              coverImage: newBackgroundImageUrl
-            };
+        // Local state'i güncelle
+        setUser(updatedUser);
 
-            // AuthContext'teki user'ı güncelle
-            updateUser(updatedUser);
-
-            // Local state'i güncelle
-            setUser(updatedUser);
-
-            toast.success('Arka plan resmi başarıyla güncellendi');
-          } else {
-            toast.error('Arka plan resmi yüklendi ama URL alınamadı');
-          }
-        } catch (error) {
-          console.error('Arka plan resmi yükleme hatası:', error);
-          toast.error(error.response?.data?.message || 'Arka plan resmi yüklenirken bir hata oluştu');
-        } finally {
-          setUploadingBackgroundImage(false);
-          // Input'u temizle
-          if (backgroundImageInputRef.current) {
-            backgroundImageInputRef.current.value = '';
-          }
-        }
-      };
-
-      reader.onerror = () => {
-        toast.error('Dosya okunamadı');
-        setUploadingBackgroundImage(false);
-      };
+        toast.success('Arka plan resmi başarıyla güncellendi');
+      } else {
+        toast.error('Arka plan resmi yüklendi ama URL alınamadı');
+      }
     } catch (error) {
       console.error('Arka plan resmi yükleme hatası:', error);
       toast.error(error.response?.data?.message || 'Arka plan resmi yüklenirken bir hata oluştu');
+    } finally {
       setUploadingBackgroundImage(false);
+      setCropperImage(null);
     }
   };
 
@@ -335,16 +338,19 @@ const ProfilePage = () => {
     }
   };
 
-  const handleDeleteImage = async (imageId) => {
+  const handleDeleteImage = async (image) => {
     if (!confirm('Bu resmi silmek istediğinizden emin misiniz?')) return;
 
-    try {
-      await userAPI.deleteAdditionalImage(imageId);
+    // Backend publicId, url veya url içinde geçen bir string kabul ediyor
+    const identifier = image.publicId || image.url;
 
-      // Mevcut user objesini kopyala ve resmi kaldır
+    try {
+      await userAPI.deleteAdditionalImage(identifier);
+
+      // Mevcut user objesini kopyala ve resmi kaldır (url ile eşleştir)
       const updatedUser = {
         ...currentUser,
-        additionalImages: (currentUser.additionalImages || []).filter(img => img._id !== imageId)
+        additionalImages: (currentUser.additionalImages || []).filter(img => img.url !== image.url)
       };
 
       // AuthContext'teki user'ı güncelle
@@ -363,8 +369,7 @@ const ProfilePage = () => {
   const tabs = [
     { id: 'images', label: 'Images' },
     { id: 'playlists', label: 'Playlists' },
-    { id: 'events', label: 'Events' },
-    { id: 'charms', label: 'Charms' }
+    { id: 'events', label: 'Events' }
   ];
 
   if (loading) {
@@ -549,7 +554,7 @@ const ProfilePage = () => {
                     {isOwnProfile && (
                       <button
                         className="profile-image-delete-btn"
-                        onClick={() => handleDeleteImage(img._id)}
+                        onClick={() => handleDeleteImage(img)}
                         title="Resmi Sil"
                       >
                         <FiTrash2 size={18} />
@@ -621,14 +626,20 @@ const ProfilePage = () => {
           </div>
         )}
 
-        {activeTab === 'charms' && (
-          <div className="profile-charms-grid">
-            <div className="profile-empty-state">
-              <p>Henüz rozet yok</p>
-            </div>
-          </div>
-        )}
-      </div>
+              </div>
+
+      {/* Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={showCropper}
+        onClose={() => {
+          setShowCropper(false);
+          setCropperImage(null);
+        }}
+        imageSrc={cropperImage}
+        onCropComplete={handleCroppedImageUpload}
+        aspectRatio={16 / 9}
+        title="Arka Plan Resmini Düzenle"
+      />
     </div>
   );
 };

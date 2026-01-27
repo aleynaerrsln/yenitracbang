@@ -303,8 +303,8 @@ export const userAPI = {
         'Content-Type': 'multipart/form-data',
       },
     }),
-  deleteAdditionalImage: (imageId) =>
-    api.delete(`/additional-images/${imageId}`),
+  deleteAdditionalImage: (identifier) =>
+    api.delete(`/additional-image/${encodeURIComponent(identifier)}`),
   followUser: (userId) =>
     api.post(`/users/${userId}/follow`),
   unfollowUser: (userId) =>

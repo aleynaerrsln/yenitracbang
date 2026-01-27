@@ -1,5 +1,5 @@
 // src/components/modals/CreateArtistPlaylistModal.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { artistEssentialAPI } from '../../services/api';
 import { FiX, FiImage, FiMusic, FiCheck, FiSearch, FiPlus, FiTrash2 } from 'react-icons/fi';
 import './CreateArtistPlaylistModal.css';
@@ -19,21 +19,51 @@ const CreateArtistPlaylistModal = ({ isOpen, onClose, onSuccess, editPlaylist = 
   const [musicLoading, setMusicLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Edit modunda populate edilmiş şarkı verileri için
+  const [editMusicData, setEditMusicData] = useState([]);
+
   const fileInputRef = useRef(null);
 
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen) {
+      // Modal açıldığında şarkıları yükle (seçilen şarkıları göstermek için)
+      loadAllMusic();
+
       if (editPlaylist) {
         setName(editPlaylist.name || '');
         setDescription(editPlaylist.description || '');
         setCoverPreview(editPlaylist.coverImage || null);
-        setSelectedMusicIds(editPlaylist.musics?.map(m => m._id || m) || []);
+
+        // Musics populate edilmiş mi kontrol et
+        if (editPlaylist.musics?.length > 0) {
+          if (typeof editPlaylist.musics[0] === 'object' && editPlaylist.musics[0]._id) {
+            // Populate edilmiş - object array
+            setEditMusicData(editPlaylist.musics);
+            setSelectedMusicIds(editPlaylist.musics.map(m => m._id));
+            console.log('Edit playlist musics (populated):', editPlaylist.musics);
+          } else {
+            // Sadece ID'ler
+            setSelectedMusicIds(editPlaylist.musics);
+            console.log('Edit playlist musics (IDs only):', editPlaylist.musics);
+          }
+        } else {
+          setSelectedMusicIds([]);
+          setEditMusicData([]);
+        }
       } else {
         resetForm();
+        setEditMusicData([]);
       }
     }
   }, [isOpen, editPlaylist]);
+
+  // Şarkıları yükle (async wrapper)
+  const loadAllMusic = async () => {
+    if (allMusic.length === 0) {
+      await fetchAllMusic();
+    }
+  };
 
   // Fetch music when music selector opens
   useEffect(() => {
@@ -48,6 +78,7 @@ const CreateArtistPlaylistModal = ({ isOpen, onClose, onSuccess, editPlaylist = 
     setCoverImage(null);
     setCoverPreview(null);
     setSelectedMusicIds([]);
+    setEditMusicData([]);
     setError('');
     setSearchQuery('');
   };
@@ -109,22 +140,26 @@ const CreateArtistPlaylistModal = ({ isOpen, onClose, onSuccess, editPlaylist = 
       setLoading(true);
       setError('');
 
-      const formData = new FormData();
-      formData.append('name', name.trim());
-      formData.append('description', description.trim());
-      formData.append('musicIds', JSON.stringify(selectedMusicIds));
+      // JSON request gönder (FormData yerine) - Backend base64 image destekliyor
+      // Bu şekilde musicIds array olarak düzgün gider
+      const requestData = {
+        name: name.trim(),
+        description: description.trim(),
+        musicIds: selectedMusicIds
+      };
 
-      if (coverImage) {
-        formData.append('coverImage', coverImage);
-      } else if (coverPreview && typeof coverPreview === 'string' && coverPreview.startsWith('data:')) {
-        formData.append('coverImage', coverPreview);
+      console.log('Saving playlist with musicIds:', selectedMusicIds);
+
+      // Cover image varsa base64 olarak ekle
+      if (coverPreview && typeof coverPreview === 'string' && coverPreview.startsWith('data:')) {
+        requestData.coverImage = coverPreview;
       }
 
       let response;
       if (editPlaylist) {
-        response = await artistEssentialAPI.updatePlaylist(editPlaylist._id, formData);
+        response = await artistEssentialAPI.updatePlaylist(editPlaylist._id, requestData);
       } else {
-        response = await artistEssentialAPI.createPlaylist(formData);
+        response = await artistEssentialAPI.createPlaylist(requestData);
       }
 
       console.log('Playlist saved:', response.data);
@@ -145,6 +180,7 @@ const CreateArtistPlaylistModal = ({ isOpen, onClose, onSuccess, editPlaylist = 
   const handleClose = () => {
     resetForm();
     setShowMusicSelector(false);
+    setEditMusicData([]);
     onClose();
   };
 
@@ -159,8 +195,29 @@ const CreateArtistPlaylistModal = ({ isOpen, onClose, onSuccess, editPlaylist = 
     );
   });
 
-  // Get selected music details
-  const selectedMusic = allMusic.filter(m => selectedMusicIds.includes(m._id));
+  // Get selected music details - hem allMusic hem editMusicData'dan
+  const selectedMusic = useMemo(() => {
+    const musicMap = new Map();
+
+    // Önce editMusicData'dan ekle (edit modunda populate edilmiş veriler)
+    editMusicData.forEach(m => {
+      if (selectedMusicIds.includes(m._id)) {
+        musicMap.set(m._id, m);
+      }
+    });
+
+    // Sonra allMusic'ten ekle (üzerine yazar, daha güncel veri)
+    allMusic.forEach(m => {
+      if (selectedMusicIds.includes(m._id)) {
+        musicMap.set(m._id, m);
+      }
+    });
+
+    // Sıralamayı koru
+    return selectedMusicIds
+      .map(id => musicMap.get(id))
+      .filter(Boolean);
+  }, [allMusic, editMusicData, selectedMusicIds]);
 
   if (!isOpen) return null;
 
