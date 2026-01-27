@@ -646,3 +646,379 @@
     font-size: 10px;
   }
 }
+
+/* ================= DJ CHARTS SECTION ================= */
+
+.empty-dj-charts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.5);
+  gap: 12px;
+}
+
+.empty-dj-charts p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.dj-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.dj-chart-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dj-chart-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-4px);
+}
+
+.dj-chart-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.dj-chart-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dj-chart-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dj-chart-track-count {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #fff;
+}
+
+.dj-chart-info {
+  padding: 12px;
+}
+
+.dj-chart-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dj-chart-artist {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
+}
+
+.dj-chart-artist-img {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dj-chart-artist-placeholder {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dj-chart-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dj-chart-stats span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* DJ Chart Modal */
+.dj-chart-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.dj-chart-modal {
+  background: #181818;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dj-chart-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  position: relative;
+}
+
+.dj-chart-modal-cover {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.dj-chart-modal-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dj-chart-modal-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dj-chart-modal-info h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.dj-chart-modal-artist {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 4px 0;
+}
+
+.dj-chart-modal-stats {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.dj-chart-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dj-chart-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dj-chart-modal-description {
+  padding: 0 20px 16px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.dj-chart-modal-tracks {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 20px 20px;
+}
+
+.dj-chart-track-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dj-chart-track-item:last-child {
+  border-bottom: none;
+}
+
+.dj-chart-track-item .track-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  min-width: 24px;
+  text-align: center;
+}
+
+.dj-chart-track-item .track-cover {
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.dj-chart-track-item .track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dj-chart-track-item .track-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dj-chart-track-item .track-artist {
+  display: block;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dj-chart-track-item .track-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dj-chart-track-item .spotify-link {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(30, 215, 96, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1ed760;
+  transition: all 0.2s;
+}
+
+.dj-chart-track-item .spotify-link:hover {
+  background: rgba(30, 215, 96, 0.2);
+  transform: scale(1.1);
+}
+
+.dj-chart-empty-tracks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.4);
+  gap: 8px;
+}
+
+.dj-chart-empty-tracks p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Mobile adjustments for DJ Charts */
+@media (max-width: 768px) {
+  .dj-charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .dj-chart-name {
+    font-size: 13px;
+  }
+
+  .dj-chart-artist {
+    font-size: 11px;
+  }
+
+  .dj-chart-modal {
+    max-height: 90vh;
+  }
+
+  .dj-chart-modal-header {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .dj-chart-modal-cover {
+    width: 80px;
+    height: 80px;
+  }
+
+  .dj-chart-modal-info h3 {
+    font-size: 16px;
+  }
+
+  .dj-chart-modal-tracks {
+    padding: 0 16px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dj-charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .dj-chart-info {
+    padding: 10px;
+  }
+
+  .dj-chart-track-count {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+}

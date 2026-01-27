@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useChat } from '../context/ChatContext';
 import { authAPI, userAPI, playlistAPI } from '../services/api';
-import { FiEdit2, FiSettings, FiMessageCircle, FiPlus, FiTrash2, FiChevronLeft, FiCamera } from 'react-icons/fi';
+import { FiEdit2, FiSettings, FiMessageCircle, FiPlus, FiTrash2, FiChevronLeft, FiCamera, FiX } from 'react-icons/fi';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -23,6 +23,7 @@ const ProfilePage = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingBackgroundImage, setUploadingBackgroundImage] = useState(false);
   const [uploadingAdditionalImage, setUploadingAdditionalImage] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const additionalImageInputRef = useRef(null);
   const backgroundImageInputRef = useRef(null);
 
@@ -118,7 +119,19 @@ const ProfilePage = () => {
 
   const handleEditClick = () => {
     if (isOwnProfile) {
+      setIsEditMode(!isEditMode);
+    }
+  };
+
+  const handleProfileImageClick = () => {
+    if (isOwnProfile && isEditMode) {
       fileInputRef.current?.click();
+    }
+  };
+
+  const handleBackgroundClick = () => {
+    if (isOwnProfile && isEditMode) {
+      backgroundImageInputRef.current?.click();
     }
   };
 
@@ -204,42 +217,59 @@ const ProfilePage = () => {
     try {
       setUploadingBackgroundImage(true);
 
-      const formData = new FormData();
-      formData.append('coverImage', file);
+      // Dosyayı base64'e çevir
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
 
-      // userAPI kullanarak yükle
-      const response = await userAPI.uploadBackgroundImage(formData);
+      reader.onload = async () => {
+        try {
+          const base64Image = reader.result;
 
-      // Backend'den coverImage veya backgroundImage URL'i geliyor
-      const newBackgroundImageUrl = response.data.coverImage || response.data.backgroundImage;
+          // PUT /profile endpoint'ini kullan (bannerImage base64 kabul ediyor)
+          const response = await authAPI.updateProfile({ bannerImage: base64Image });
 
-      if (newBackgroundImageUrl) {
-        // Mevcut user objesini kopyala ve backgroundImage/coverImage'ı güncelle
-        const updatedUser = {
-          ...currentUser,
-          backgroundImage: newBackgroundImageUrl,
-          coverImage: newBackgroundImageUrl
-        };
+          // Backend'den bannerImage URL'i geliyor
+          const newBackgroundImageUrl = response.data.user?.bannerImage || response.data.bannerImage;
 
-        // AuthContext'teki user'ı güncelle
-        updateUser(updatedUser);
+          if (newBackgroundImageUrl) {
+            // Mevcut user objesini kopyala ve tüm image alanlarını güncelle
+            const updatedUser = {
+              ...currentUser,
+              bannerImage: newBackgroundImageUrl,
+              backgroundImage: newBackgroundImageUrl,
+              coverImage: newBackgroundImageUrl
+            };
 
-        // Local state'i güncelle
-        setUser(updatedUser);
+            // AuthContext'teki user'ı güncelle
+            updateUser(updatedUser);
 
-        toast.success('Arka plan resmi başarıyla güncellendi');
-      } else {
-        toast.error('Arka plan resmi yüklendi ama URL alınamadı');
-      }
+            // Local state'i güncelle
+            setUser(updatedUser);
+
+            toast.success('Arka plan resmi başarıyla güncellendi');
+          } else {
+            toast.error('Arka plan resmi yüklendi ama URL alınamadı');
+          }
+        } catch (error) {
+          console.error('Arka plan resmi yükleme hatası:', error);
+          toast.error(error.response?.data?.message || 'Arka plan resmi yüklenirken bir hata oluştu');
+        } finally {
+          setUploadingBackgroundImage(false);
+          // Input'u temizle
+          if (backgroundImageInputRef.current) {
+            backgroundImageInputRef.current.value = '';
+          }
+        }
+      };
+
+      reader.onerror = () => {
+        toast.error('Dosya okunamadı');
+        setUploadingBackgroundImage(false);
+      };
     } catch (error) {
       console.error('Arka plan resmi yükleme hatası:', error);
       toast.error(error.response?.data?.message || 'Arka plan resmi yüklenirken bir hata oluştu');
-    } finally {
       setUploadingBackgroundImage(false);
-      // Input'u temizle
-      if (backgroundImageInputRef.current) {
-        backgroundImageInputRef.current.value = '';
-      }
     }
   };
 
@@ -361,47 +391,43 @@ const ProfilePage = () => {
       </button>
 
       {/* Header with Background Image */}
-      <div className="profile-header">
+      <div className={`profile-header ${isEditMode ? 'edit-mode' : ''}`}>
         <div
-          className="profile-background-image"
-          style={(user.backgroundImage || user.coverImage) ? { backgroundImage: `url(${user.backgroundImage || user.coverImage})` } : {}}
+          className={`profile-background-image ${isEditMode ? 'editable' : ''}`}
+          style={(user.bannerImage || user.backgroundImage || user.coverImage) ? { backgroundImage: `url(${user.bannerImage || user.backgroundImage || user.coverImage})` } : {}}
+          onClick={handleBackgroundClick}
         >
           {uploadingBackgroundImage && (
             <div className="background-uploading-overlay">
               <div className="uploading-spinner"></div>
             </div>
           )}
-          {isOwnProfile && (
-            <>
-              <button
-                className="profile-background-edit-btn"
-                onClick={handleBackgroundImageClick}
-                disabled={uploadingBackgroundImage}
-                title="Arka plan resmini değiştir"
-              >
-                <FiCamera size={18} />
-              </button>
-              <input
-                ref={backgroundImageInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleBackgroundImageUpload}
-                style={{ display: 'none' }}
-              />
-            </>
+          {/* Edit mode'da arka plan düzenleme ikonu */}
+          {isOwnProfile && isEditMode && !uploadingBackgroundImage && (
+            <div className="background-edit-overlay">
+              <FiCamera size={32} />
+              <span>Arka Plan Değiştir</span>
+            </div>
           )}
+          <input
+            ref={backgroundImageInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleBackgroundImageUpload}
+            style={{ display: 'none' }}
+          />
         </div>
 
-        {/* Edit Profile Image Button or Message Button */}
+        {/* Edit Mode Toggle Button or Message Button */}
         {isOwnProfile ? (
           <>
             <button
-              className="profile-edit-btn"
+              className={`profile-edit-btn ${isEditMode ? 'active' : ''}`}
               onClick={handleEditClick}
-              disabled={uploadingImage}
-              title="Profil resmini değiştir"
+              disabled={uploadingImage || uploadingBackgroundImage}
+              title={isEditMode ? 'Düzenlemeyi Bitir' : 'Profili Düzenle'}
             >
-              <FiEdit2 size={20} />
+              {isEditMode ? <FiX size={20} /> : <FiEdit2 size={20} />}
             </button>
             <input
               ref={fileInputRef}
@@ -426,7 +452,10 @@ const ProfilePage = () => {
         )}
 
         {/* Profile Avatar */}
-        <div className="profile-avatar-wrapper">
+        <div
+          className={`profile-avatar-wrapper ${isEditMode ? 'editable' : ''}`}
+          onClick={handleProfileImageClick}
+        >
           {uploadingImage && (
             <div className="profile-avatar-uploading">
               <div className="uploading-spinner"></div>
@@ -437,6 +466,12 @@ const ProfilePage = () => {
           ) : (
             <div className="profile-avatar-placeholder">
               {user.username?.[0]?.toUpperCase()}
+            </div>
+          )}
+          {/* Edit mode'da profil resmi düzenleme ikonu */}
+          {isOwnProfile && isEditMode && !uploadingImage && (
+            <div className="avatar-edit-overlay">
+              <FiCamera size={24} />
             </div>
           )}
         </div>

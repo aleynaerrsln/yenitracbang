@@ -426,6 +426,55 @@ export const artistMusicAPI = {
     api.delete(`/music/${musicId}`),
 };
 
+// ================= ARTIST ESSENTIAL (DJ Charts) =================
+export const artistEssentialAPI = {
+  // Badge Check
+  checkBadgeAccess: () =>
+    api.get('/artist-essential/check-badge'),
+
+  // Music
+  addMusic: (data) =>
+    api.post('/artist-essential/music', data),
+  getMyMusic: (params) =>
+    api.get('/artist-essential/my-music', { params }),
+  getAllMusicForPlaylist: (search) =>
+    api.get('/artist-essential/all-music-for-playlist', { params: { search } }),
+  updateMusic: (id, data) =>
+    api.put(`/artist-essential/music/${id}`, data),
+  deleteMusic: (id) =>
+    api.delete(`/artist-essential/music/${id}`),
+
+  // Playlists - Artist's own
+  createPlaylist: (data) => {
+    const config = data instanceof FormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    return api.post('/artist-essential/playlist', data, config);
+  },
+  getMyPlaylists: (params) =>
+    api.get('/artist-essential/my-playlists', { params }),
+  updatePlaylist: (id, data) => {
+    const config = data instanceof FormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    return api.put(`/artist-essential/playlist/${id}`, data, config);
+  },
+  deletePlaylist: (id) =>
+    api.delete(`/artist-essential/playlist/${id}`),
+  addMusicToPlaylist: (playlistId, musicId) =>
+    api.post(`/artist-essential/playlist/${playlistId}/add-music`, { musicId }),
+  removeMusicFromPlaylist: (playlistId, musicId) =>
+    api.delete(`/artist-essential/playlist/${playlistId}/remove-music`, { data: { musicId } }),
+
+  // Public - DJ Charts (approved playlists)
+  getApprovedPlaylists: (params) =>
+    publicApi.get('/artist-essential/approved', { params }),
+  getPlaylistDetail: (id) =>
+    publicApi.get(`/artist-essential/playlist/${id}`),
+  getArtistPlaylists: (artistId, params) =>
+    publicApi.get(`/artist-essential/artist/${artistId}/playlists`, { params }),
+};
+
 // ================= SUPPORT =================
 export const supportAPI = {
   // Destek talebi oluştur (giriş yapmış kullanıcılar için)

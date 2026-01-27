@@ -1,11 +1,12 @@
 // src/components/layout/MainContent.jsx - MİNİMALİST HEADER + MOBİL TOP 10
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { genreAPI, hotAPI, musicAPI } from '../../services/api';
+import { genreAPI, hotAPI, musicAPI, artistEssentialAPI } from '../../services/api';
 import GenreCard from '../common/GenreCard';
 import PlaylistCard from '../common/PlaylistCard';
 import HotCard from '../common/HotCard';
-import { FiChevronLeft, FiChevronRight, FiTrendingUp } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronRight, FiTrendingUp, FiMusic, FiHeart, FiUser, FiX } from 'react-icons/fi';
+import { SiSpotify } from 'react-icons/si';
 import './MainContent.css';
 
 const MainContent = () => {
@@ -13,6 +14,8 @@ const MainContent = () => {
   const [genres, setGenres] = useState([]);
   const [hotPlaylists, setHotPlaylists] = useState([]);
   const [top10Tracks, setTop10Tracks] = useState([]);
+  const [djCharts, setDjCharts] = useState([]);
+  const [selectedDjChart, setSelectedDjChart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
@@ -26,14 +29,16 @@ const MainContent = () => {
     try {
       setLoading(true);
 
-      const [genresRes, hotRes, top10Res] = await Promise.all([
+      const [genresRes, hotRes, top10Res, djChartsRes] = await Promise.all([
         genreAPI.getAllGenres(),
         hotAPI.getHotPlaylists(),
-        musicAPI.getGlobalTop10()
+        musicAPI.getGlobalTop10(),
+        artistEssentialAPI.getApprovedPlaylists({ limit: 6, sortBy: 'likes' })
       ]);
 
       console.log('Genres Response:', genresRes);
       console.log('Hot Response:', hotRes);
+      console.log('DJ Charts Response:', djChartsRes);
 
       if (genresRes.data.success) {
         setGenres(genresRes.data.data || []);
@@ -41,6 +46,12 @@ const MainContent = () => {
 
       if (hotRes.data.success) {
         setHotPlaylists(hotRes.data.hotPlaylists || []);
+      }
+
+      // DJ Charts - Onaylanan Artist Essential Playlistler
+      if (djChartsRes.data.success) {
+        const charts = djChartsRes.data?.data?.playlists || djChartsRes.data?.playlists || [];
+        setDjCharts(charts);
       }
 
       // Top 10 Tracks
@@ -172,11 +183,11 @@ const MainContent = () => {
           )}
         </section>
 
-        {/* DJ Charts Section */}
+        {/* DJ Charts Section - Onaylanan Artist Essential Playlistler */}
         <section className="content-section">
           <div className="section-header">
             <h2 className="section-title">DJ Charts</h2>
-            <button className="view-all-btn">View All</button>
+            <button className="view-all-btn" onClick={() => navigate('/dj-charts')}>View All</button>
           </div>
 
           {loading ? (
@@ -185,21 +196,116 @@ const MainContent = () => {
                 <div key={i} className="skeleton-card" />
               ))}
             </div>
+          ) : djCharts.length === 0 ? (
+            <div className="empty-dj-charts">
+              <FiMusic size={32} />
+              <p>Henüz DJ Chart yok</p>
+            </div>
           ) : (
-            <div className="hot-grid">
-              {hotPlaylists
-                .filter(p => !p.isEmpty)
-                .slice(0, 3)
-                .map((playlist) => (
-                  <HotCard
-                    key={playlist._id}
-                    playlist={playlist}
-                    onLike={(id) => console.log('Liked playlist:', id)}
-                  />
-                ))}
+            <div className="dj-charts-grid">
+              {djCharts.slice(0, 6).map((chart) => (
+                <div
+                  key={chart._id}
+                  className="dj-chart-card"
+                  onClick={() => setSelectedDjChart(chart)}
+                >
+                  <div className="dj-chart-cover">
+                    {chart.coverImage ? (
+                      <img src={chart.coverImage} alt={chart.name} />
+                    ) : (
+                      <div className="dj-chart-cover-placeholder">
+                        <FiMusic size={24} />
+                      </div>
+                    )}
+                    <div className="dj-chart-track-count">
+                      {chart.musicCount || chart.musics?.length || 0} şarkı
+                    </div>
+                  </div>
+                  <div className="dj-chart-info">
+                    <h4 className="dj-chart-name">{chart.name}</h4>
+                    <div className="dj-chart-artist">
+                      {chart.artist?.profileImage ? (
+                        <img src={chart.artist.profileImage} alt="" className="dj-chart-artist-img" />
+                      ) : (
+                        <div className="dj-chart-artist-placeholder"><FiUser size={10} /></div>
+                      )}
+                      <span>{chart.artist?.displayName || chart.artist?.username || 'DJ'}</span>
+                    </div>
+                    <div className="dj-chart-stats">
+                      <span><FiHeart size={12} /> {chart.likes || 0}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </section>
+
+        {/* DJ Chart Detail Modal */}
+        {selectedDjChart && (
+          <div className="dj-chart-modal-overlay" onClick={() => setSelectedDjChart(null)}>
+            <div className="dj-chart-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="dj-chart-modal-header">
+                <div className="dj-chart-modal-cover">
+                  {selectedDjChart.coverImage ? (
+                    <img src={selectedDjChart.coverImage} alt={selectedDjChart.name} />
+                  ) : (
+                    <div className="dj-chart-cover-placeholder"><FiMusic size={32} /></div>
+                  )}
+                </div>
+                <div className="dj-chart-modal-info">
+                  <h3>{selectedDjChart.name}</h3>
+                  <p className="dj-chart-modal-artist">
+                    {selectedDjChart.artist?.displayName || selectedDjChart.artist?.username}
+                  </p>
+                  <p className="dj-chart-modal-stats">
+                    {selectedDjChart.musicCount || selectedDjChart.musics?.length || 0} şarkı • {selectedDjChart.likes || 0} beğeni
+                  </p>
+                </div>
+                <button className="dj-chart-modal-close" onClick={() => setSelectedDjChart(null)}>
+                  <FiX size={24} />
+                </button>
+              </div>
+
+              {selectedDjChart.description && (
+                <p className="dj-chart-modal-description">{selectedDjChart.description}</p>
+              )}
+
+              <div className="dj-chart-modal-tracks">
+                {selectedDjChart.musics && selectedDjChart.musics.length > 0 ? (
+                  selectedDjChart.musics.map((music, index) => (
+                    <div key={music._id} className="dj-chart-track-item">
+                      <span className="track-number">{index + 1}</span>
+                      <img src={music.imageUrl} alt={music.title} className="track-cover" />
+                      <div className="track-info">
+                        <span className="track-title">{music.title}</span>
+                        <span className="track-artist">{music.artistNames || music.artist}</span>
+                      </div>
+                      <div className="track-actions">
+                        {music.platformLinks?.spotify && (
+                          <a
+                            href={music.platformLinks.spotify}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="spotify-link"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <SiSpotify size={18} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="dj-chart-empty-tracks">
+                    <FiMusic size={24} />
+                    <p>Bu playlist'te şarkı yok</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Top 10 Tracks Section - Mobile Only */}
         <section className="content-section mobile-top10-section">

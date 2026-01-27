@@ -22,6 +22,7 @@ import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import ArtistEssential from './pages/ArtistEssential';
 import ArtistPage from './pages/ArtistPage';
+import DJChartsPage from './pages/DJChartsPage';
 import NotificationsPage from './pages/NotificationsPage';
 import SettingsPage from './pages/SettingsPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -118,6 +119,7 @@ function AppRoutes() {
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/messages/:userId" element={<MessagesPage />} />
           <Route path="/artist-essential" element={<ArtistEssential />} />
+          <Route path="/dj-charts" element={<DJChartsPage />} />
           <Route path="/artist/:slug" element={<ArtistPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />

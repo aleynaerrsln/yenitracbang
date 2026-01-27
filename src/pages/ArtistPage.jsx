@@ -3,13 +3,58 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { artistAPI, musicAPI } from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { FiArrowLeft, FiPlay, FiHeart, FiMoreVertical } from 'react-icons/fi';
 import './ArtistPage.css';
+
+// localStorage helper fonksiyonları
+const getFollowingArtistsFromStorage = () => {
+  try {
+    const stored = localStorage.getItem('followingArtists');
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveFollowingArtistsToStorage = (artistIds) => {
+  try {
+    localStorage.setItem('followingArtists', JSON.stringify(artistIds));
+  } catch (error) {
+    console.error('Failed to save followingArtists to localStorage:', error);
+  }
+};
+
+// Takipçi sayısı delta'larını localStorage'da sakla (cache bug workaround)
+const getFollowerCountDeltas = () => {
+  try {
+    const stored = localStorage.getItem('followerCountDeltas');
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+};
+
+const saveFollowerCountDelta = (artistId, delta) => {
+  try {
+    const deltas = getFollowerCountDeltas();
+    deltas[artistId] = (deltas[artistId] || 0) + delta;
+    localStorage.setItem('followerCountDeltas', JSON.stringify(deltas));
+  } catch (error) {
+    console.error('Failed to save followerCountDelta to localStorage:', error);
+  }
+};
+
+const getFollowerCountDelta = (artistId) => {
+  const deltas = getFollowerCountDeltas();
+  return deltas[artistId] || 0;
+};
 
 const ArtistPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const { user: currentUser, updateUser } = useAuth();
 
   const [artist, setArtist] = useState(null);
   const [artistMusic, setArtistMusic] = useState([]);
@@ -24,6 +69,19 @@ const ArtistPage = () => {
     }
   }, [slug]);
 
+  // Artist yüklendiğinde localStorage'dan follow durumunu kontrol et
+  useEffect(() => {
+    if (artist && currentUser) {
+      const storedFollowingArtists = getFollowingArtistsFromStorage();
+      const isUserFollowing = storedFollowingArtists.some(
+        (artistId) => artistId === artist._id || artistId?.toString() === artist._id
+      );
+      setIsFollowing(isUserFollowing);
+    } else if (!currentUser) {
+      setIsFollowing(false);
+    }
+  }, [currentUser, artist?._id]);
+
   const fetchArtistData = async () => {
     try {
       setLoading(true);
@@ -37,7 +95,17 @@ const ArtistPage = () => {
 
       console.log('🎨 Artist data from backend:', artistData);
       console.log('🖼️ Profile image:', artistData?.profileImage);
-      setArtist(artistData);
+
+      // Backend cache bug workaround: localStorage'daki delta'yı uygula
+      // followers array'den veya followersCount'dan takipçi sayısını al
+      const baseFollowerCount = artistData.followersCount ?? artistData.followerCount ?? artistData.followers?.length ?? 0;
+      const delta = getFollowerCountDelta(artistData._id);
+      const adjustedFollowerCount = Math.max(0, baseFollowerCount + delta);
+
+      setArtist({
+        ...artistData,
+        followersCount: adjustedFollowerCount
+      });
 
       // Sanatçının şarkılarını çek
       const musicResponse = await musicAPI.getMusicByArtistSlug(slug);
@@ -64,8 +132,14 @@ const ArtistPage = () => {
       const sortedByLikes = [...uniqueMusics].sort((a, b) => (b.likes || 0) - (a.likes || 0));
       setPopularTracks(sortedByLikes.slice(0, 5));
 
-      // Takip durumunu kontrol et
-      setIsFollowing(artistData?.isFollowing || false);
+      // Takip durumunu kontrol et - localStorage'dan
+      if (currentUser) {
+        const storedFollowingArtists = getFollowingArtistsFromStorage();
+        const isUserFollowing = storedFollowingArtists.some(
+          (artistId) => artistId === artistData._id || artistId?.toString() === artistData._id
+        );
+        setIsFollowing(isUserFollowing);
+      }
 
     } catch (error) {
       console.error('Failed to fetch artist:', error);
@@ -78,27 +152,75 @@ const ArtistPage = () => {
   const handleFollowToggle = async () => {
     if (!artist) return;
 
+    // Giriş kontrolü
+    if (!currentUser) {
+      toast.error('Takip etmek için giriş yapmalısınız');
+      return;
+    }
+
     try {
-      if (isFollowing) {
-        await artistAPI.unfollowArtist(artist._id);
-        setIsFollowing(false);
-        setArtist(prev => ({
-          ...prev,
-          followersCount: (prev.followersCount || 0) - 1
-        }));
-        toast.success('Takipten çıkıldı');
-      } else {
-        await artistAPI.followArtist(artist._id);
+      // Backend toggleFollow kullanıyor - tek endpoint hem takip et hem takipten çık
+      const response = await artistAPI.followArtist(artist._id);
+      const action = response.data?.action || response.data?.data?.action;
+
+      if (action === 'followed') {
         setIsFollowing(true);
         setArtist(prev => ({
           ...prev,
           followersCount: (prev.followersCount || 0) + 1
         }));
+
+        // localStorage'a kaydet (follow durumu)
+        const storedFollowingArtists = getFollowingArtistsFromStorage();
+        if (!storedFollowingArtists.includes(artist._id)) {
+          storedFollowingArtists.push(artist._id);
+          saveFollowingArtistsToStorage(storedFollowingArtists);
+        }
+
+        // localStorage'a follower count delta kaydet (cache bug workaround)
+        saveFollowerCountDelta(artist._id, 1);
+
+        // currentUser'ı da güncelle (diğer sayfalar için)
+        if (currentUser && updateUser) {
+          const updatedFollowingArtists = [...(currentUser.followingArtists || []), artist._id];
+          updateUser({ ...currentUser, followingArtists: updatedFollowingArtists });
+        }
+
         toast.success('Takip edildi');
+      } else if (action === 'unfollowed') {
+        setIsFollowing(false);
+        setArtist(prev => ({
+          ...prev,
+          followersCount: Math.max(0, (prev.followersCount || 0) - 1)
+        }));
+
+        // localStorage'dan kaldır (follow durumu)
+        const storedFollowingArtists = getFollowingArtistsFromStorage();
+        const updatedStoredArtists = storedFollowingArtists.filter(
+          id => id !== artist._id && id?.toString() !== artist._id
+        );
+        saveFollowingArtistsToStorage(updatedStoredArtists);
+
+        // localStorage'a follower count delta kaydet (cache bug workaround)
+        saveFollowerCountDelta(artist._id, -1);
+
+        // currentUser'ı da güncelle (diğer sayfalar için)
+        if (currentUser && updateUser) {
+          const updatedFollowingArtists = (currentUser.followingArtists || []).filter(
+            id => id !== artist._id && id?.toString() !== artist._id
+          );
+          updateUser({ ...currentUser, followingArtists: updatedFollowingArtists });
+        }
+
+        toast.success('Takipten çıkıldı');
       }
     } catch (error) {
       console.error('Follow error:', error);
-      toast.error('İşlem başarısız');
+      if (error.response?.status === 401) {
+        toast.error('Takip etmek için giriş yapmalısınız');
+      } else {
+        toast.error('İşlem başarısız');
+      }
     }
   };
 
@@ -174,11 +296,6 @@ const ArtistPage = () => {
 
   return (
     <div className="artist-page">
-      {/* Header with Back Button */}
-      <button className="back-btn" onClick={() => navigate(-1)}>
-        <FiArrowLeft size={24} />
-      </button>
-
       {/* Artist Header */}
       <div className="artist-header">
         <div className="artist-profile-section">
@@ -222,16 +339,16 @@ const ArtistPage = () => {
             {/* Artist Stats */}
             <div className="artist-stats-row">
               <div className="stat-item">
-                <span className="stat-value">{artist.bangasCount || 0}</span>
-                <span className="stat-label">Bangas</span>
-              </div>
-              <div className="stat-item">
                 <span className="stat-value">{artistMusic.length}</span>
                 <span className="stat-label">Tracks</span>
               </div>
               <div className="stat-item">
                 <span className="stat-value">{artist.followersCount || 0}</span>
                 <span className="stat-label">Followers</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-value">{artist.followingCount || artist.following?.length || 0}</span>
+                <span className="stat-label">Following</span>
               </div>
             </div>
           </div>

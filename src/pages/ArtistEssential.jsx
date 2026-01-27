@@ -1,18 +1,23 @@
 // src/pages/ArtistEssential.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
+import { useNavigate } from 'react-router-dom';
 import AddMusicModal from '../components/modals/AddMusicModal';
 import TrackOptionsModal from '../components/modals/TrackOptionsModal';
 import SelectArtistModal from '../components/modals/SelectArtistModal';
-import { artistMusicAPI, musicAPI } from '../services/api';
+import CreateArtistPlaylistModal from '../components/modals/CreateArtistPlaylistModal';
+import { artistMusicAPI, musicAPI, artistEssentialAPI } from '../services/api';
 import './ArtistEssential.css';
 import { toast } from 'react-hot-toast';
-import { FiHeart, FiMoreVertical } from 'react-icons/fi';
+import { FiHeart, FiMoreVertical, FiPlus, FiEdit2, FiTrash2, FiClock, FiCheck, FiX, FiRefreshCw } from 'react-icons/fi';
 
 
 
 const ArtistEssential = () => {
   const { user } = useAuth();
+  const { socket, connected } = useSocket();
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [myMusic, setMyMusic] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,6 +37,13 @@ const ArtistEssential = () => {
   const [artistModalOpen, setArtistModalOpen] = useState(false);
   const [artistModalPosition, setArtistModalPosition] = useState({ top: 0, left: 0 });
 
+  // Playlist states
+  const [myPlaylists, setMyPlaylists] = useState([]);
+  const [playlistsLoading, setPlaylistsLoading] = useState(false);
+  const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
+  const [editingPlaylist, setEditingPlaylist] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   // Debug: Kullanıcı bilgisini konsola yazdır
   console.log('ArtistEssential - User data:', user);
   console.log('isVerifiedArtist:', user?.isVerifiedArtist);
@@ -46,13 +58,63 @@ const ArtistEssential = () => {
   const hasAccess = user?.isVerifiedArtist === true ||
                     (user?.badge && user.badge !== 'none');
 
-  // Kullanıcının müziklerini çek
+  // Kullanıcının müziklerini ve playlistlerini çek
   useEffect(() => {
     if (hasAccess) {
       fetchMyMusic();
+      fetchMyPlaylists();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasAccess]);
+
+  // Socket listener for real-time playlist approval updates
+  useEffect(() => {
+    if (!socket || !connected) return;
+
+    // Listen for playlist approval status changes
+    const handlePlaylistApproval = (data) => {
+      console.log('📢 Playlist approval update received:', data);
+
+      if (data?.playlistId && data?.status) {
+        // Önce lokal state'i güncelle (hızlı görsel feedback)
+        setMyPlaylists(prev =>
+          prev.map(playlist =>
+            playlist._id === data.playlistId
+              ? {
+                  ...playlist,
+                  adminApprovalStatus: data.status,
+                  approvalStatus: { ...playlist.approvalStatus, status: data.status }
+                }
+              : playlist
+          )
+        );
+
+        // Show toast notification
+        if (data.status === 'approved') {
+          toast.success('DJ Chart\'ınız onaylandı! 🎉');
+        } else if (data.status === 'rejected') {
+          toast.error('DJ Chart\'ınız reddedildi.');
+        }
+
+        // Tam veriyi almak için playlistleri yeniden çek (şarkı sayısı vs için)
+        // Kısa bir gecikme ekle ki backend cache'i temizlenmiş olsun
+        setTimeout(() => {
+          fetchMyPlaylists(true);
+        }, 500);
+      }
+    };
+
+    // Listen for multiple possible event names
+    socket.on('playlist:approval', handlePlaylistApproval);
+    socket.on('djchart:approval', handlePlaylistApproval);
+    socket.on('playlist:status_updated', handlePlaylistApproval);
+
+    return () => {
+      socket.off('playlist:approval', handlePlaylistApproval);
+      socket.off('djchart:approval', handlePlaylistApproval);
+      socket.off('playlist:status_updated', handlePlaylistApproval);
+    };
+  }, [socket, connected]);
 
   const fetchMyMusic = async () => {
     try {
@@ -87,6 +149,72 @@ const ArtistEssential = () => {
       setMyMusic([]); // Hata durumunda boş array
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Kullanıcının playlistlerini çek
+  const fetchMyPlaylists = async (forceRefresh = false) => {
+    try {
+      if (forceRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setPlaylistsLoading(true);
+      }
+      // Cache bypass için timestamp ekle
+      const params = forceRefresh ? { _t: Date.now() } : {};
+      const response = await artistEssentialAPI.getMyPlaylists(params);
+      console.log('My playlists response:', response.data);
+      const playlists = response.data?.data?.playlists || response.data?.playlists || [];
+      setMyPlaylists(playlists);
+    } catch (error) {
+      console.error('Failed to fetch playlists:', error);
+      setMyPlaylists([]);
+    } finally {
+      setPlaylistsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  // Manuel yenileme
+  const handleRefreshPlaylists = () => {
+    fetchMyPlaylists(true);
+  };
+
+  // Playlist silme
+  const handleDeletePlaylist = async (playlistId) => {
+    if (!window.confirm('Bu playlist\'i silmek istediğinize emin misiniz?')) return;
+
+    try {
+      await artistEssentialAPI.deletePlaylist(playlistId);
+      toast.success('Playlist silindi');
+      fetchMyPlaylists();
+    } catch (error) {
+      console.error('Delete playlist error:', error);
+      toast.error('Playlist silinemedi');
+    }
+  };
+
+  // Playlist düzenleme
+  const handleEditPlaylist = (playlist) => {
+    setEditingPlaylist(playlist);
+    setPlaylistModalOpen(true);
+  };
+
+  // Playlist oluşturma/düzenleme başarılı
+  const handlePlaylistSuccess = () => {
+    fetchMyPlaylists();
+    toast.success(editingPlaylist ? 'Playlist güncellendi' : 'DJ Chart oluşturuldu!');
+  };
+
+  // Status badge component
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'approved':
+        return <span className="status-badge approved"><FiCheck size={12} /> Onaylandı</span>;
+      case 'rejected':
+        return <span className="status-badge rejected"><FiX size={12} /> Reddedildi</span>;
+      default:
+        return <span className="status-badge pending"><FiClock size={12} /> Onay Bekliyor</span>;
     }
   };
 
@@ -301,14 +429,120 @@ const handleSaveMusic = async (musicData) => {
             </div>
             )
           ) : (
-            <div className="empty-music-state">
-              <div className="music-icon">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 3l-1.1 3.3H7l2.9 2.1-1.1 3.4L12 9.7l3.2 2.1-1.1-3.4L17 6.3h-3.9L12 3zm0 3.9l.6 1.8h1.9l-1.5 1.1.6 1.8L12 11.1l-1.5 1.1.6-1.8-1.5-1.1h1.9l.6-1.8z"/>
-                </svg>
+            <div className="playlists-tab-content">
+              {/* Header with Create and Refresh buttons */}
+              <div className="playlist-tab-header">
+                <button
+                  className="create-playlist-btn"
+                  onClick={() => {
+                    setEditingPlaylist(null);
+                    setPlaylistModalOpen(true);
+                  }}
+                >
+                  <div className="plus-circle">+</div>
+                  <span>DJ Chart Oluştur</span>
+                </button>
+                <button
+                  className={`refresh-btn ${isRefreshing ? 'spinning' : ''}`}
+                  onClick={handleRefreshPlaylists}
+                  disabled={isRefreshing}
+                  title="Yenile"
+                >
+                  <FiRefreshCw size={18} />
+                </button>
               </div>
-              <h3 className="empty-title">My Playlists</h3>
-              <p className="empty-subtitle">Playlist feature coming soon</p>
+
+              {/* Playlists Grid - World Style */}
+              {playlistsLoading ? (
+                <div className="loading-grid">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="skeleton-playlist-card"></div>
+                  ))}
+                </div>
+              ) : myPlaylists.length === 0 ? (
+                <div className="empty-music-state">
+                  <div className="music-icon">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/>
+                    </svg>
+                  </div>
+                  <h3 className="empty-title">Henüz playlist yok</h3>
+                  <p className="empty-subtitle">DJ Chart oluşturarak şarkılarını paylaş</p>
+                </div>
+              ) : (
+                <div className="my-playlists-grid">
+                  {myPlaylists.map((playlist) => (
+                    <div key={playlist._id} className="my-playlist-card">
+                      {/* Playlist Cover */}
+                      <div className="my-playlist-cover">
+                        {/* Track Count Badge */}
+                        <div className="track-badge">
+                          {playlist.musicCount || playlist.musics?.length || 0} tracks
+                        </div>
+
+                        {/* Status Badge */}
+                        <div className={`status-overlay-badge ${playlist.approvalStatus?.status || playlist.adminApprovalStatus || 'pending'}`}>
+                          {(playlist.approvalStatus?.status || playlist.adminApprovalStatus) === 'approved' && <FiCheck size={12} />}
+                          {(playlist.approvalStatus?.status || playlist.adminApprovalStatus) === 'rejected' && <FiX size={12} />}
+                          {(!playlist.approvalStatus?.status && !playlist.adminApprovalStatus) || (playlist.approvalStatus?.status || playlist.adminApprovalStatus) === 'pending' ? <FiClock size={12} /> : null}
+                        </div>
+
+                        {playlist.coverImage ? (
+                          <img src={playlist.coverImage} alt={playlist.name} />
+                        ) : (
+                          <div className="cover-placeholder">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/>
+                            </svg>
+                          </div>
+                        )}
+
+                        {/* Action Buttons Overlay */}
+                        <div className="card-actions-overlay">
+                          <button
+                            className="card-action-btn edit"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditPlaylist(playlist);
+                            }}
+                            title="Düzenle"
+                          >
+                            <FiEdit2 size={18} />
+                          </button>
+                          <button
+                            className="card-action-btn delete"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeletePlaylist(playlist._id);
+                            }}
+                            title="Sil"
+                          >
+                            <FiTrash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Playlist Info */}
+                      <div className="my-playlist-info">
+                        <h3 className="my-playlist-name">{playlist.name}</h3>
+                        <p className="my-playlist-status">
+                          {(playlist.approvalStatus?.status || playlist.adminApprovalStatus) === 'approved' && 'Onaylandı'}
+                          {(playlist.approvalStatus?.status || playlist.adminApprovalStatus) === 'rejected' && 'Reddedildi'}
+                          {(!playlist.approvalStatus?.status && !playlist.adminApprovalStatus) || (playlist.approvalStatus?.status || playlist.adminApprovalStatus) === 'pending' ? 'Onay Bekliyor' : ''}
+                        </p>
+                      </div>
+
+                      {/* Playlist Stats */}
+                      <div className="my-playlist-stats">
+                        <span className="stat-item">
+                          <FiHeart size={14} />
+                          {playlist.likes || 0}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -336,6 +570,17 @@ const handleSaveMusic = async (musicData) => {
           position={artistModalPosition}
           artists={selectedTrack?.artists || []}
           trackInfo={selectedTrack}
+        />
+
+        {/* Create/Edit Artist Playlist Modal */}
+        <CreateArtistPlaylistModal
+          isOpen={playlistModalOpen}
+          onClose={() => {
+            setPlaylistModalOpen(false);
+            setEditingPlaylist(null);
+          }}
+          onSuccess={handlePlaylistSuccess}
+          editPlaylist={editingPlaylist}
         />
 
       </div>

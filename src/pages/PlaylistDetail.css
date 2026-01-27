@@ -213,9 +213,17 @@
 /* ========== TRACK LIST CONTAINER ========== */
 
 .track-list-container {
-  max-width: 800px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 0rem 2rem;
+  padding: 0 0 2rem 0;
+}
+
+/* Sidebar kapalıyken (geniş ekran) biraz boşluk */
+@media (min-width: 1200px) {
+  .track-list-container {
+    max-width: 1000px;
+    padding: 0 1.5rem 2rem;
+  }
 }
 
 .track-list-header {
@@ -242,82 +250,81 @@
 
 /* ========== TRACK CARDS ========== */
 
-.track-list {
+.playlist-detail .track-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
-.track-card {
+.playlist-detail .track-card {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem;
+  gap: 0.95rem;
+  padding: 0.625rem 0.75rem;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.2s ease;
+  transition: background 0.2s;
   cursor: pointer;
+  border: none;
 }
 
-.track-card:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
+.playlist-detail .track-card:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* Track Cover */
-.track-cover-small {
+.playlist-detail .track-cover-small {
+  position: relative;
   width: 56px;
   height: 56px;
   border-radius: 6px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
 }
 
-.track-cover-small img {
+.playlist-detail .track-cover-small img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 /* Track Info */
-.track-info {
+.playlist-detail .track-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   min-width: 0;
 }
 
-.track-name {
-  font-size: 0.95rem;
-  font-weight: 500;
+.playlist-detail .track-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
   color: #fff;
-  margin-bottom: 0.25rem;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.track-artist {
-  font-size: 0.85rem;
+.playlist-detail .track-artist {
+  font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.6);
-  white-space: nowrap;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Platform Buttons */
-.track-platforms {
+.playlist-detail .track-platforms {
   display: flex;
   gap: 0.5rem;
   flex-shrink: 0;
 }
 
-.platform-btn {
+.playlist-detail .platform-btn {
   width: 36px;
   height: 36px;
   border-radius: 6px;
@@ -332,55 +339,60 @@
   transition: all 0.2s ease;
 }
 
-.platform-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #fff;
-  color: #fff;
-  transform: scale(1.05);
+.playlist-detail .platform-btn:hover {
+  background: transparent;
 }
 
-.platform-btn.spotify {
+.playlist-detail .platform-btn.spotify {
   color: #1DB954;
-  border-color: rgba(29, 185, 84, 0.4);
-}
-
-.platform-btn.spotify:hover {
-  background: rgba(29, 185, 84, 0.2);
   border-color: #1DB954;
+  background: transparent;
 }
 
-.platform-btn.beatport {
+.playlist-detail .platform-btn.spotify:hover {
+  background: transparent;
+  border-color: #1DB954;
+  transform: none;
+}
+
+.playlist-detail .platform-btn.beatport {
   color: #01FF95;
-  border-color: rgba(1, 255, 149, 0.4);
-}
-
-.platform-btn.beatport:hover {
-  background: rgba(1, 255, 149, 0.2);
   border-color: #01FF95;
+  background: transparent;
 }
 
-.platform-btn.apple {
+.playlist-detail .platform-btn.beatport:hover {
+  background: transparent;
+  border-color: #01FF95;
+  transform: none;
+}
+
+.playlist-detail .platform-btn.apple {
   color: #FC3C44;
-  border-color: rgba(252, 60, 68, 0.4);
-}
-
-.platform-btn.apple:hover {
-  background: rgba(252, 60, 68, 0.2);
   border-color: #FC3C44;
+  background: transparent;
 }
 
-.platform-btn.soundcloud {
+.playlist-detail .platform-btn.apple:hover {
+  background: transparent;
+  border-color: #FC3C44;
+  transform: none;
+}
+
+.playlist-detail .platform-btn.soundcloud {
   color: #FF5500;
-  border-color: rgba(255, 85, 0, 0.4);
+  border-color: #FF5500;
+  background: transparent;
 }
 
-.platform-btn.soundcloud:hover {
-  background: rgba(255, 85, 0, 0.2);
+.playlist-detail .platform-btn.soundcloud:hover {
+  background: transparent;
   border-color: #FF5500;
+  transform: none;
 }
 
 /* Track Like */
-.track-like {
+.playlist-detail .track-like {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -389,7 +401,7 @@
   min-width: 50px;
 }
 
-.btn-track-like {
+.playlist-detail .btn-track-like {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -404,16 +416,16 @@
   transition: all 0.2s;
 }
 
-.btn-track-like:hover {
+.playlist-detail .btn-track-like:hover {
   color: #fff;
   transform: scale(1.1);
 }
 
-.btn-track-like.liked {
+.playlist-detail .btn-track-like.liked {
   color: #1DB954;
 }
 
-.like-count {
+.playlist-detail .like-count {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.5);
   font-weight: 600;
@@ -421,7 +433,7 @@
 
 /* ========== 3-DOT MENU ========== */
 
-.btn-track-menu {
+.playlist-detail .btn-track-menu {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -436,7 +448,7 @@
   flex-shrink: 0;
 }
 
-.btn-track-menu:hover {
+.playlist-detail .btn-track-menu:hover {
   color: #fff;
   background: rgba(255, 255, 255, 0.1);
 }
@@ -584,54 +596,54 @@
   }
 
   .track-list-container {
-    padding: 0 0.75rem 2rem;
+    padding: 0 0 2rem 0;
   }
 
-  .track-card {
-    gap: 0.75rem;
-    padding: 0.65rem;
+  .playlist-detail .track-card {
+    gap: 0.625rem;
+    padding: 0.5rem 0.625rem;
   }
 
-  .track-cover-small {
+  .playlist-detail .track-cover-small {
     width: 48px;
     height: 48px;
   }
 
-  .track-name {
-    font-size: 0.9rem;
+  .playlist-detail .track-name {
+    font-size: 0.875rem;
   }
 
-  .track-artist {
-    font-size: 0.8rem;
+  .playlist-detail .track-artist {
+    font-size: 0.75rem;
   }
 
-  .platform-btn {
+  .playlist-detail .platform-btn {
     width: 32px;
     height: 32px;
     font-size: 0.9rem;
   }
 
-  .btn-track-menu {
+  .playlist-detail .btn-track-menu {
     width: 28px;
     height: 28px;
   }
 }
 
 @media (max-width: 480px) {
-  .track-platforms {
+  .playlist-detail .track-platforms {
     gap: 0.35rem;
   }
 
-  .platform-btn {
+  .playlist-detail .platform-btn {
     width: 30px;
     height: 30px;
   }
 
-  .track-like {
+  .playlist-detail .track-like {
     min-width: 40px;
   }
 
-  .btn-track-menu {
+  .playlist-detail .btn-track-menu {
     width: 26px;
     height: 26px;
   }
