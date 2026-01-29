@@ -503,6 +503,88 @@ export const supportAPI = {
     api.delete(`/support/tickets/${id}`),
 };
 
+// ================= WORLD FEED =================
+export const worldAPI = {
+  // World Photos (tüm kullanıcıların fotoğrafları)
+  getWorldPhotos: (params) =>
+    publicApi.get('/users/world-photos', { params }),
+
+  // Following Photos (takip edilenlerin fotoğrafları)
+  getFollowingPhotos: (userId, params) =>
+    publicApi.get(`/users/following-photos/${userId}`, { params }),
+
+  // World Events (tüm kullanıcıların etkinlikleri)
+  getWorldEvents: (params) =>
+    publicApi.get('/events/world', { params }),
+
+  // Following Events (takip edilenlerin etkinlikleri)
+  getFollowingEvents: (userId, params) =>
+    publicApi.get(`/events/following/${userId}`, { params }),
+
+  // Image Detail
+  getImageDetails: (targetUserId, imageId) =>
+    api.get(`/user/${targetUserId}/image/${imageId}`),
+
+  // Image Like
+  likeImage: (targetUserId, imageId) =>
+    api.post(`/user/${targetUserId}/image/${imageId}/like`),
+
+  // Image Comment
+  commentImage: (targetUserId, imageId, text) =>
+    api.post(`/user/${targetUserId}/image/${imageId}/comment`, { text }),
+
+  // Delete Comment
+  deleteImageComment: (targetUserId, imageId, commentId) =>
+    api.delete(`/user/${targetUserId}/image/${imageId}/comment/${commentId}`),
+};
+
+// ================= PROFILES =================
+export const profileAPI = {
+  // Get all profiles
+  getProfiles: () =>
+    api.get('/profiles'),
+
+  // Get active profile
+  getActiveProfile: () =>
+    api.get('/profiles/active'),
+
+  // Get profile by ID
+  getProfileById: (profileId) =>
+    publicApi.get(`/profiles/${profileId}`),
+
+  // Create profile
+  createProfile: (data) =>
+    api.post('/profiles', data),
+
+  // Update profile
+  updateProfile: (profileId, data) =>
+    api.put(`/profiles/${profileId}`, data),
+
+  // Update profile details
+  updateProfileDetails: (profileId, data) =>
+    api.put(`/profiles/${profileId}/details`, data),
+
+  // Delete profile
+  deleteProfile: (profileId) =>
+    api.delete(`/profiles/${profileId}`),
+
+  // Switch profile
+  switchProfile: (profileId) =>
+    api.post(`/profiles/${profileId}/switch`),
+
+  // Set default profile
+  setDefaultProfile: (profileId) =>
+    api.post(`/profiles/${profileId}/set-default`),
+
+  // Follow/Unfollow profile
+  followProfile: (profileId) =>
+    api.post(`/profiles/${profileId}/follow`),
+
+  // Reorder profiles
+  reorderProfiles: (profileIds) =>
+    api.put('/profiles/reorder', { profileIds }),
+};
+
 // ================= STORE =================
 export const storeAPI = {
   // İlanları getir (sayfalı, filtrelenebilir)
