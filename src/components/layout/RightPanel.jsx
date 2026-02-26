@@ -171,9 +171,7 @@ const RightPanel = ({ onWidthChange }) => {
   };
 
   const handleTrackClick = (track) => {
-    // Şarkıya tıklandığında yapılacak işlem (şarkıyı çal, detay sayfasına git vb.)
-    toast.info(`Playing: ${track.title}`);
-    // navigate(`/track/${track._id}`); // Eğer track detay sayfası varsa
+    navigate(`/music/${track._id}`);
   };
 
   if (loading) {
@@ -215,7 +213,7 @@ const RightPanel = ({ onWidthChange }) => {
                 className="trending-item"
                 onClick={() => handleTrackClick(track)}
               >
-                <div className="trending-rank">#{index + 1}</div>
+                <div className="trending-rank">{index + 1}</div>
 
                 <div className="track-cover">
                   {track.imageUrl ? (
@@ -247,17 +245,18 @@ const RightPanel = ({ onWidthChange }) => {
                   </button>
                 </div>
 
-                <div className="trending-badge">
-                  {track.likes || 0}
+                <div className="trending-right">
+                  <div className="trending-badge">
+                    {track.likes || 0}
+                  </div>
+                  <button
+                    className="trending-options-btn"
+                    onClick={(e) => handleOpenOptions(track, e)}
+                    title="More options"
+                  >
+                    •••
+                  </button>
                 </div>
-
-                <button
-                  className="trending-options-btn"
-                  onClick={(e) => handleOpenOptions(track, e)}
-                  title="More options"
-                >
-                  <FiMoreVertical size={16} />
-                </button>
               </div>
             ))
           )}

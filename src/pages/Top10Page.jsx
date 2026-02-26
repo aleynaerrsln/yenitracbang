@@ -156,8 +156,8 @@ const Top10Page = () => {
 
         <div className="top10-grid">
           {musics.map((music, index) => (
-            <div key={music._id} className="top10-card">
-              <div className="rank-badge">#{index + 1}</div>
+            <div key={music._id} className="top10-card" onClick={() => navigate(`/music/${music._id}`)}>
+              <div className="rank-badge">{index + 1}</div>
 
               <button
                 className="three-dot-menu"
